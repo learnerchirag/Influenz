@@ -2,11 +2,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {userActions} from "../../_actions/user.actions";
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
-
- 
+import axios from 'axios';
+import config from '../../config/config';
 // reactstrap components
 import {
   Button,
@@ -31,7 +30,8 @@ class Login extends React.Component {
     this.state = {
       isRemember: true,
       email: "",
-      psw:""
+      psw:"",
+      user:{}
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -50,10 +50,23 @@ class Login extends React.Component {
   }
   handleSubmit(event) {
     debugger;
-    const { dispatch } = this.props;
-    console.log(this.state);
-    dispatch(userActions.login(this.state));
     event.preventDefault();
+    const { history } = this.props;
+    const serverport = {
+      email: this.state.email,
+      password: this.state.psw
+  }
+  // 'https://devapi.influenz.club/v1/client/signin ' 
+  const apiEndpoint="signin";
+    axios.post(config.loginUrl+apiEndpoint, serverport)
+        .then(res => {
+          if(res.data.status){
+            history.push('/admin/index');
+            this.setState({
+              user: res.data.payload,
+          });
+          }
+        });
   }
   render() {
     return (
@@ -156,20 +169,14 @@ class Login extends React.Component {
             </Col>
             <Col className="text-right" xs="6">
             <NavLink
-                    className="nav-link-icon"
+                    className="text-light"
                     to="/auth/register"
                     tag={Link}
                   >
-                    <i className="ni ni-circle-08" />
-                    <span className="nav-link-inner--text">Register</span>
+                    
+                    <small>Create new account</small>
                   </NavLink>
-              <a
-                className="text-light"
-                to="/auth/register"
-                    tag={Link}
-              >
-                <small>Create new account</small>
-              </a>
+             
             </Col>
           </Row>
         </Col>

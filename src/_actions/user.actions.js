@@ -5,17 +5,16 @@ export const userActions = {
     login,
     logout
 };
-function login(email, password){
-     
+function login(data){
+     debugger;
     return dispatch => {
        let apiEndpoint = 'authenticate';
        let payload = {
-           email: email,
-           password: password
+           email: data.email,
+           password: data.password
        }
        userService.loginService("/signin", payload)
        .then((response)=>{
-            
            console.log(response);
            if (response !=null && response !=undefined && response !=""){
             console.log(response.data);

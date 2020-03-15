@@ -20,6 +20,19 @@ import {
 } from "reactstrap";
 
 class AdminNavbar extends React.Component {
+  constructor(props) {
+    debugger;
+    super(props);
+    this.state = {
+      
+    };
+    this.handleLogout = this.handleLogout.bind(this);
+  }
+  handleLogout(event){
+    event.preventDefault();
+    const { history } = this.props;
+    history.push('/auth/login');
+  }
   render() {
     return (
       <>
@@ -81,7 +94,7 @@ class AdminNavbar extends React.Component {
                     <span>Support</span>
                   </DropdownItem>
                   <DropdownItem divider />
-                  <DropdownItem href="#pablo" onClick={e => e.preventDefault()}>
+                  <DropdownItem href="#pablo" onClick={this.handleLogout}>
                     <i className="ni ni-user-run" />
                     <span>Logout</span>
                   </DropdownItem>

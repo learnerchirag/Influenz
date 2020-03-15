@@ -13,6 +13,7 @@ import { createStore,applyMiddleware } from "redux";
 import reducer from "./_reducers";
 
 
+
 const store = createStore(reducer, applyMiddleware(thunk))
 
 // export default store;

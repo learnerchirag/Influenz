@@ -1,22 +1,4 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2019 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 import React from "react";
-
 // reactstrap components
 import {
   Button,
@@ -43,7 +25,7 @@ class Register extends React.Component {
               <div className="text-muted text-center mt-2 mb-4">
                 <small>Sign up with</small>
               </div>
-              <div className="text-center">
+              {/* <div className="text-center">
                 <Button
                   className="btn-neutral btn-icon mr-4"
                   color="default"
@@ -72,12 +54,12 @@ class Register extends React.Component {
                   </span>
                   <span className="btn-inner--text">Google</span>
                 </Button>
-              </div>
+              </div> */}
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
-              <div className="text-center text-muted mb-4">
+              {/* <div className="text-center text-muted mb-4">
                 <small>Or sign up with credentials</small>
-              </div>
+              </div> */}
               <Form role="form">
                 <FormGroup>
                   <InputGroup className="input-group-alternative mb-3">
@@ -109,12 +91,12 @@ class Register extends React.Component {
                     <Input placeholder="Password" type="password" autoComplete="new-password"/>
                   </InputGroup>
                 </FormGroup>
-                <div className="text-muted font-italic">
+                {/* <div className="text-muted font-italic">
                   <small>
                     password strength:{" "}
                     <span className="text-success font-weight-700">strong</span>
                   </small>
-                </div>
+                </div> */}
                 <Row className="my-4">
                   <Col xs="12">
                     <div className="custom-control custom-control-alternative custom-checkbox">
