@@ -3,7 +3,7 @@ import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 // reactstrap components
 import { Container, Row, Col } from "reactstrap";
-
+import { UncontrolledAlert } from 'reactstrap';
 // core components
 import AuthNavbar from "components/Navbars/AuthNavbar.js";
 import AuthFooter from "components/Footers/AuthFooter.js";

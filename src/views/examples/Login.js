@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {userActions} from "../../_actions/user.actions";
 // import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { useAlert } from 'react-alert'
+import { Alert } from 'reactstrap';
 import axios from 'axios';
 import config from '../../config/config';
 // reactstrap components
@@ -25,14 +25,18 @@ import {
 } from "reactstrap";
 // const alert = useAlert();
 class Login extends React.Component {
+  debugger;
+  
   constructor(props) {
     debugger;
+    console.log(props)
     super(props);
     this.state = {
       isRemember: true,
       email: "",
       psw:"",
-      user:{}
+      user:{},
+      visible:true
       // alert:useAlert()
     };
 
@@ -64,7 +68,6 @@ class Login extends React.Component {
     axios.post(config.loginUrl+apiEndpoint, serverport)
         .then(res => {
           if(res.data.status){
-            
             this.setState({
               user: res.data.payload,
           });
