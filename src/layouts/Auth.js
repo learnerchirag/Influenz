@@ -7,9 +7,7 @@ import { Container, Row, Col } from "reactstrap";
 // core components
 import AuthNavbar from "components/Navbars/AuthNavbar.js";
 import AuthFooter from "components/Footers/AuthFooter.js";
-
 import routes from "routes.js";
-
 class Auth extends React.Component {
   componentDidMount() {
     document.body.classList.add("bg-default");
@@ -37,14 +35,14 @@ class Auth extends React.Component {
       <>
         <div className="main-content">
           <AuthNavbar />
-          <div className="header bg-gradient-info py-7 py-lg-8">
+          <div className="header bg-gradient-info py-6 py-lg-7">
             <Container>
-              <div className="header-body text-center mb-7">
+              <div className="header-body text-center mb-6">
                 <Row className="justify-content-center">
-                  <Col lg="5" md="6">
-                    <h1 className="text-white">Welcome!</h1>
+                  <Col lg="5" md="8">
+                    <h1 className="text-white">Influenz Campaign Dashboard</h1>
                     <p className="text-lead text-light">
-                    Let Influencers Spread The Word.
+                    Let Influencers Spread The World.
                     </p>
                   </Col>
                 </Row>
@@ -67,7 +65,7 @@ class Auth extends React.Component {
             </div>
           </div>
           {/* Page content */}
-          <Container className="mt--8 pb-5">
+          <Container className="mt--9 pb-4">
             <Row className="justify-content-center">
               <Switch>
                 {this.getRoutes(routes)}

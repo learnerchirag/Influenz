@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import {userActions} from "../../_actions/user.actions";
 // import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { useAlert } from 'react-alert'
 import axios from 'axios';
 import config from '../../config/config';
 // reactstrap components
@@ -22,7 +23,7 @@ import {
   NavLink,
   Col
 } from "reactstrap";
-
+// const alert = useAlert();
 class Login extends React.Component {
   constructor(props) {
     debugger;
@@ -32,6 +33,7 @@ class Login extends React.Component {
       email: "",
       psw:"",
       user:{}
+      // alert:useAlert()
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -58,24 +60,33 @@ class Login extends React.Component {
   }
   // 'https://devapi.influenz.club/v1/client/signin ' 
   const apiEndpoint="signin";
+  // const alert=useAlert();
     axios.post(config.loginUrl+apiEndpoint, serverport)
         .then(res => {
           if(res.data.status){
-            history.push('/admin/index');
+            
             this.setState({
               user: res.data.payload,
           });
+          
+          localStorage.setItem('access_token', res.data.payload.access_token);
+          // alert.show(<div style={{ color: 'blue' }}>Some Message</div>);
+          history.push('/admin/index');
+          }
+          else{
+            alert("Unautorised");
           }
         });
   }
   render() {
+    // const alert = useAlert();
     return (
       <>
         <Col lg="5" md="7">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent pb-5">
-              <div className="text-muted text-center mt-2 mb-3">
-                <small>Sign in with</small>
+            <CardHeader className="bg-transparent pb-4">
+              <div className="text-muted text-center mt-1 mb-2">
+                <small>Enter your credential to log in</small>
               </div>
               {/* <div className="btn-wrapper text-center">
                 <Button
@@ -120,7 +131,7 @@ class Login extends React.Component {
                         <i className="ni ni-email-83" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Email" type="email" autoComplete="new-email" name="email" onChange={this.handleInputChange} value={this.state.email}/>
+                    <Input placeholder="name@example.com" type="email" autoComplete="new-email" name="email" onChange={this.handleInputChange} value={this.state.email}/>
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
@@ -159,13 +170,13 @@ class Login extends React.Component {
           </Card>
           <Row className="mt-3">
             <Col xs="6">
-              <a
-                className="text-light"
-                href="#pablo"
-                onClick={e => e.preventDefault()}
-              >
+            <NavLink
+                    className="text-light"
+                    to="/auth/forget"
+                    tag={Link}
+                  >
                 <small>Forgot password?</small>
-              </a>
+              </NavLink>
             </Col>
             <Col className="text-right" xs="6">
             <NavLink

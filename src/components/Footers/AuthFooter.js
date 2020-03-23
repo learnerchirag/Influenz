@@ -1,20 +1,4 @@
-/*!
 
-=========================================================
-* Argon Dashboard React - v1.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2019 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 /*eslint-disable*/
 import React from "react";
 
@@ -25,18 +9,18 @@ class Login extends React.Component {
   render() {
     return (
       <>
-        <footer className="py-5">
+        <footer className="py-3">
           <Container>
             <Row className="align-items-center justify-content-xl-between">
               <Col xl="6">
                 <div className="copyright text-center text-xl-left text-muted">
-                  © 2018{" "}
+                  © 2020{" "}
                   <a
                     className="font-weight-bold ml-1"
-                    href="https://www.creative-tim.com?ref=adr-auth-footer"
+                    href="#Influenz_Campaign"
                     target="_blank"
                   >
-                    Creative Tim
+                    Influenz Campaign
                   </a>
                 </div>
               </Col>
@@ -44,15 +28,15 @@ class Login extends React.Component {
                 <Nav className="nav-footer justify-content-center justify-content-xl-end">
                   <NavItem>
                     <NavLink
-                      href="https://www.creative-tim.com?ref=adr-auth-footer"
+                      href="#"
                       target="_blank"
                     >
-                      Creative Tim
+                      Influenz Campaign
                     </NavLink>
                   </NavItem>
                   <NavItem>
                     <NavLink
-                      href="https://www.creative-tim.com/presentation?ref=adr-auth-footer"
+                      href="#"
                       target="_blank"
                     >
                       About Us
@@ -60,7 +44,7 @@ class Login extends React.Component {
                   </NavItem>
                   <NavItem>
                     <NavLink
-                      href="http://blog.creative-tim.com?ref=adr-auth-footer"
+                      href="#"
                       target="_blank"
                     >
                       Blog
@@ -68,7 +52,7 @@ class Login extends React.Component {
                   </NavItem>
                   <NavItem>
                     <NavLink
-                      href="https://github.com/creativetimofficial/argon-dashboard/blob/master/LICENSE.md?ref=adr-auth-footer"
+                      href="#"
                       target="_blank"
                     >
                       MIT License

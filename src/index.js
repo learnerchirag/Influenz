@@ -11,6 +11,17 @@ import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { createStore,applyMiddleware } from "redux";
 import reducer from "./_reducers";
+import { transitions, positions, Provider as AlertProvider } from 'react-alert'
+import AlertTemplate from 'react-alert-template-basic'
+// optional cofiguration
+const options = {
+  // you can also just use 'bottom center'
+  position: positions.BOTTOM_CENTER,
+  timeout: 5000,
+  offset: '30px',
+  // you can also just use 'scale'
+  transition: transitions.SCALE
+}
 
 
 
@@ -22,10 +33,12 @@ ReactDOM.render(
   <Provider store={store}>
   <BrowserRouter>
     <Switch>
+    <AlertProvider template={AlertTemplate} {...options}>
       <Route path="/admin" render={props => <AdminLayout {...props} />} />
       <Route path="/auth" render={props => <AuthLayout {...props} />} />
       {/* <Redirect from="/" to="/admin/index" /> */}
       <Redirect from="/" to="/auth/login" />
+      </AlertProvider>
     </Switch>
   </BrowserRouter>
   </Provider>

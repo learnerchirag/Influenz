@@ -1,4 +1,8 @@
 import React from "react";
+import axios from 'axios';
+import config from '../../config/config';
+
+
 // reactstrap components
 import {
   Button,
@@ -16,13 +20,66 @@ import {
 } from "reactstrap";
 
 class Register extends React.Component {
+  constructor(props) {
+    debugger;
+    super(props);
+    this.state = {
+      name: "",
+      email: "",
+      phone:"",
+      captcha:""
+    };
+
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleInputChange(event) {
+    debugger;
+    const target = event.target;
+    const value = target.name === 'isRemember' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
+  handleSubmit(event) {
+    debugger;
+    event.preventDefault();
+    const { history } = this.props;
+    const serverport = {
+      email: this.state.email,
+      phone_number: this.state.phone,
+      name:this.state.name
+  }
+  const apiEndpoint="signup";
+    axios.post(config.loginUrl+apiEndpoint, serverport)
+        .then(res => {
+          if(res.data.status){
+            console.log(res.data);
+          //   this.setState({
+          //     payload: res.data.payload,
+          // });
+          alert(res.data.message);
+          history.push('./');
+          }
+          else{
+            alert(res.data.message);
+          }
+        });
+  }
+
+
+
+
   render() {
     return (
       <>
         <Col lg="6" md="8">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent pb-5">
-              <div className="text-muted text-center mt-2 mb-4">
+            <CardHeader className="bg-transparent pb-3">
+              <div className="text-muted text-center mt-1 mb-2">
                 <small>Sign up with</small>
               </div>
               {/* <div className="text-center">
@@ -68,7 +125,7 @@ class Register extends React.Component {
                         <i className="ni ni-hat-3" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Name" type="text" />
+                    <Input placeholder="Name" type="text" name="name" onChange={this.handleInputChange} value={this.state.name}/>
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
@@ -78,17 +135,17 @@ class Register extends React.Component {
                         <i className="ni ni-email-83" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Email" type="email" autoComplete="new-email"/>
+                    <Input placeholder="name@example.com" type="email" autoComplete="new-email" name="email" onChange={this.handleInputChange} value={this.state.email}/>
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
                   <InputGroup className="input-group-alternative">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText>
-                        <i className="ni ni-lock-circle-open" />
+                        <i className="ni ni-mobile-button" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Password" type="password" autoComplete="new-password"/>
+                    <Input placeholder="Phone No." type="phone" autoComplete="phone" name="phone" onChange={this.handleInputChange} value={this.state.phone}/>
                   </InputGroup>
                 </FormGroup>
                 {/* <div className="text-muted font-italic">
@@ -120,7 +177,7 @@ class Register extends React.Component {
                   </Col>
                 </Row>
                 <div className="text-center">
-                  <Button className="mt-4" color="primary" type="button">
+                  <Button className="mt-4" color="primary" type="button" onClick={this.handleSubmit}>
                     Create account
                   </Button>
                 </div>
