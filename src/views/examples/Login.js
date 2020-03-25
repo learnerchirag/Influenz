@@ -1,17 +1,18 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import {userActions} from "../../_actions/user.actions";
+import { userActions } from "../../_actions/user.actions";
 // import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import axios from 'axios';
-import config from '../../config/config';
+import { connect } from "react-redux";
+import Axios from "axios";
+import api from "../constants/api";
+
 // reactstrap components
 import {
   Button,
   Card,
   CardHeader,
   CardBody,
+  Container,
   FormGroup,
   Form,
   Input,
@@ -30,8 +31,8 @@ class Login extends React.Component {
     this.state = {
       isRemember: true,
       email: "",
-      psw:"",
-      user:{}
+      psw: "",
+      user: {}
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -41,7 +42,7 @@ class Login extends React.Component {
   handleInputChange(event) {
     debugger;
     const target = event.target;
-    const value = target.name === 'isRemember' ? target.checked : target.value;
+    const value = target.name === "isRemember" ? target.checked : target.value;
     const name = target.name;
 
     this.setState({
@@ -55,28 +56,41 @@ class Login extends React.Component {
     const serverport = {
       email: this.state.email,
       password: this.state.psw
-  }
-  // 'https://devapi.influenz.club/v1/client/signin ' 
-  const apiEndpoint="signin";
-    axios.post(config.loginUrl+apiEndpoint, serverport)
-        .then(res => {
-          if(res.data.status){
-            history.push('/admin/index');
-            this.setState({
-              user: res.data.payload,
-          });
-          }
+    };
+    // 'https://devapi.influenz.club/v1/client/signin '
+    Axios.post(
+      `${api.protocol}${api.baseUrl}${api.userLogin}`,
+      this.state
+    ).then(res => {
+      if (res.data.status) {
+        history.push("/admin/index");
+        this.setState({
+          user: res.data.payload
         });
+      }
+    });
   }
   render() {
     return (
       <>
         <Col lg="5" md="7">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent pb-5">
-              <div className="text-muted text-center mt-2 mb-3">
+            <CardHeader className="bg-transparent ">
+              <Container>
+                <div className="header-body text-center mb-7">
+                  <Row className="justify-content-center">
+                    <Col lg="9" md="6">
+                      <h1 className="#5e72e4">Welcome!</h1>
+                      <p className="text-lead #8898aa">
+                        Let Influencers Spread The Word.
+                      </p>
+                    </Col>
+                  </Row>
+                </div>
+              </Container>
+              {/* <div className="text-muted text-center mt-2 mb-3">
                 <small>Sign in with</small>
-              </div>
+              </div> */}
               {/* <div className="btn-wrapper text-center">
                 <Button
                   className="btn-neutral btn-icon"
@@ -120,7 +134,14 @@ class Login extends React.Component {
                         <i className="ni ni-email-83" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Email" type="email" autoComplete="new-email" name="email" onChange={this.handleInputChange} value={this.state.email}/>
+                    <Input
+                      placeholder="Email"
+                      type="email"
+                      autoComplete="new-email"
+                      name="email"
+                      onChange={this.handleInputChange}
+                      value={this.state.email}
+                    />
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
@@ -130,17 +151,24 @@ class Login extends React.Component {
                         <i className="ni ni-lock-circle-open" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Password" type="password" autoComplete="new-password" name="psw" value={this.state.psw}
-                     onChange={this.handleInputChange}/>
+                    <Input
+                      placeholder="Password"
+                      type="password"
+                      autoComplete="new-password"
+                      name="psw"
+                      value={this.state.psw}
+                      onChange={this.handleInputChange}
+                    />
                   </InputGroup>
                 </FormGroup>
                 <div className="custom-control custom-control-alternative custom-checkbox">
                   <input
                     className="custom-control-input"
                     id=" customCheckLogin"
-                    type="checkbox" name="isRemember"
+                    type="checkbox"
+                    name="isRemember"
                     checked={this.state.isRemember}
-            onChange={this.handleInputChange}
+                    onChange={this.handleInputChange}
                   />
                   <label
                     className="custom-control-label"
@@ -150,7 +178,12 @@ class Login extends React.Component {
                   </label>
                 </div>
                 <div className="text-center">
-                  <Button className="my-4" color="primary" type="button" onClick={this.handleSubmit}>
+                  <Button
+                    className="my-4"
+                    color="primary"
+                    type="button"
+                    onClick={this.handleSubmit}
+                  >
                     Sign in
                   </Button>
                 </div>
@@ -168,15 +201,9 @@ class Login extends React.Component {
               </a>
             </Col>
             <Col className="text-right" xs="6">
-            <NavLink
-                    className="text-light"
-                    to="/auth/register"
-                    tag={Link}
-                  >
-                    
-                    <small>Create new account</small>
-                  </NavLink>
-             
+              <NavLink className="text-light" to="/auth/register" tag={Link}>
+                <small>Create new account</small>
+              </NavLink>
             </Col>
           </Row>
         </Col>
@@ -186,18 +213,18 @@ class Login extends React.Component {
 }
 
 //export default Login;
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     isLoginPending: state.isLoginPending,
     isLoginSuccess: state.isLoginSuccess,
     loginError: state.loginError
   };
-}
+};
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
     login: (email, password) => dispatch(userActions.login(email, password))
   };
-}
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
