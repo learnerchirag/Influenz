@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 // reactstrap components
@@ -35,9 +34,15 @@ class Auth extends React.Component {
       <>
         <div className="main-content">
           <AuthNavbar />
+<<<<<<< HEAD
           <div className="header bg-gradient-info py-6 py-lg-7">
             <Container>
               <div className="header-body text-center mb-6">
+=======
+          <div className="header bg-gradient-info py-7 py-lg-8">
+            {/* <Container>
+              <div className="header-body text-center mb-7">
+>>>>>>> new_branch
                 <Row className="justify-content-center">
                   <Col lg="5" md="8">
                     <h1 className="text-white">Influenz Campaign Dashboard</h1>
@@ -47,7 +52,7 @@ class Auth extends React.Component {
                   </Col>
                 </Row>
               </div>
-            </Container>
+            </Container> */}
             <div className="separator separator-bottom separator-skew zindex-100">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
