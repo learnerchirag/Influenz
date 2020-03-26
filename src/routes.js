@@ -1,10 +1,9 @@
-
 import Index from "views/Index.js";
 import Profile from "views/examples/Profile.js";
 import Maps from "views/examples/Maps.js";
 import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
-import Forget from "views/examples/Forget";
+import Forgot from "views/examples/Forgot.js";
 import Tables from "views/examples/Tables.js";
 import Icons from "views/examples/Icons.js";
 
@@ -45,25 +44,25 @@ var routes = [
     layout: "/admin"
   },
   {
-    path: "/login",
+    path: "login",
     name: "Login",
     icon: "ni ni-key-25 text-info",
     component: Login,
-    layout: "/auth"
+    layout: "/"
   },
   {
-    path: "/register",
+    path: "register",
     name: "Register",
     icon: "ni ni-circle-08 text-pink",
     component: Register,
-    layout: "/auth"
+    layout: "/"
   },
   {
-    path: "/forget",
-    name: "Forget",
+    path: "forgot",
+    name: "Forgot",
     icon: "ni ni-tv-2 text-primary",
-    component: Forget,
-    layout: "/auth"
-  },
+    component: Forgot,
+    layout: "/"
+  }
 ];
 export default routes;

@@ -1,18 +1,26 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import {userActions} from "../../_actions/user.actions";
+import { userActions } from "../../_actions/user.actions";
 // import PropTypes from 'prop-types';
+<<<<<<< HEAD
 import { connect } from 'react-redux';
 import { Alert } from 'reactstrap';
 import axios from 'axios';
 import config from '../../config/config';
+=======
+import { connect } from "react-redux";
+import Axios from "axios";
+import api from "../constants/api";
+import cogoToast from "cogo-toast";
+
+>>>>>>> new_branch
 // reactstrap components
 import {
   Button,
   Card,
   CardHeader,
   CardBody,
+  Container,
   FormGroup,
   Form,
   Input,
@@ -28,16 +36,26 @@ class Login extends React.Component {
   debugger;
   
   constructor(props) {
+<<<<<<< HEAD
     debugger;
     console.log(props)
+=======
+    // debugger;
+>>>>>>> new_branch
     super(props);
     this.state = {
       isRemember: true,
       email: "",
+<<<<<<< HEAD
       psw:"",
       user:{},
       visible:true
       // alert:useAlert()
+=======
+      password: "",
+      user: {},
+      errors: {}
+>>>>>>> new_branch
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -45,9 +63,9 @@ class Login extends React.Component {
   }
 
   handleInputChange(event) {
-    debugger;
+    // debugger;
     const target = event.target;
-    const value = target.name === 'isRemember' ? target.checked : target.value;
+    const value = target.name === "isRemember" ? target.checked : target.value;
     const name = target.name;
 
     this.setState({
@@ -55,11 +73,17 @@ class Login extends React.Component {
     });
   }
   handleSubmit(event) {
-    debugger;
+    // debugger;
+    let errors = {};
+    this.setState({
+      ...this.state,
+      errors
+    });
     event.preventDefault();
     const { history } = this.props;
     const serverport = {
       email: this.state.email,
+<<<<<<< HEAD
       password: this.state.psw
   }
   // 'https://devapi.influenz.club/v1/client/signin ' 
@@ -68,18 +92,48 @@ class Login extends React.Component {
     axios.post(config.loginUrl+apiEndpoint, serverport)
         .then(res => {
           if(res.data.status){
+=======
+      password: this.state.password
+    };
+    if (this.state.email === "" || this.state.password === "") {
+      errors["Required"] = "Fill all the fields required";
+      this.setState({
+        ...this.state,
+        errors
+      });
+      cogoToast.error(errors.Required);
+      console.log(this.state);
+      return;
+    }
+    if (Object.keys(this.state.errors).length === 0) {
+      event.preventDefault();
+      // 'https://devapi.influenz.club/v1/client/signin '
+      Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
+        .then(result => {
+          console.log(result);
+          console.log("hello");
+          if (result.status === 200) {
+            history.push("/admin/index");
+>>>>>>> new_branch
             this.setState({
-              user: res.data.payload,
-          });
-          
-          localStorage.setItem('access_token', res.data.payload.access_token);
-          // alert.show(<div style={{ color: 'blue' }}>Some Message</div>);
-          history.push('/admin/index');
+              user: result.data.payload
+            });
+            console.log(this.state.user);
           }
-          else{
-            alert("Unautorised");
+        })
+        .catch(error => {
+          console.log(error);
+          if (error.status === 400) {
+            cogoToast.error("Status " + error.status + ". Request failed.");
+          }
+          if (error.status === 500) {
+            cogoToast.error("Status " + error.status + ". Request failed.");
           }
         });
+    }
+    console.log(this.state.errors);
+    console.log(this.state);
+    console.log("This is user" + this.state.user);
   }
   render() {
     // const alert = useAlert();
@@ -87,10 +141,22 @@ class Login extends React.Component {
       <>
         <Col lg="5" md="7">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent pb-4">
-              <div className="text-muted text-center mt-1 mb-2">
-                <small>Enter your credential to log in</small>
-              </div>
+            <CardHeader className="bg-transparent ">
+              <Container>
+                <div className="header-body text-center mb-7">
+                  <Row className="justify-content-center">
+                    <Col lg="9" md="6">
+                      <h1 className="#5e72e4">Welcome!</h1>
+                      <p className="text-lead #8898aa">
+                        Let Influencers Spread The Word.
+                      </p>
+                    </Col>
+                  </Row>
+                </div>
+              </Container>
+              {/* <div className="text-muted text-center mt-2 mb-3">
+                <small>Sign in with</small>
+              </div> */}
               {/* <div className="btn-wrapper text-center">
                 <Button
                   className="btn-neutral btn-icon"
@@ -134,7 +200,14 @@ class Login extends React.Component {
                         <i className="ni ni-email-83" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="name@example.com" type="email" autoComplete="new-email" name="email" onChange={this.handleInputChange} value={this.state.email}/>
+                    <Input
+                      placeholder="Email"
+                      type="email"
+                      autoComplete="new-email"
+                      name="email"
+                      onChange={this.handleInputChange}
+                      value={this.state.email}
+                    />
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
@@ -144,17 +217,24 @@ class Login extends React.Component {
                         <i className="ni ni-lock-circle-open" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Password" type="password" autoComplete="new-password" name="psw" value={this.state.psw}
-                     onChange={this.handleInputChange}/>
+                    <Input
+                      placeholder="Password"
+                      type="password"
+                      autoComplete="new-password"
+                      name="password"
+                      value={this.state.password}
+                      onChange={this.handleInputChange}
+                    />
                   </InputGroup>
                 </FormGroup>
                 <div className="custom-control custom-control-alternative custom-checkbox">
                   <input
                     className="custom-control-input"
                     id=" customCheckLogin"
-                    type="checkbox" name="isRemember"
+                    type="checkbox"
+                    name="isRemember"
                     checked={this.state.isRemember}
-            onChange={this.handleInputChange}
+                    onChange={this.handleInputChange}
                   />
                   <label
                     className="custom-control-label"
@@ -164,7 +244,12 @@ class Login extends React.Component {
                   </label>
                 </div>
                 <div className="text-center">
-                  <Button className="my-4" color="primary" type="button" onClick={this.handleSubmit}>
+                  <Button
+                    className="my-4"
+                    color="primary"
+                    type="button"
+                    onClick={this.handleSubmit}
+                  >
                     Sign in
                   </Button>
                 </div>
@@ -173,24 +258,14 @@ class Login extends React.Component {
           </Card>
           <Row className="mt-3">
             <Col xs="6">
-            <NavLink
-                    className="text-light"
-                    to="/auth/forget"
-                    tag={Link}
-                  >
+              <NavLink className="text-light" to="/forgot" tag={Link}>
                 <small>Forgot password?</small>
               </NavLink>
             </Col>
             <Col className="text-right" xs="6">
-            <NavLink
-                    className="text-light"
-                    to="/auth/register"
-                    tag={Link}
-                  >
-                    
-                    <small>Create new account</small>
-                  </NavLink>
-             
+              <NavLink className="text-light" to="/register" tag={Link}>
+                <small>Create new account</small>
+              </NavLink>
             </Col>
           </Row>
         </Col>
@@ -200,18 +275,18 @@ class Login extends React.Component {
 }
 
 //export default Login;
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     isLoginPending: state.isLoginPending,
     isLoginSuccess: state.isLoginSuccess,
     loginError: state.loginError
   };
-}
+};
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
     login: (email, password) => dispatch(userActions.login(email, password))
   };
-}
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
