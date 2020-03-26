@@ -16,7 +16,7 @@ class Auth extends React.Component {
   }
   getRoutes = routes => {
     return routes.map((prop, key) => {
-      if (prop.layout === "/auth") {
+      if (prop.layout === "/") {
         return (
           <Route
             path={prop.layout + prop.path}
@@ -34,20 +34,19 @@ class Auth extends React.Component {
       <>
         <div className="main-content">
           <AuthNavbar />
-          <div className="header bg-gradient-info py-6 py-lg-7">
-            <Container>
-              <div className="header-body text-center mb-6">
+          <div className="header bg-gradient-info py-7 py-lg-8">
+            {/* <Container>
+              <div className="header-body text-center mb-7">
                 <Row className="justify-content-center">
                   <Col lg="5" md="8">
                     <h1 className="text-white">Influenz Campaign Dashboard</h1>
                     <p className="text-lead text-light">
-                      Let Influencers Spread The World.
+                    Let Influencers Spread The World.
                     </p>
                   </Col>
                 </Row>
               </div>
-            </Container>{" "}
-            */}
+            </Container> */}
             <div className="separator separator-bottom separator-skew zindex-100">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +68,7 @@ class Auth extends React.Component {
             <Row className="justify-content-center">
               <Switch>
                 {this.getRoutes(routes)}
-                <Redirect from="*" to="/auth/login" />
+                <Redirect from="*" to="/login" />
               </Switch>
             </Row>
           </Container>

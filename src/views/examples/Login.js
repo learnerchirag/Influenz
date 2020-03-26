@@ -5,6 +5,7 @@ import { userActions } from "../../_actions/user.actions";
 import { connect } from "react-redux";
 import Axios from "axios";
 import api from "../constants/api";
+import cogoToast from "cogo-toast";
 
 // reactstrap components
 import {
@@ -26,13 +27,14 @@ import {
 // const alert = useAlert();
 class Login extends React.Component {
   constructor(props) {
-    debugger;
+    // debugger;
     super(props);
     this.state = {
       isRemember: true,
       email: "",
-      psw: "",
-      user: {}
+      password: "",
+      user: {},
+      errors: {}
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -40,7 +42,7 @@ class Login extends React.Component {
   }
 
   handleInputChange(event) {
-    debugger;
+    // debugger;
     const target = event.target;
     const value = target.name === "isRemember" ? target.checked : target.value;
     const name = target.name;
@@ -50,25 +52,56 @@ class Login extends React.Component {
     });
   }
   handleSubmit(event) {
-    debugger;
+    // debugger;
+    let errors = {};
+    this.setState({
+      ...this.state,
+      errors
+    });
     event.preventDefault();
     const { history } = this.props;
     const serverport = {
       email: this.state.email,
-      password: this.state.psw
+      password: this.state.password
     };
-    // 'https://devapi.influenz.club/v1/client/signin '
-    Axios.post(
-      `${api.protocol}${api.baseUrl}${api.userLogin}`,
-      this.state
-    ).then(res => {
-      if (res.data.status) {
-        history.push("/admin/index");
-        this.setState({
-          user: res.data.payload
+    if (this.state.email === "" || this.state.password === "") {
+      errors["Required"] = "Fill all the fields required";
+      this.setState({
+        ...this.state,
+        errors
+      });
+      cogoToast.error(errors.Required);
+      console.log(this.state);
+      return;
+    }
+    if (Object.keys(this.state.errors).length === 0) {
+      event.preventDefault();
+      // 'https://devapi.influenz.club/v1/client/signin '
+      Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
+        .then(result => {
+          console.log(result);
+          console.log("hello");
+          if (result.status === 200) {
+            history.push("/admin/index");
+            this.setState({
+              user: result.data.payload
+            });
+            console.log(this.state.user);
+          }
+        })
+        .catch(error => {
+          console.log(error);
+          if (error.status === 400) {
+            cogoToast.error("Status " + error.status + ". Request failed.");
+          }
+          if (error.status === 500) {
+            cogoToast.error("Status " + error.status + ". Request failed.");
+          }
         });
-      }
-    });
+    }
+    console.log(this.state.errors);
+    console.log(this.state);
+    console.log("This is user" + this.state.user);
   }
   render() {
     // const alert = useAlert();
@@ -156,8 +189,8 @@ class Login extends React.Component {
                       placeholder="Password"
                       type="password"
                       autoComplete="new-password"
-                      name="psw"
-                      value={this.state.psw}
+                      name="password"
+                      value={this.state.password}
                       onChange={this.handleInputChange}
                     />
                   </InputGroup>
@@ -193,12 +226,12 @@ class Login extends React.Component {
           </Card>
           <Row className="mt-3">
             <Col xs="6">
-              <NavLink className="text-light" to="/auth/forget" tag={Link}>
+              <NavLink className="text-light" to="/forgot" tag={Link}>
                 <small>Forgot password?</small>
               </NavLink>
             </Col>
             <Col className="text-right" xs="6">
-              <NavLink className="text-light" to="/auth/register" tag={Link}>
+              <NavLink className="text-light" to="/register" tag={Link}>
                 <small>Create new account</small>
               </NavLink>
             </Col>

@@ -92,13 +92,13 @@ class Register extends React.Component {
     }
     if (Object.keys(this.state.errors).length === 0) {
       e.preventDefault();
-      Axios.post(`${api.protocol}${api.baseUrl}${api.userSignup}`, "")
+      Axios.post(`${api.protocol}${api.baseUrl}${api.userSignup}`, this.state)
         .then(result => {
           console.log(result);
           if (result.status === 200) {
             if (result.data.status === true) {
               cogoToast.success(result.data.message);
-              this.props.history.push("/auth/login");
+              this.props.history.push("/login");
             }
             if (result.data.status === false) {
               cogoToast.error(result.data.message);
@@ -286,7 +286,7 @@ class Register extends React.Component {
           </Card>
           <Row className="mt-3">
             <Col className="text-right" xs="12">
-              <NavLink className="text-light" to="/auth/login" tag={Link}>
+              <NavLink className="text-light" to="/login" tag={Link}>
                 <small>Sign in</small>
               </NavLink>
             </Col>

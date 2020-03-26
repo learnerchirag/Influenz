@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 // reactstrap components
@@ -24,10 +23,11 @@ class AdminNavbar extends React.Component {
         >
           <Container className="px-4">
             <NavbarBrand to="/" tag={Link}>
-              <img alt="..." 
-              src={require("assets/img/brand/argon-react-white.png")}
-              style={{height:"100px"}}
-               />
+              <img
+                alt="..."
+                src={require("assets/img/brand/argon-react-white.png")}
+                style={{ height: "100px" }}
+              />
             </NavbarBrand>
             <button className="navbar-toggler" id="navbar-collapse-main">
               <span className="navbar-toggler-icon" />
@@ -40,7 +40,7 @@ class AdminNavbar extends React.Component {
                       <img
                         alt="..."
                         src={require("assets/img/brand/argon-react.png")}
-                        style={{height:"100px !important"}}
+                        style={{ height: "100px !important" }}
                       />
                     </Link>
                   </Col>
