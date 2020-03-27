@@ -2,18 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { userActions } from "../../_actions/user.actions";
 // import PropTypes from 'prop-types';
-<<<<<<< HEAD
-import { connect } from 'react-redux';
-import { Alert } from 'reactstrap';
-import axios from 'axios';
-import config from '../../config/config';
-=======
 import { connect } from "react-redux";
 import Axios from "axios";
 import api from "../constants/api";
 import cogoToast from "cogo-toast";
-
->>>>>>> new_branch
 // reactstrap components
 import {
   Button,
@@ -34,28 +26,16 @@ import {
 // const alert = useAlert();
 class Login extends React.Component {
   debugger;
-  
+
   constructor(props) {
-<<<<<<< HEAD
-    debugger;
-    console.log(props)
-=======
     // debugger;
->>>>>>> new_branch
     super(props);
     this.state = {
       isRemember: true,
       email: "",
-<<<<<<< HEAD
-      psw:"",
-      user:{},
-      visible:true
-      // alert:useAlert()
-=======
       password: "",
       user: {},
       errors: {}
->>>>>>> new_branch
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -83,16 +63,6 @@ class Login extends React.Component {
     const { history } = this.props;
     const serverport = {
       email: this.state.email,
-<<<<<<< HEAD
-      password: this.state.psw
-  }
-  // 'https://devapi.influenz.club/v1/client/signin ' 
-  const apiEndpoint="signin";
-  // const alert=useAlert();
-    axios.post(config.loginUrl+apiEndpoint, serverport)
-        .then(res => {
-          if(res.data.status){
-=======
       password: this.state.password
     };
     if (this.state.email === "" || this.state.password === "") {
@@ -114,7 +84,6 @@ class Login extends React.Component {
           console.log("hello");
           if (result.status === 200) {
             history.push("/admin/index");
->>>>>>> new_branch
             this.setState({
               user: result.data.payload
             });
