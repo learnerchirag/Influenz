@@ -54,11 +54,11 @@ class Login extends React.Component {
   }
   handleSubmit(event) {
     // debugger;
-    let errors = {};
     this.setState({
-      ...this.state,
-      errors
+      errors: {}
     });
+    let errors = {};
+
     event.preventDefault();
     const { history } = this.props;
     const serverport = {
@@ -75,11 +75,18 @@ class Login extends React.Component {
       console.log(this.state);
       return;
     }
-    if (Object.keys(this.state.errors).length === 0) {
+    if (this.state.errors) {
       event.preventDefault();
+      console.log(this.props, "these are props");
+      // const handleLoader = this.props.location.handleLoader.handleLoader();
+      const { myProp } = this.props;
+      console.log(myProp);
+      myProp(true);
       // 'https://devapi.influenz.club/v1/client/signin '
       Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
         .then(result => {
+          myProp(false);
+          // this.props.location.handleLoader(false);
           console.log(result);
           console.log("hello");
           if (result.status === 200) {
@@ -91,12 +98,25 @@ class Login extends React.Component {
           }
         })
         .catch(error => {
+          myProp(false);
+          // this.props.location.handleLoader(false);
           console.log(error);
-          if (error.status === 400) {
-            cogoToast.error("Status " + error.status + ". Request failed.");
+          if (error.message === "Network Error") {
+            cogoToast.error("Network error");
+            return;
           }
-          if (error.status === 500) {
-            cogoToast.error("Status " + error.status + ". Request failed.");
+          if (error.response.status === 401) {
+            cogoToast.error("Email or Password is incorrect.");
+          }
+          if (error.response.status === 400) {
+            cogoToast.error(
+              "Status " + error.response.status + ". Request failed."
+            );
+          }
+          if (error.response.status === 500) {
+            cogoToast.error(
+              "Status " + error.response.status + ". Request failed."
+            );
           }
         });
     }
@@ -110,9 +130,9 @@ class Login extends React.Component {
       <>
         <Col lg="5" md="7">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent ">
+            <CardHeader className="bg-transparent py-lg-4">
               <Container>
-                <div className="header-body text-center mb-7">
+                <div className="header-body text-center ">
                   <Row className="justify-content-center">
                     <Col lg="9" md="6">
                       <h1 className="#5e72e4">Welcome!</h1>
@@ -158,6 +178,9 @@ class Login extends React.Component {
               </div> */}
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
+              <div class="text-center py-lg-3">
+                <small style={{ color: "#8898aa" }}>Sign in with </small>
+              </div>
               {/* <div className="text-center text-muted mb-4">
                 <small>Or sign in with credentials</small>
               </div> */}

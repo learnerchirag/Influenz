@@ -36,6 +36,9 @@ class Register extends React.Component {
     this.setState({ [event.target.name]: event.target.value });
   };
   handleSignupClick = e => {
+    this.setState({
+      errors: {}
+    });
     let errors = {};
     e.preventDefault();
     if (
@@ -107,11 +110,15 @@ class Register extends React.Component {
         })
         .catch(error => {
           console.log(error);
-          if (error.status === 400) {
-            cogoToast.error("Status " + error.status + ". Request failed.");
+          if (error.response.status === 400) {
+            cogoToast.error(
+              "Status " + error.response.status + ". Request failed."
+            );
           }
-          if (error.status === 500) {
-            cogoToast.error("Status " + error.status + ". Request failed.");
+          if (error.response.status === 500) {
+            cogoToast.error(
+              "Status " + error.response.status + ". Request failed."
+            );
           }
         });
     }
@@ -125,9 +132,9 @@ class Register extends React.Component {
       <>
         <Col lg="6" md="8">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent">
+            <CardHeader className="bg-transparent py-lg-4">
               <Container>
-                <div className="header-body text-center mb-7">
+                <div className="header-body text-center">
                   <Row className="justify-content-center">
                     <Col lg="9" md="6">
                       <h1 className="#5e72e4">Welcome!</h1>
@@ -173,6 +180,11 @@ class Register extends React.Component {
               </div> */}
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
+              <div class="text-center py-lg-3">
+                <small style={{ color: "#8898aa" }}>
+                  Fill all credentials to register
+                </small>
+              </div>
               {/* <div className="text-center text-muted mb-4">
                 <small>Or sign up with credentials</small>
               </div> */}
