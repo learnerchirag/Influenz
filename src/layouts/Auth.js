@@ -40,7 +40,7 @@ class Auth extends React.Component {
         return (
           <Route
             path={prop.layout + prop.path}
-            render={prop => <Register />}
+            render={prop => <Register myProp={this.handleLoader} {...prop} />}
             key={key}
             // handleLoader={this.handleLoader}
           />
@@ -50,7 +50,7 @@ class Auth extends React.Component {
         return (
           <Route
             path={prop.layout + prop.path}
-            render={prop => <Forgot />}
+            render={prop => <Forgot myProp={this.handleLoader} {...prop} />}
             key={key}
             // handleLoader={this.handleLoader}
           />

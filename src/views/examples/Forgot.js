@@ -33,6 +33,9 @@ class Forgot extends React.Component {
     this.setState({ [event.target.name]: event.target.value });
   };
   handleResetClick = e => {
+    this.setState({
+      errors: {}
+    });
     let errors = {};
     e.preventDefault();
     if (
@@ -61,12 +64,15 @@ class Forgot extends React.Component {
 
     if (Object.keys(this.state.errors).length === 0) {
       e.preventDefault();
+      const { myProp } = this.props;
+      myProp(true);
       Axios.post(
         `${api.protocol}${api.baseUrl}${api.forgotPassword}`,
         this.state
       )
         .then(result => {
           console.log(result);
+          myProp(false);
           if (result.status === 200) {
             if (result.data.status === true) {
               cogoToast.success(result.data.message);
@@ -79,6 +85,7 @@ class Forgot extends React.Component {
         })
         .catch(error => {
           console.log(error);
+          myProp(false);
           if (error.response.status === 400) {
             cogoToast.error(
               "Status " + error.response.status + ". Request failed."
@@ -108,7 +115,7 @@ class Forgot extends React.Component {
                     <Col lg="9" md="6">
                       <h1 className="#5e72e4">Welcome!</h1>
                       <p className="text-lead #8898aa">
-                        Let Influencers Spread The Word.
+                        Influenz Campaign Management
                       </p>
                     </Col>
                   </Row>
@@ -117,7 +124,9 @@ class Forgot extends React.Component {
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
               <div class="text-center py-lg-3">
-                <small style={{ color: "#8898aa" }}>Enter email to reset</small>
+                <small style={{ color: "#8898aa" }}>
+                  Enter your email to reset password
+                </small>
               </div>
               <Form role="form">
                 <FormGroup>

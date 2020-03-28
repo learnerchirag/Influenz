@@ -27,7 +27,7 @@ class Register extends React.Component {
   state = {
     name: "",
     email: "",
-    password: "",
+    // password: "",
     phone_number: "",
     errors: {}
   };
@@ -45,9 +45,9 @@ class Register extends React.Component {
       // this.state.name === null ||
       this.state.name === "" ||
       // this.state.email === null ||
-      this.state.email === "" ||
+      this.state.email === ""
       // this.state.password === null ||
-      this.state.password === ""
+      // this.state.password === ""
     ) {
       errors["Required"] = "Fill all the fields required";
       this.setState({
@@ -84,19 +84,22 @@ class Register extends React.Component {
       cogoToast.error("Please type a valid email");
     }
 
-    if (this.state.password.length < 6) {
-      console.log("in password");
-      errors["Password"] = "Password should be more than 6 characaters";
-      this.setState({
-        ...this.state,
-        errors
-      });
-      cogoToast.error("Password should be more than 6 characaters");
-    }
+    // if (this.state.password.length < 6) {
+    //   console.log("in password");
+    //   errors["Password"] = "Password should be more than 6 characaters";
+    //   this.setState({
+    //     ...this.state,
+    //     errors
+    //   });
+    //   cogoToast.error("Password should be more than 6 characaters");
+    // }
     if (Object.keys(this.state.errors).length === 0) {
       e.preventDefault();
+      const { myProp } = this.props;
+      myProp(true);
       Axios.post(`${api.protocol}${api.baseUrl}${api.userSignup}`, this.state)
         .then(result => {
+          myProp(false);
           console.log(result);
           if (result.status === 200) {
             if (result.data.status === true) {
@@ -109,6 +112,7 @@ class Register extends React.Component {
           }
         })
         .catch(error => {
+          myProp(false);
           console.log(error);
           if (error.response.status === 400) {
             cogoToast.error(
@@ -139,7 +143,7 @@ class Register extends React.Component {
                     <Col lg="9" md="6">
                       <h1 className="#5e72e4">Welcome!</h1>
                       <p className="text-lead #8898aa">
-                        Let Influencers Spread The Word.
+                        Influenz Campaign Management
                       </p>
                     </Col>
                   </Row>
@@ -182,7 +186,7 @@ class Register extends React.Component {
             <CardBody className="px-lg-5 py-lg-5">
               <div class="text-center py-lg-3">
                 <small style={{ color: "#8898aa" }}>
-                  Fill all credentials to register
+                  Fill your details to register
                 </small>
               </div>
               {/* <div className="text-center text-muted mb-4">
@@ -238,7 +242,7 @@ class Register extends React.Component {
                     />
                   </InputGroup>
                 </FormGroup>
-                <FormGroup>
+                {/* <FormGroup>
                   <InputGroup className="input-group-alternative">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText>
@@ -254,7 +258,7 @@ class Register extends React.Component {
                       autoComplete="new-password"
                     />
                   </InputGroup>
-                </FormGroup>
+                </FormGroup> */}
                 {/* <div className="text-muted font-italic">
                   <small>
                     password strength:{" "}
