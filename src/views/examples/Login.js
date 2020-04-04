@@ -1,11 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { userActions } from "../../_actions/user.actions";
 // import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Axios from "axios";
 import api from "../constants/api";
 import cogoToast from "cogo-toast";
+import Cookies from "universal-cookie";
 // reactstrap components
 import {
   Button,
@@ -25,24 +26,31 @@ import {
 } from "reactstrap";
 // const alert = useAlert();
 class Login extends React.Component {
-  debugger;
+  // debugger;
+  state = {
+    isRemember: true,
+    email: "",
+    password: "",
+    user: null,
+    errors: {}
+  };
 
-  constructor(props) {
-    // debugger;
-    super(props);
-    this.state = {
-      isRemember: true,
-      email: "",
-      password: "",
-      user: {},
-      errors: {}
-    };
+  // constructor(props) {
+  //   // debugger;
+  //   super(props);
+  //   this.state = {
+  //     isRemember: true,
+  //     email: "",
+  //     password: "",
+  //     user: {},
+  //     errors: {}
+  //   };
 
-    this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+  //   this.handleInputChange = this.handleInputChange.bind(this);
+  //   this.handleSubmit = this.handleSubmit.bind(this);
+  // }
 
-  handleInputChange(event) {
+  handleInputChange = event => {
     // debugger;
     const target = event.target;
     const value = target.name === "isRemember" ? target.checked : target.value;
@@ -51,8 +59,8 @@ class Login extends React.Component {
     this.setState({
       [name]: value
     });
-  }
-  handleSubmit(event) {
+  };
+  handleSubmit = event => {
     // debugger;
     this.setState({
       errors: {}
@@ -72,15 +80,16 @@ class Login extends React.Component {
         errors
       });
       cogoToast.error(errors.Required);
-      console.log(this.state);
+      // console.log(this.state);
       return;
     }
     if (this.state.errors) {
       event.preventDefault();
-      console.log(this.props, "these are props");
+      // console.log(this.props, "these are props");
       // const handleLoader = this.props.location.handleLoader.handleLoader();
       const { myProp } = this.props;
-      console.log(myProp);
+      const cookies = new Cookies();
+      // console.log(myProp);
       myProp(true);
       // 'https://devapi.influenz.club/v1/client/signin '
       Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
@@ -90,11 +99,22 @@ class Login extends React.Component {
           console.log(result);
           console.log("hello");
           if (result.status === 200) {
-            history.push("/admin/index");
-            this.setState({
-              user: result.data.payload
-            });
-            console.log(this.state.user);
+            console.log("chalja bhai");
+            const user = result.data.payload;
+            console.log(user);
+            // this.setState(
+            //   {
+            //     user: user
+            //   },
+            //   function() {
+            //     console.log("user");
+            //   }
+            // );
+            cookies.set("Auth-token", result.data.payload.access_token);
+            cookies.set("User", result.data.payload.name);
+
+            this.props.history.push("/admin");
+            // return <Redirect to="/admin" />;
           }
         })
         .catch(error => {
@@ -122,8 +142,9 @@ class Login extends React.Component {
     }
     console.log(this.state.errors);
     console.log(this.state);
-    console.log("This is user" + this.state.user);
-  }
+    console.log("This is user", this.state.user);
+    console.log(this.props);
+  };
   render() {
     // const alert = useAlert();
     return (

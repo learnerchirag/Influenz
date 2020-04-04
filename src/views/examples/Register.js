@@ -4,6 +4,8 @@ import Axios from "axios";
 import validator from "validator";
 import api from "../constants/api";
 import cogoToast from "cogo-toast";
+import { ReCaptcha } from "react-recaptcha-google";
+import { loadReCaptcha } from "react-recaptcha-google";
 
 // reactstrap components
 import {
@@ -29,7 +31,34 @@ class Register extends React.Component {
     email: "",
     // password: "",
     phone_number: "",
-    errors: {}
+    errors: {},
+    captchaVerified: false
+  };
+  componentDidMount = () => {
+    loadReCaptcha();
+    // if (this.captchaDemo) {
+    //   console.log("started, just a second...");
+    //   console.log(this.captchaDemo);
+    //   this.captchaDemo.reset();
+    //   // this.captchaDemo.execute();
+    // }
+  };
+  onLoadRecaptcha = () => {
+    if (this.captchaDemo) {
+      this.captchaDemo.reset();
+      // this.captchaDemo.getValue();
+      // this.captchaDemo.getWidgetId();
+      console.log("hello captcha");
+      // this.captchaDemo.execute();
+    }
+  };
+  verifyCallback = response => {
+    if (response) {
+      console.log("hello verified");
+      this.setState({
+        captchaVerified: true
+      });
+    }
   };
 
   handleInputChange = event => {
@@ -41,6 +70,7 @@ class Register extends React.Component {
     });
     let errors = {};
     e.preventDefault();
+
     if (
       // this.state.name === null ||
       this.state.name === "" ||
@@ -73,8 +103,7 @@ class Register extends React.Component {
         errors
       });
       cogoToast.error("Enter a valid phone number");
-    }
-    if (!validator.isEmail(this.state.email)) {
+    } else if (!validator.isEmail(this.state.email)) {
       console.log("in email");
       errors["Email"] = "Please type a valid email";
       this.setState({
@@ -93,38 +122,42 @@ class Register extends React.Component {
     //   });
     //   cogoToast.error("Password should be more than 6 characaters");
     // }
-    if (Object.keys(this.state.errors).length === 0) {
-      e.preventDefault();
-      const { myProp } = this.props;
-      myProp(true);
-      Axios.post(`${api.protocol}${api.baseUrl}${api.userSignup}`, this.state)
-        .then(result => {
-          myProp(false);
-          console.log(result);
-          if (result.status === 200) {
-            if (result.data.status === true) {
-              cogoToast.success(result.data.message);
-              this.props.history.push("/login");
+    else if (this.state.captchaVerified) {
+      if (this.state.errors) {
+        e.preventDefault();
+        const { myProp } = this.props;
+        myProp(true);
+        Axios.post(`${api.protocol}${api.baseUrl}${api.userSignup}`, this.state)
+          .then(result => {
+            myProp(false);
+            console.log(result);
+            if (result.status === 200) {
+              if (result.data.status === true) {
+                cogoToast.success(result.data.message);
+                this.props.history.push("/login");
+              }
+              if (result.data.status === false) {
+                cogoToast.error(result.data.message);
+              }
             }
-            if (result.data.status === false) {
-              cogoToast.error(result.data.message);
+          })
+          .catch(error => {
+            myProp(false);
+            console.log(error);
+            if (error.response.status === 400) {
+              cogoToast.error(
+                "Status " + error.response.status + ". Request failed."
+              );
             }
-          }
-        })
-        .catch(error => {
-          myProp(false);
-          console.log(error);
-          if (error.response.status === 400) {
-            cogoToast.error(
-              "Status " + error.response.status + ". Request failed."
-            );
-          }
-          if (error.response.status === 500) {
-            cogoToast.error(
-              "Status " + error.response.status + ". Request failed."
-            );
-          }
-        });
+            if (error.response.status === 500) {
+              cogoToast.error(
+                "Status " + error.response.status + ". Request failed."
+              );
+            }
+          });
+      }
+    } else {
+      cogoToast.error("ReCAPTCHA required");
     }
 
     console.log(this.state.errors);
@@ -149,39 +182,6 @@ class Register extends React.Component {
                   </Row>
                 </div>
               </Container>
-              {/* <div className="text-muted text-center mt-2 mb-4">
-                <small>Sign up with</small>
-              </div> */}
-              {/* <div className="text-center">
-                <Button
-                  className="btn-neutral btn-icon mr-4"
-                  color="default"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={require("assets/img/icons/common/github.svg")}
-                    />
-                  </span>
-                  <span className="btn-inner--text">Github</span>
-                </Button>
-                <Button
-                  className="btn-neutral btn-icon"
-                  color="default"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={require("assets/img/icons/common/google.svg")}
-                    />
-                  </span>
-                  <span className="btn-inner--text">Google</span>
-                </Button>
-              </div> */}
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
               <div class="text-center py-lg-3">
@@ -242,29 +242,7 @@ class Register extends React.Component {
                     />
                   </InputGroup>
                 </FormGroup>
-                {/* <FormGroup>
-                  <InputGroup className="input-group-alternative">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <i className="ni ni-mobile-button" />
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      name="password"
-                      onChange={this.handleInputChange}
-                      value={this.state.password}
-                      placeholder="Password"
-                      type="password"
-                      autoComplete="new-password"
-                    />
-                  </InputGroup>
-                </FormGroup> */}
-                {/* <div className="text-muted font-italic">
-                  <small>
-                    password strength:{" "}
-                    <span className="text-success font-weight-700">strong</span>
-                  </small>
-                </div> */}
+
                 <Row className="my-4">
                   <Col xs="12">
                     <div className="custom-control custom-control-alternative custom-checkbox">
@@ -287,6 +265,16 @@ class Register extends React.Component {
                     </div>
                   </Col>
                 </Row>
+                <ReCaptcha
+                  ref={el => {
+                    this.captchaDemo = el;
+                  }}
+                  size="normal"
+                  render="explicit"
+                  sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
+                  onloadCallback={this.onLoadRecaptcha}
+                  verifyCallback={this.verifyCallback}
+                />
                 <div className="text-center">
                   <Button
                     className="mt-4"

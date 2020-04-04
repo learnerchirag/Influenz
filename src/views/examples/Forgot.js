@@ -60,9 +60,7 @@ class Forgot extends React.Component {
         errors
       });
       cogoToast.error("Please type a valid email");
-    }
-
-    if (Object.keys(this.state.errors).length === 0) {
+    } else if (this.state.errors) {
       e.preventDefault();
       const { myProp } = this.props;
       myProp(true);

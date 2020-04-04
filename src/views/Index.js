@@ -1,4 +1,3 @@
-
 import React from "react";
 // node.js library that concatenates classes (strings)
 import classnames from "classnames";
@@ -33,16 +32,16 @@ import {
 import Header from "components/Headers/Header.js";
 
 class Index extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      activeNav: 1,
-      chartExample1Data: "data1"
-    };
+  state = {
+    activeNav: 1,
+    chartExample1Data: "data1"
+  };
+  componentDidMount = () => {
+    console.log("mounted");
     if (window.Chart) {
       parseOptions(Chart, chartOptions());
     }
-  }
+  };
   toggleNavs = (e, index) => {
     e.preventDefault();
     this.setState({

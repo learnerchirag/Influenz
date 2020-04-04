@@ -1,6 +1,6 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
+import Cookies from "universal-cookie";
 // reactstrap components
 import {
   DropdownMenu,
@@ -18,20 +18,18 @@ import {
   Container,
   Media
 } from "reactstrap";
-
+const cookies = new Cookies();
 class AdminNavbar extends React.Component {
   constructor(props) {
-    debugger;
+    // debugger;
     super(props);
-    this.state = {
-      
-    };
+    this.state = {};
     this.handleLogout = this.handleLogout.bind(this);
   }
-  handleLogout(event){
+  handleLogout(event) {
     event.preventDefault();
     const { history } = this.props;
-    history.push('/auth/login');
+    history.push("/auth/login");
   }
   render() {
     return (
@@ -68,7 +66,7 @@ class AdminNavbar extends React.Component {
                     </span>
                     <Media className="ml-2 d-none d-lg-block">
                       <span className="mb-0 text-sm font-weight-bold">
-                        Jessica Jones
+                        {cookies.get("User")}
                       </span>
                     </Media>
                   </Media>

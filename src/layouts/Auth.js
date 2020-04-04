@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect, Router } from "react-router-dom";
 // reactstrap components
 import { Container, Row, Col } from "reactstrap";
 import { UncontrolledAlert } from "reactstrap";
@@ -22,50 +22,68 @@ class Auth extends React.Component {
   componentWillUnmount() {
     document.body.classList.remove("bg-default");
   }
-  getRoutes = routes => {
-    return routes.map((prop, key) => {
-      if (prop.component === Login) {
-        return (
-          <Route
-            path={prop.layout + prop.path}
-            render={prop => (
-              <Login myProp={this.handleLoader} {...prop}></Login>
-            )}
-            key={key}
-            // handleLoader={this.handleLoader}
-          />
-        );
-      }
-      if (prop.component === Register) {
-        return (
-          <Route
-            path={prop.layout + prop.path}
-            render={prop => <Register myProp={this.handleLoader} {...prop} />}
-            key={key}
-            // handleLoader={this.handleLoader}
-          />
-        );
-      }
-      if (prop.component === Forgot) {
-        return (
-          <Route
-            path={prop.layout + prop.path}
-            render={prop => <Forgot myProp={this.handleLoader} {...prop} />}
-            key={key}
-            // handleLoader={this.handleLoader}
-          />
-        );
-      } else {
-        return null;
-      }
-    });
-  };
+  handleComponent(props) {
+    if (props.location.pathname === "/login") {
+      return <Login myProp={this.handleLoader} {...props} />;
+    } else if (props.location.pathname === "/register") {
+      return <Register myProp={this.handleLoader} {...props} />;
+    } else if (props.location.pathname === "/forgot") {
+      return <Forgot myProp={this.handleLoader} {...props} />;
+    } else return <Redirect from="/" to="/login" />;
+  }
+
+  // getRoutes = routes => {
+  //   console.log(routes);
+
+  //   return routes.map((prop, key) => {
+  //     console.log();
+  //     if (prop.name === "Login") {
+  //       return (
+  //         <React.Fragment>
+  //           <Route
+  //             path={prop.layout + prop.path}
+  //             render={prop => (
+  //               <Login myProp={this.handleLoader} {...prop}></Login>
+  //             )}
+  //             key={key}
+  //             // handleLoader={this.handleLoader}
+  //           />
+  //           {/* <Redirect to="/login" /> */}
+  //         </React.Fragment>
+  //       );
+  //     }
+  //     if (prop.component === Register) {
+  //       return (
+  //         <Route
+  //           path={prop.layout + prop.path}
+  //           render={prop => <Register myProp={this.handleLoader} {...prop} />}
+  //           key={key}
+  //           // handleLoader={this.handleLoader}
+  //         />
+  //       );
+  //     }
+  //     if (prop.component === Forgot) {
+  //       return (
+  //         <Route
+  //           path={prop.layout + prop.path}
+  //           render={prop => <Forgot myProp={this.handleLoader} {...prop} />}
+  //           key={key}
+  //           // handleLoader={this.handleLoader}
+  //         />
+  //       );
+  //     } else {
+  //       return null;
+  //     }
+  //   });
+  // };
   handleLoader = status => {
     this.setState({
       isLoading: status
     });
   };
   render() {
+    const props = this.props;
+    // console.log(props);
     return (
       <>
         {this.state.isLoading ? (
@@ -125,10 +143,12 @@ class Auth extends React.Component {
             {/* Page content */}
             <Container className="mt--9 pb-4">
               <Row className="justify-content-center">
-                <Switch>
+                {this.handleComponent(props)}
+                {/* <Redirect from="/" to="/login" /> */}
+                {/* <Switch>
                   {this.getRoutes(routes)}
                   <Redirect from="*" to="/login" />
-                </Switch>
+                </Switch> */}
               </Row>
             </Container>
             <AuthFooter />
