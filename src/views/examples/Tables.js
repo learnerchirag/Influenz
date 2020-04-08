@@ -5,11 +5,18 @@ import Cookies from "universal-cookie";
 // reactstrap components
 import {
   Badge,
+  Button,
   Card,
   CardHeader,
   CardFooter,
   DropdownMenu,
   DropdownItem,
+  Form,
+  FormGroup,
+  InputGroupAddon,
+  InputGroupText,
+  Input,
+  InputGroup,
   UncontrolledDropdown,
   DropdownToggle,
   Media,
@@ -21,7 +28,7 @@ import {
   Container,
   Row,
   UncontrolledTooltip,
-  Col
+  Col,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
@@ -33,63 +40,116 @@ class Tables extends React.Component {
   state = {
     tableList: [],
     influencersList: [],
-    uuid: null,
-    name: null,
-    image_url: null,
-    content: null,
-    cta_url: null,
-    company_logo: null,
-    company_name: null,
-    facebook_url: null,
-    instagram_url: null,
-    twitter_url: null,
-    linkedin_url: null,
-    payment_per_click: null,
-    age_max: null,
-    age_min: null,
-    gender: null,
-    locations: []
+    users: [],
+    search: null,
+    tableListFiltered: [],
   };
   componentDidMount = () => {
+    const { myProp } = this.props;
     const token = cookies.get("Auth-token");
+    // myProp(true);
+
     Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
-      headers: { Authorization: "Bearer " + token }
-    }).then(result => {
+      headers: { Authorization: "Bearer " + token },
+    }).then((result) => {
+      myProp(false);
       console.log(result);
-      this.setState({ tableList: result.data.payload });
+      this.setState({
+        tableListFiltered: result.data.payload,
+        tableList: result.data.payload,
+      });
       console.log(this.state.tableList);
+      console.log(this.state.tableListFiltered, "before");
     });
   };
-  handleAnalytics = () => {};
+  handleAnalytics = (user) => {
+    this.setState(
+      {
+        users: user,
+      },
+      () => {
+        this.props.history.push({
+          pathname: "/admin/index",
+          state: { users: this.state.users },
+        });
+      }
+    );
+
+    console.log("handling analytics");
+    console.log(user, "this is the user");
+  };
+  handleSearch = (event) => {
+    this.setState(
+      {
+        search: event.target.value.toLowerCase(),
+        tableListFiltered: [],
+      },
+      () => {
+        console.log(this.state.search);
+        let temp = [];
+        for (let i = 0; i < this.state.tableList.length; i++) {
+          if (
+            this.state.tableList[i].company_name
+              .toLowerCase()
+              .includes(this.state.search)
+          ) {
+            console.log(this.state.tableListFiltered, "afterfiltering");
+            temp = [...temp, this.state.tableList[i]];
+            this.setState({
+              tableListFiltered: temp,
+            });
+          }
+          console.log(
+            this.state.search,
+            this.state.tableList[i].company_name,
+            this.state.tableList[i].company_name.includes(this.state.search),
+            "out ofloop"
+          );
+        }
+      }
+    );
+  };
   render() {
     return (
       <>
         <Header />
         {/* Page content */}
-        <Container className="mt--7" fluid>
+        <Container className="mt-1" fluid>
           {/* Table */}
           <Row>
             <div className="col">
               <Card className="shadow">
                 <CardHeader className="border-0" float="right">
                   <Row>
-                    <Col>
+                    {/* <div className="col">
                       <h3 className="mb-0">Campaigns</h3>
-                    </Col>
-                    <Col xs="auto">
-                      <h4>
-                        <a href="/admin/maps">
-                          <img
-                            alt="..."
-                            src={require("../../assets/img/icons/002-plus-1.png")}
-                          />
-                        </a>
-                        {" Create Campaign"}
-                      </h4>
-                    </Col>
+                    </div> */}
+                    <div className="col text-right">
+                      <Form className=" form-inline mr-3 d-none d-md-flex ml-lg-auto">
+                        <FormGroup className="mb-0">
+                          <InputGroup className="input-group-alternative">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText>
+                                <i className="fas fa-search" />
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              placeholder="Search Campaign"
+                              type="text"
+                              onChange={this.handleSearch}
+                            />
+                          </InputGroup>
+                        </FormGroup>
+                      </Form>
+                    </div>
+                    <div className="col text-right">
+                      <Button color="primary" href="/admin/maps" size="sm">
+                        Create Campaign
+                      </Button>
+                    </div>
                   </Row>
                 </CardHeader>
-                {this.state.tableList.length !== 0 ? (
+                {this.state.tableListFiltered.length !== 0 ? (
                   <Table className="align-items-center table-flush" responsive>
                     <thead className="thead-light">
                       <tr>
@@ -103,14 +163,14 @@ class Tables extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                      {this.state.tableList.map((user, index) => (
+                      {this.state.tableListFiltered.map((user, index) => (
                         <tr>
                           <th scope="row">
                             <Media className="align-items-center">
                               <a
                                 className="avatar rounded-circle mr-3"
                                 href="#pablo"
-                                onClick={e => e.preventDefault()}
+                                onClick={(e) => e.preventDefault()}
                               >
                                 <img alt="..." src={user.company_logo} />
                               </a>
@@ -144,7 +204,7 @@ class Tables extends React.Component {
                                     className="avatar avatar-sm"
                                     href="#pablo"
                                     id="tooltip742438047"
-                                    onClick={e => e.preventDefault()}
+                                    onClick={(e) => e.preventDefault()}
                                   >
                                     <img
                                       alt="..."
@@ -184,7 +244,7 @@ class Tables extends React.Component {
                                 role="button"
                                 size="sm"
                                 color=""
-                                onClick={e => e.preventDefault()}
+                                onClick={(e) => e.preventDefault()}
                               >
                                 <i className="fas fa-ellipsis-v" />
                               </DropdownToggle>
@@ -192,20 +252,22 @@ class Tables extends React.Component {
                                 className="dropdown-menu-arrow"
                                 right
                               >
-                                <DropdownItem onClick={e => e.preventDefault()}>
+                                <DropdownItem
+                                  onClick={(e) => e.preventDefault()}
+                                >
                                   {user.status === "active"
                                     ? "Deactivate"
                                     : "Activate"}
                                 </DropdownItem>
                                 <DropdownItem
-                                  href="/admin/index"
-                                  // onClick={e => e.preventDefault()}
+                                  // href="/admin/index"
+                                  onClick={() => this.handleAnalytics(user)}
                                 >
                                   View Analytics
                                 </DropdownItem>
                                 <DropdownItem
                                   href="#pablo"
-                                  onClick={e => e.preventDefault()}
+                                  onClick={(e) => e.preventDefault()}
                                 >
                                   Edit Campaign
                                 </DropdownItem>
@@ -233,7 +295,7 @@ class Tables extends React.Component {
                       <PaginationItem className="disabled">
                         <PaginationLink
                           href="#pablo"
-                          onClick={e => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
                           tabIndex="-1"
                         >
                           <i className="fas fa-angle-left" />
@@ -243,7 +305,7 @@ class Tables extends React.Component {
                       <PaginationItem className="active">
                         <PaginationLink
                           href="#pablo"
-                          onClick={e => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
                         >
                           1
                         </PaginationLink>
@@ -251,7 +313,7 @@ class Tables extends React.Component {
                       <PaginationItem>
                         <PaginationLink
                           href="#pablo"
-                          onClick={e => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
                         >
                           2 <span className="sr-only">(current)</span>
                         </PaginationLink>
@@ -259,7 +321,7 @@ class Tables extends React.Component {
                       <PaginationItem>
                         <PaginationLink
                           href="#pablo"
-                          onClick={e => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
                         >
                           3
                         </PaginationLink>
@@ -267,7 +329,7 @@ class Tables extends React.Component {
                       <PaginationItem>
                         <PaginationLink
                           href="#pablo"
-                          onClick={e => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
                         >
                           <i className="fas fa-angle-right" />
                           <span className="sr-only">Next</span>

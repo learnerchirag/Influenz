@@ -14,7 +14,7 @@ import Forgot from "views/examples/Forgot.js";
 
 class Auth extends React.Component {
   state = {
-    isLoading: false
+    isLoading: false,
   };
   componentDidMount() {
     document.body.classList.add("bg-default");
@@ -76,9 +76,9 @@ class Auth extends React.Component {
   //     }
   //   });
   // };
-  handleLoader = status => {
+  handleLoader = (status) => {
     this.setState({
-      isLoading: status
+      isLoading: status,
     });
   };
   render() {
@@ -95,20 +95,10 @@ class Auth extends React.Component {
               top: "50%",
               color: "black",
               display: "block",
-              right: "50%"
+              right: "50%",
             }}
           />
         ) : (
-          // <Spinner
-          //   style={{
-          //     width: "3rem",
-          //     height: "3rem",
-          //     textAlign: "center",
-          //     color: "black",
-          //     display: "none"
-          //   }}
-          // />
-
           <div className="main-content">
             <AuthNavbar />
             <div className="header bg-gradient-info py-7 py-lg-8">

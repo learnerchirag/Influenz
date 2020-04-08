@@ -4,5 +4,7 @@ module.exports = {
   userLogin: "signin",
   userSignup: "signup",
   forgotPassword: "forgot",
-  campaignList: "campaign/list"
+  campaignList: "campaign/list",
+  campaignAnalytics: "campaign/analytics",
+  campaignTransaction: "transaction/list",
 };

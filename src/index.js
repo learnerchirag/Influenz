@@ -20,7 +20,7 @@ const options = {
   timeout: 5000,
   offset: "30px",
   // you can also just use 'scale'
-  transition: transitions.SCALE
+  transition: transitions.SCALE,
 };
 
 const store = createStore(reducer, applyMiddleware(thunk));
@@ -32,10 +32,10 @@ ReactDOM.render(
     <BrowserRouter>
       <Switch>
         <AlertProvider template={AlertTemplate} {...options}>
-          <Route exact path="/" render={props => <Auth {...props} />} />
-          <Route path="/login" render={props => <Auth {...props} />} />
-          <Route path="/register" render={props => <Auth {...props} />} />
-          <Route path="/forgot" render={props => <Auth {...props} />} />
+          <Route exact path="/" render={(props) => <Auth {...props} />} />
+          <Route path="/login" render={(props) => <Auth {...props} />} />
+          <Route path="/register" render={(props) => <Auth {...props} />} />
+          <Route path="/forgot" render={(props) => <Auth {...props} />} />
 
           {/* <Route
             path="/login"
@@ -43,13 +43,16 @@ ReactDOM.render(
             // key={key}
             // handleLoader={this.handleLoader}
           /> */}
-          <Route exact path="/admin" render={props => <Admin {...props} />} />
-          <Route path="/admin/tables" render={props => <Admin {...props} />} />
-          <Route path="/admin/maps" render={props => <Admin {...props} />} />
-          <Route path="/admin/index" render={props => <Admin {...props} />} />
+          <Route exact path="/admin" render={(props) => <Admin {...props} />} />
+          <Route
+            path="/admin/campaigns"
+            render={(props) => <Admin {...props} />}
+          />
+          <Route path="/admin/maps" render={(props) => <Admin {...props} />} />
+          <Route path="/admin/index" render={(props) => <Admin {...props} />} />
           <Route
             path="/admin/user-profile"
-            render={props => <Admin {...props} />}
+            render={(props) => <Admin {...props} />}
           />
 
           {/* <Redirect from="/" to="/admin/index" /> */}

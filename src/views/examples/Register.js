@@ -22,7 +22,7 @@ import {
   InputGroup,
   Row,
   Col,
-  NavLink
+  NavLink,
 } from "reactstrap";
 
 class Register extends React.Component {
@@ -32,7 +32,7 @@ class Register extends React.Component {
     // password: "",
     phone_number: "",
     errors: {},
-    captchaVerified: false
+    captchaVerified: false,
   };
   componentDidMount = () => {
     loadReCaptcha();
@@ -52,21 +52,21 @@ class Register extends React.Component {
       // this.captchaDemo.execute();
     }
   };
-  verifyCallback = response => {
+  verifyCallback = (response) => {
     if (response) {
       console.log("hello verified");
       this.setState({
-        captchaVerified: true
+        captchaVerified: true,
       });
     }
   };
 
-  handleInputChange = event => {
+  handleInputChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
   };
-  handleSignupClick = e => {
+  handleSignupClick = (e) => {
     this.setState({
-      errors: {}
+      errors: {},
     });
     let errors = {};
     e.preventDefault();
@@ -82,7 +82,7 @@ class Register extends React.Component {
       errors["Required"] = "Fill all the fields required";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error("Fill all the fields required");
       console.log(this.state);
@@ -92,7 +92,7 @@ class Register extends React.Component {
       errors["Name"] = "Name should be less than 50 characters";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error("Name should be less than 50 characters");
     }
@@ -100,7 +100,7 @@ class Register extends React.Component {
       errors["Phone"] = "Enter a valid phone number";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error("Enter a valid phone number");
     } else if (!validator.isEmail(this.state.email)) {
@@ -108,7 +108,7 @@ class Register extends React.Component {
       errors["Email"] = "Please type a valid email";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error("Please type a valid email");
     }
@@ -128,7 +128,7 @@ class Register extends React.Component {
         const { myProp } = this.props;
         myProp(true);
         Axios.post(`${api.protocol}${api.baseUrl}${api.userSignup}`, this.state)
-          .then(result => {
+          .then((result) => {
             myProp(false);
             console.log(result);
             if (result.status === 200) {
@@ -141,7 +141,7 @@ class Register extends React.Component {
               }
             }
           })
-          .catch(error => {
+          .catch((error) => {
             myProp(false);
             console.log(error);
             if (error.response.status === 400) {
@@ -257,7 +257,7 @@ class Register extends React.Component {
                       >
                         <span className="text-muted">
                           I agree with the{" "}
-                          <a href="#pablo" onClick={e => e.preventDefault()}>
+                          <a href="#pablo" onClick={(e) => e.preventDefault()}>
                             Privacy Policy
                           </a>
                         </span>
@@ -266,7 +266,7 @@ class Register extends React.Component {
                   </Col>
                 </Row>
                 <ReCaptcha
-                  ref={el => {
+                  ref={(el) => {
                     this.captchaDemo = el;
                   }}
                   size="normal"
