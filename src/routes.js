@@ -37,7 +37,7 @@ var routes = [
     layout: "/admin",
   },
   {
-    path: "/campaigns",
+    path: "/dashboard",
     name: "Tables",
     icon: "ni ni-bullet-list-67 text-red",
     component: Tables,

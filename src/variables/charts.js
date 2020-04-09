@@ -318,6 +318,19 @@ let chartExample1 = {
         },
       },
     },
+    // animation: {
+    //   onComplete: function () {
+    //     var chartInstance = this.Chart;
+    //     var ctx = chartInstance.ctx;
+    //     ctx.up;
+    //     // Chart.helpers.each(this.data.datasets.forEach(function (dataset, i) {
+    //     //     var meta = chartInstance.controller.getDatasetMeta(i);
+    //     //     Chart.helpers.each(meta.data.forEach(function (bar, index) {
+    //     //         ctx.fillText(dataset.data[index], bar._model.x - 5, bar._model.y + 3);
+    //     //     }),this)
+    //     // }),this);
+    //   },
+    // },
   },
   data1: (labels, datasets) => {
     console.log(datasets, labels, "data1");
@@ -327,50 +340,11 @@ let chartExample1 = {
       maxBarThickness: 10,
     };
   },
-  //   data2: (canvas) => {
-  //     return {
-  //       labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  //       datasets: [
-  //         {
-  //           label: "Performance",
-  //           data: [0, 20, 5, 25, 10, 30, 15, 40, 40],
-  //         },
-  //       ],
-  //     };
-  //   },
 };
 
 // Example 2 of Chart inside src/views/Index.js (Total orders - Card)
 let chartExample2 = {
   options: {
-    // scales: {
-    //   yAxes: [
-    //     {
-    //       ticks: {
-    //         callback: function (value) {
-    //           if (!(value % 1)) {
-    //             //return '$' + value + 'k'
-    //             return value;
-    //           }
-    //         },
-    //       },
-    //     },
-    //   ],
-    // },
-    // tooltips: {
-    //   callbacks: {
-    //     label: function (item, data) {
-    //       var label = data.datasets[item.datasetIndex].label || "";
-    //       var yLabel = item.yLabel;
-    //       var content = "";
-    //       if (data.datasets.length > 1) {
-    //         content += label;
-    //       }
-    //       content += yLabel;
-    //       return content;
-    //     },
-    //   },
-    // },
     legend: {
       display: true,
       position: "right",

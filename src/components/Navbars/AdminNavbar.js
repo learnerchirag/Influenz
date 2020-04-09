@@ -28,8 +28,19 @@ class AdminNavbar extends React.Component {
   }
   handleLogout(event) {
     event.preventDefault();
-    const { history } = this.props;
-    history.push("/login");
+    // const { history } = this.props;
+    console.log("logout", this.props);
+    // cookies.set("Auth-token", null);
+    cookies.remove("Auth-token", { path: "/" });
+    cookies.remove("Auth-token", { path: "/admin" });
+    console.log(cookies.get("Auth-token"));
+    // setTimeout(() => {
+    //   this.props.history.push("/login");
+    // }, 1000);
+
+    setTimeout(() => {
+      window.location = "/login";
+    }, 1000);
   }
   render() {
     return (
@@ -81,7 +92,7 @@ class AdminNavbar extends React.Component {
                     <span>Support</span>
                   </DropdownItem>
                   <DropdownItem divider />
-                  <DropdownItem href="#pablo" onClick={this.handleLogout}>
+                  <DropdownItem onClick={(e) => this.handleLogout(e)}>
                     <i className="ni ni-user-run" />
                     <span>Logout</span>
                   </DropdownItem>

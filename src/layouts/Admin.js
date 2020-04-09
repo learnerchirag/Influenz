@@ -12,7 +12,9 @@ import Tables from "views/examples/Tables";
 import Maps from "views/examples/Maps";
 import Index from "views/Index";
 import Profile from "views/examples/Profile";
-
+import cogoToast from "cogo-toast";
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
 class Admin extends React.Component {
   state = {
     isLoading: false,
@@ -23,8 +25,8 @@ class Admin extends React.Component {
   //   this.refs.mainContent.scrollTop = 0;
   // }
   handleComponent = (props) => {
-    if (props.location.pathname === "/admin/campaigns") {
-      console.log("i'm in /campaigns");
+    if (props.location.pathname === "/admin/dashboard") {
+      console.log("i'm in /dashboard");
       return <Tables myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/admin/maps") {
       console.log("i'm in /maps");
@@ -41,7 +43,7 @@ class Admin extends React.Component {
         <Redirect
           myProp={this.handleLoader}
           from="/admin"
-          to="/admin/campaigns"
+          to="/admin/dashboard"
         />
       );
     }
@@ -55,10 +57,22 @@ class Admin extends React.Component {
       isLoading: status,
     });
   };
+  handleCookieRedirect = () => {
+    cogoToast.error("You need to Sign in first");
+  };
   render() {
     return (
       <>
-        {this.state.isLoading ? (
+        {/* {cookies.get("Auth-token") === "null" ||
+        cookies.get("Auth-token") === undefined */}
+        {!cookies.get("Auth-token") && (
+          <React.Fragment>
+            <Redirect to="/login"></Redirect>
+            {this.handleCookieRedirect()}
+            {/* {cogoToast.error("You need to Signin first")} */}
+          </React.Fragment>
+        )}
+        {cookies.get("Auth-token") && this.state.isLoading ? (
           <Spinner
             style={{
               width: "3rem",

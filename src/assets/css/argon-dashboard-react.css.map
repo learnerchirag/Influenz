@@ -179,7 +179,7 @@
     "../scss/argon-dashboard/custom/_separator.scss",
     "../scss/argon-dashboard/custom/separators/_separator.scss",
     "../scss/argon-dashboard/custom/_tables.scss",
-    "../scss/argon-dashboard/custom/campaigns/_table.scss",
+    "../scss/argon-dashboard/custom/dashboard/_table.scss",
     "../scss/argon-dashboard/custom/_type.scss",
     "../scss/argon-dashboard/custom/type/_type.scss",
     "../scss/argon-dashboard/custom/type/_heading.scss",

@@ -22,7 +22,7 @@ import {
   InputGroup,
   Row,
   NavLink,
-  Col
+  Col,
 } from "reactstrap";
 // const alert = useAlert();
 class Login extends React.Component {
@@ -32,7 +32,7 @@ class Login extends React.Component {
     email: "",
     password: "",
     user: null,
-    errors: {}
+    errors: {},
   };
 
   // constructor(props) {
@@ -50,20 +50,20 @@ class Login extends React.Component {
   //   this.handleSubmit = this.handleSubmit.bind(this);
   // }
 
-  handleInputChange = event => {
+  handleInputChange = (event) => {
     // debugger;
     const target = event.target;
     const value = target.name === "isRemember" ? target.checked : target.value;
     const name = target.name;
 
     this.setState({
-      [name]: value
+      [name]: value,
     });
   };
-  handleSubmit = event => {
+  handleSubmit = (event) => {
     // debugger;
     this.setState({
-      errors: {}
+      errors: {},
     });
     let errors = {};
 
@@ -71,13 +71,13 @@ class Login extends React.Component {
     const { history } = this.props;
     const serverport = {
       email: this.state.email,
-      password: this.state.password
+      password: this.state.password,
     };
     if (this.state.email === "" || this.state.password === "") {
       errors["Required"] = "Fill all the fields required";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error(errors.Required);
       // console.log(this.state);
@@ -93,7 +93,7 @@ class Login extends React.Component {
       myProp(true);
       // 'https://devapi.influenz.club/v1/client/signin '
       Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
-        .then(result => {
+        .then((result) => {
           myProp(false);
           // this.props.location.handleLoader(false);
           console.log(result);
@@ -110,14 +110,18 @@ class Login extends React.Component {
             //     console.log("user");
             //   }
             // );
-            cookies.set("Auth-token", result.data.payload.access_token);
-            cookies.set("User", result.data.payload.name);
+            cookies.set("Auth-token", result.data.payload.access_token, {
+              path: "/",
+            });
+            cookies.set("User", result.data.payload.name, {
+              path: "/",
+            });
 
             this.props.history.push("/admin");
             // return <Redirect to="/admin" />;
           }
         })
-        .catch(error => {
+        .catch((error) => {
           myProp(false);
           // this.props.location.handleLoader(false);
           console.log(error);
@@ -164,39 +168,6 @@ class Login extends React.Component {
                   </Row>
                 </div>
               </Container>
-              {/* <div className="text-muted text-center mt-2 mb-3">
-                <small>Sign in with</small>
-              </div> */}
-              {/* <div className="btn-wrapper text-center">
-                <Button
-                  className="btn-neutral btn-icon"
-                  color="default"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={require("assets/img/icons/common/github.svg")}
-                    />
-                  </span>
-                  <span className="btn-inner--text">Github</span>
-                </Button>
-                <Button
-                  className="btn-neutral btn-icon"
-                  color="default"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={require("assets/img/icons/common/google.svg")}
-                    />
-                  </span>
-                  <span className="btn-inner--text">Google</span>
-                </Button>
-              </div> */}
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
               <div class="text-center py-lg-3">
@@ -207,7 +178,7 @@ class Login extends React.Component {
               {/* <div className="text-center text-muted mb-4">
                 <small>Or sign in with credentials</small>
               </div> */}
-              <Form role="form">
+              <Form role="form" onSubmit={this.handleSubmit}>
                 <FormGroup className="mb-3">
                   <InputGroup className="input-group-alternative">
                     <InputGroupAddon addonType="prepend">
@@ -262,8 +233,8 @@ class Login extends React.Component {
                   <Button
                     className="my-4"
                     color="primary"
-                    type="button"
-                    onClick={this.handleSubmit}
+                    type="submit"
+                    onSubmit={this.handleSubmit}
                   >
                     Sign in
                   </Button>
@@ -290,17 +261,17 @@ class Login extends React.Component {
 }
 
 //export default Login;
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isLoginPending: state.isLoginPending,
     isLoginSuccess: state.isLoginSuccess,
-    loginError: state.loginError
+    loginError: state.loginError,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    login: (email, password) => dispatch(userActions.login(email, password))
+    login: (email, password) => dispatch(userActions.login(email, password)),
   };
 };
 

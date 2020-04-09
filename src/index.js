@@ -13,6 +13,8 @@ import reducer from "./_reducers";
 import { transitions, positions, Provider as AlertProvider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
 import { loadReCaptcha } from "react-recaptcha-google";
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
 // optional cofiguration
 const options = {
   // you can also just use 'bottom center'
@@ -37,15 +39,9 @@ ReactDOM.render(
           <Route path="/register" render={(props) => <Auth {...props} />} />
           <Route path="/forgot" render={(props) => <Auth {...props} />} />
 
-          {/* <Route
-            path="/login"
-            render={() => <Login />}
-            // key={key}
-            // handleLoader={this.handleLoader}
-          /> */}
           <Route exact path="/admin" render={(props) => <Admin {...props} />} />
           <Route
-            path="/admin/campaigns"
+            path="/admin/dashboard"
             render={(props) => <Admin {...props} />}
           />
           <Route path="/admin/maps" render={(props) => <Admin {...props} />} />
@@ -54,9 +50,6 @@ ReactDOM.render(
             path="/admin/user-profile"
             render={(props) => <Admin {...props} />}
           />
-
-          {/* <Redirect from="/" to="/admin/index" /> */}
-          {/* <Redirect exact from="/" to="/login" /> */}
         </AlertProvider>
       </Switch>
     </BrowserRouter>

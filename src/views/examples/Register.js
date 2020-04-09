@@ -192,7 +192,7 @@ class Register extends React.Component {
               {/* <div className="text-center text-muted mb-4">
                 <small>Or sign up with credentials</small>
               </div> */}
-              <Form role="form">
+              <Form role="form" onSubmit={this.handleSignupClick}>
                 <FormGroup>
                   <InputGroup className="input-group-alternative mb-3">
                     <InputGroupAddon addonType="prepend">
