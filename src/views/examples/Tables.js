@@ -121,13 +121,13 @@ class Tables extends React.Component {
               <Card className="shadow">
                 <CardHeader className="border-0" float="right">
                   <Row>
-                    <div className="col my-auto">
+                    <div className="col-auto my-auto">
                       <h2 className="mb-0">Campaigns</h2>
                     </div>
-                    <div className="col text-right">
-                      <Form className=" form-inline mr-3 d-none d-md-flex ml-lg-auto">
-                        <FormGroup className="mb-0">
-                          <InputGroup className="input-group-alternative">
+                    <div className="col offset-1 text-right">
+                      <Form className=" form-inline  d-none d-md-flex ">
+                        <FormGroup className="w-100 mb-0">
+                          <InputGroup className="w-75 input-group-alternative">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText>
                                 <i className="fas fa-search" />
@@ -142,7 +142,7 @@ class Tables extends React.Component {
                         </FormGroup>
                       </Form>
                     </div>
-                    <div className="col text-right">
+                    <div className="col-auto text-right">
                       <Button color="primary" href="/admin/maps" size="md">
                         {/* <h5 className="text-white">Create Campaign</h5> */}
                         Create Campaign

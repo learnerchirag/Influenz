@@ -15,6 +15,8 @@ import {
   Card,
   CardHeader,
   CardBody,
+  DropdownMenu,
+  DropdownItem,
   NavItem,
   NavLink,
   Nav,
@@ -25,6 +27,8 @@ import {
   Container,
   Row,
   Col,
+  UncontrolledDropdown,
+  DropdownToggle,
 } from "reactstrap";
 
 // core components
@@ -144,7 +148,7 @@ class Index extends React.Component {
     });
 
     Axios.get(
-      `${api.protocol}${api.baseUrl}${api.campaignTransaction}${"?uuid="}${
+      `${api.protocol}${api.baseUrl}${api.campaignReacharge}${"?uuid="}${
         this.state.current_user.uuid
       }`,
       { headers: { Authorization: "Bearer " + token } }
@@ -336,7 +340,7 @@ class Index extends React.Component {
                           <th scope="col">Status</th>
                           {/* <th scope="col">Influencers</th> */}
                           <th scope="col">Balance</th>
-                          {/* <th scope="col" /> */}
+                          <th scope="col" />
                         </tr>
                       </thead>
                       <tbody>
@@ -396,6 +400,39 @@ class Index extends React.Component {
                                 />
                               </div>
                             </div>
+                          </td>
+                          <td className="text-left">
+                            <UncontrolledDropdown>
+                              <DropdownToggle
+                                className="btn-icon-only text-light"
+                                href="#pablo"
+                                role="button"
+                                size="sm"
+                                color=""
+                                onClick={(e) => e.preventDefault()}
+                              >
+                                <i className="fas fa-ellipsis-v" />
+                              </DropdownToggle>
+                              <DropdownMenu
+                                className="dropdown-menu-arrow"
+                                right
+                              >
+                                <DropdownItem
+                                  onClick={(e) => e.preventDefault()}
+                                >
+                                  {this.state.current_user.status === "active"
+                                    ? "Deactivate"
+                                    : "Activate"}
+                                </DropdownItem>
+
+                                <DropdownItem
+                                  href="#pablo"
+                                  onClick={(e) => e.preventDefault()}
+                                >
+                                  Edit Campaign
+                                </DropdownItem>
+                              </DropdownMenu>
+                            </UncontrolledDropdown>
                           </td>
                         </tr>
                       </tbody>

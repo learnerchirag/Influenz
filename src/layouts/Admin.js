@@ -59,6 +59,7 @@ class Admin extends React.Component {
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
+    console.log("function");
   };
   render() {
     return (
