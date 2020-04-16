@@ -71,14 +71,7 @@ class Register extends React.Component {
     let errors = {};
     e.preventDefault();
 
-    if (
-      // this.state.name === null ||
-      this.state.name === "" ||
-      // this.state.email === null ||
-      this.state.email === ""
-      // this.state.password === null ||
-      // this.state.password === ""
-    ) {
+    if (this.state.name === "" || this.state.email === "") {
       errors["Required"] = "Fill all the fields required";
       this.setState({
         ...this.state,
@@ -111,18 +104,7 @@ class Register extends React.Component {
         errors,
       });
       cogoToast.error("Please type a valid email");
-    }
-
-    // if (this.state.password.length < 6) {
-    //   console.log("in password");
-    //   errors["Password"] = "Password should be more than 6 characaters";
-    //   this.setState({
-    //     ...this.state,
-    //     errors
-    //   });
-    //   cogoToast.error("Password should be more than 6 characaters");
-    // }
-    else if (this.state.captchaVerified) {
+    } else if (this.state.captchaVerified) {
       if (this.state.errors) {
         e.preventDefault();
         const { myProp } = this.props;

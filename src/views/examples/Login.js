@@ -116,7 +116,7 @@ class Login extends React.Component {
             cookies.set("User", result.data.payload.name, {
               path: "/",
             });
-
+            console.log(cookies.get("Auth-token"));
             this.props.history.push("/admin");
             // return <Redirect to="/admin" />;
           }

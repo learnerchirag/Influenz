@@ -34,7 +34,10 @@ import {
 import Header from "components/Headers/Header.js";
 import Axios from "axios";
 import { Redirect } from "react-router-dom";
+import { confirmAlert } from "react-confirm-alert";
+
 const cookies = new Cookies();
+// const token = cookies.get("Auth-token");
 
 class Tables extends React.Component {
   state = {
@@ -46,8 +49,8 @@ class Tables extends React.Component {
   };
   componentDidMount = () => {
     const { myProp } = this.props;
-    const token = cookies.get("Auth-token");
     // myProp(true);
+    const token = cookies.get("Auth-token");
 
     Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
       headers: { Authorization: "Bearer " + token },
@@ -108,6 +111,43 @@ class Tables extends React.Component {
         }
       }
     );
+  };
+  handleStatus = (status, uuid) => {
+    const token = cookies.get("Auth-token");
+    var modelOpen = true;
+    console.log(status, uuid);
+    modelOpen &&
+      confirmAlert({
+        title:
+          "Click confirm to " +
+          (status === "active" ? "deactivate" : "activate"),
+        // message: "Click recharge to Confirm campaign and recharge",
+        buttons: [
+          {
+            label: "Confirm",
+            onClick: () => {
+              Axios.put(
+                `${api.protocol}${api.baseUrl}${api.campaignStatus}`,
+
+                {
+                  uuid: uuid,
+                  status: status === "active" ? "inactive" : "active",
+                },
+                {
+                  headers: { Authorization: "Bearer " + token },
+                }
+              ).then((result) => {
+                window.location.reload(true);
+              });
+            },
+          },
+
+          {
+            label: "Cancel",
+            onClick: () => (modelOpen = false),
+          },
+        ],
+      });
   };
   render() {
     return (
@@ -254,7 +294,9 @@ class Tables extends React.Component {
                                 right
                               >
                                 <DropdownItem
-                                  onClick={(e) => e.preventDefault()}
+                                  onClick={() =>
+                                    this.handleStatus(user.status, user.uuid)
+                                  }
                                 >
                                   {user.status === "active"
                                     ? "Deactivate"
