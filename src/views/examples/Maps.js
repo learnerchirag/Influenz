@@ -25,10 +25,12 @@ import {
   NavItem,
   NavLink,
   TabContent,
+  Table,
   TabPane,
 } from "reactstrap";
 // import FileUploadProgress from "react-fileupload-progress";
 import Progress from "react-progressbar";
+import validator from "validator";
 
 // core components
 import Header from "components/Headers/Header.js";
@@ -44,28 +46,29 @@ import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { Redirect } from "react-router-dom";
 import cogoToast from "cogo-toast";
+import Select from "react-select";
+
 // import Razorpay from "razorpay";
 
 const cookies = new Cookies();
 const token = cookies.get("Auth-token");
-
 // mapTypeId={google.maps.MapTypeId.ROADMAP}
 
 var progress = 0;
 class Maps extends React.Component {
   state = {
-    name: null,
-    company_name: null,
-    company_logo: null,
-    content: null,
-    cta_url: null,
-    facebook_url: null,
-    instagram_url: null,
-    twitter_url: null,
-    linkedin_url: null,
-    payment_per_click: null,
-    image: null,
-    selected_image: null,
+    name: "",
+    company_name: "",
+    company_logo: "",
+    content: "",
+    cta_url: "",
+    facebook_url: "",
+    instagram_url: "",
+    twitter_url: "",
+    linkedin_url: "",
+    payment_per_click: "",
+    image_url: "",
+    selected_image: "",
     progress: 0,
     upload: false,
     activeTab: "1",
@@ -73,15 +76,46 @@ class Maps extends React.Component {
     age_min: null,
     gender: null,
     current_balance: 0,
-    uuid: "",
+    uuid: null,
     transaction_value: 0,
-    transaction_id: "",
-    transaction_mode: "",
+    transaction_id: null,
+    transaction_mode: "upi",
     tab_preference: false,
     tab_recharge: false,
     tab_transaction: false,
+    options: [],
+    selectedOption: null,
+    transaction_list: [],
   };
   componentDidMount = () => {
+    this.props.location.state.editing &&
+      // var users= this.props.location.state.users
+      // console.log(this.props.location.state.editing);
+      this.setState({
+        name: this.props.location.state.users.name,
+        company_name: this.props.location.state.users.company_name,
+        company_logo: this.props.location.state.users.company_logo,
+        content: this.props.location.state.users.content,
+        cta_url: this.props.location.state.users.cta_url,
+        facebook_url: this.props.location.state.users.facebook_url,
+        instagram_url: this.props.location.state.users.instagram_url,
+        twitter_url: this.props.location.state.users.twitter_url,
+        linkedin_url: this.props.location.state.users.linkedin_url,
+        payment_per_click: this.props.location.state.users.payment_per_click,
+        image_url: this.props.location.state.users.image_url,
+        upload: true,
+        activeTab: "1",
+        age_max: this.props.location.state.users.age_max,
+        age_min: this.props.location.state.users.age_min,
+        gender: this.props.location.state.users.gender,
+        current_balance: this.props.location.state.users.balance,
+        uuid: this.props.location.state.users.uuid,
+
+        tab_preference: true,
+        tab_recharge: true,
+        tab_transaction: true,
+      });
+    console.log(this.props.location.state.users.image_url);
     var config = {
       apiKey: "AIzaSyDaH6y6-TmOgugETzqMuKgoj3HxTkDmGV0",
       authDomain: "influenz-7d329.web.app",
@@ -90,10 +124,38 @@ class Maps extends React.Component {
       projectId: "influenz-7d329",
       storageBucket: "influenz-7d329.appspot.com",
     };
-    firebase.initializeApp(config);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(config);
+    }
+    Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
+      headers: { Authorization: "Bearer " + token },
+    }).then((result) => {
+      const options = [];
+      result.data.payload.map((users) => {
+        options.push({
+          value: users.uuid,
+          label: users.name,
+        });
+      });
+      this.setState({
+        options,
+      });
+    });
+    Axios.get(`${api.protocol}${api.baseUrl}${api.transactionList}`, {
+      headers: { Authorization: "Bearer " + token },
+    }).then((result) => {
+      this.setState({
+        transaction_list: result.data.payload,
+      });
+    });
   };
   handleInputChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
+  };
+  handleSelect = (selectedOption) => {
+    this.setState({
+      selectedOption,
+    });
   };
   handleFile = (event) => {
     this.setState({
@@ -139,9 +201,9 @@ class Maps extends React.Component {
               company_logo: url,
             })
           : this.setState({
-              image: url,
+              image_url: url,
             });
-        console.log("downloaded url image", url);
+        console.log("downloaded url image_url", url);
       });
   };
   handleToggle = (index) => {
@@ -152,18 +214,28 @@ class Maps extends React.Component {
   handleSave = () => {
     var isNull = false;
     Object.values(this.state).map((item, index) => {
-      if (index !== 15 && index !== 16 && index !== 17) {
-        if (item === null) {
+      if (index !== 15 && index !== 16 && index !== 17 && index !== 11) {
+        if (item === "") {
           isNull = true;
           console.log(index);
         }
       }
     });
     if (isNull === false) {
-      this.setState({
-        activeTab: "2",
-        tab_preference: true,
-      });
+      if (!validator.isEmail(this.state.facebook_url)) {
+        cogoToast.error("Please type a valid facebook id");
+      } else if (!validator.isEmail(this.state.instagram_url)) {
+        cogoToast.error("Please type a valid instagram id");
+      } else if (!validator.isEmail(this.state.twitter_url)) {
+        cogoToast.error("Please type a valid twitter id");
+      } else if (!validator.isEmail(this.state.linkedin_url)) {
+        cogoToast.error("Please type a valid linkedin id");
+      } else {
+        this.setState({
+          activeTab: "2",
+          tab_preference: true,
+        });
+      }
     } else {
       cogoToast.error("All the fields are required");
     }
@@ -189,34 +261,63 @@ class Maps extends React.Component {
             {
               label: "Recharge",
               onClick: () => {
-                Axios.post(
-                  `${api.protocol}${api.baseUrl}${api.campaign}`,
-                  this.state,
-                  {
-                    headers: { Authorization: "Bearer " + token },
-                  }
-                ).then((result) => {
-                  this.setState({
-                    activeTab: "3",
-                    current_balance: result.data.payload.balance,
-                  });
-                  console.log(result);
-                });
+                this.props.location.state.editing
+                  ? Axios.put(
+                      `${api.protocol}${api.baseUrl}${api.campaign}`,
+                      this.state,
+                      {
+                        headers: { Authorization: "Bearer " + token },
+                      }
+                    ).then((result) => {
+                      this.setState({
+                        activeTab: "3",
+                        current_balance: result.data.payload.balance,
+                        uuid: result.data.payload.uuid,
+                      });
+                      console.log(result);
+                    })
+                  : Axios.post(
+                      `${api.protocol}${api.baseUrl}${api.campaign}`,
+                      this.state,
+                      {
+                        headers: { Authorization: "Bearer " + token },
+                      }
+                    ).then((result) => {
+                      this.setState({
+                        activeTab: "3",
+                        current_balance: result.data.payload.balance,
+                        uuid: result.data.payload.uuid,
+                        tab_recharge: true,
+                        tab_transaction: true,
+                      });
+                      console.log(result);
+                    });
               },
             },
             {
               label: "Later",
               onClick: () => {
-                Axios.post(
-                  `${api.protocol}${api.baseUrl}${api.campaign}`,
-                  this.state,
-                  {
-                    headers: { Authorization: "Bearer " + token },
-                  }
-                ).then((result) => {
-                  this.props.history.push("/admin/dashboard");
-                  console.log(result);
-                });
+                this.props.location.state.editing
+                  ? Axios.put(
+                      `${api.protocol}${api.baseUrl}${api.campaign}`,
+                      this.state,
+                      {
+                        headers: { Authorization: "Bearer " + token },
+                      }
+                    ).then((result) => {
+                      this.props.history.push("/admin/dashboard");
+                      console.log(result);
+                    })
+                  : Axios.post(
+                      `${api.protocol}${api.baseUrl}${api.campaign}`,
+                      this.state,
+                      {
+                        headers: { Authorization: "Bearer " + token },
+                      }
+                    ).then((result) => {
+                      this.props.history.push("/admin/dashboard");
+                      console.log(result);
+                    });
               },
             },
             {
@@ -239,9 +340,31 @@ class Maps extends React.Component {
       image: "",
       handler: (response) => {
         console.log(response);
-        this.setState({
-          transaction_id: response.razorpay_payment_id,
-        });
+        this.setState(
+          {
+            transaction_id: response.razorpay_payment_id,
+          },
+          () => {
+            Axios.post(
+              `${api.protocol}${api.baseUrl}${api.campaignRecharge}`,
+              {
+                uuid: this.state.uuid,
+                transaction_id: this.state.transaction_id,
+                transaction_mode: this.state.transaction_mode,
+                transaction_value: this.state.transaction_value * 100,
+              },
+              {
+                headers: { Authorization: "Bearer " + token },
+              }
+            ).then((result) => {
+              this.setState({
+                current_balance: this.state.transaction_value,
+              });
+              cogoToast.success("recharge done");
+              console.log(result);
+            });
+          }
+        );
       },
       prefill: {
         name: this.state.name,
@@ -261,7 +384,20 @@ class Maps extends React.Component {
 
     // instance.open();
   };
+  handleMoveCharge = () => {
+    Axios.post(
+      `${api.protocol}${api.baseUrl}${api.campaignMoveCharge}`,
+      {
+        old_uuid: this.state.uuid,
+        neew_uuid: this.state.selectedOption.value,
+      },
+      {
+        headers: { Authorization: "Bearer " + token },
+      }
+    );
+  };
   render() {
+    // const { selectedOption } = this.state;
     return (
       <>
         <Header />
@@ -289,7 +425,9 @@ class Maps extends React.Component {
                         // disable: this.state.activeTab != "2",
                       })}
                       style={
-                        !this.state.tab_preference && { pointerEvents: "none" }
+                        this.state.tab_preference
+                          ? undefined
+                          : { pointerEvents: "none" }
                       }
                       onClick={() => this.handleToggle("2")}
                     >
@@ -301,6 +439,11 @@ class Maps extends React.Component {
                       className={classnames("py-2 px-3", {
                         active: this.state.activeTab === "3",
                       })}
+                      style={
+                        this.state.tab_recharge
+                          ? undefined
+                          : { pointerEvents: "none" }
+                      }
                       onClick={() => this.handleToggle("3")}
                     >
                       Recharge
@@ -311,6 +454,11 @@ class Maps extends React.Component {
                       className={classnames("py-2 px-3", {
                         active: this.state.activeTab === "4",
                       })}
+                      style={
+                        this.state.tab_transaction
+                          ? undefined
+                          : { pointerEvents: "none" }
+                      }
                       onClick={() => this.handleToggle("4")}
                     >
                       Transactions
@@ -537,7 +685,7 @@ class Maps extends React.Component {
                             <Col>
                               {this.state.upload === true && (
                                 <img
-                                  src={this.state.image}
+                                  src={this.state.image_url}
                                   height="100px"
                                 ></img>
                               )}
@@ -602,7 +750,7 @@ class Maps extends React.Component {
                             >
                               Payment per click
                             </label>
-                            <InputGroup>
+                            <InputGroup className="form-control-alternative">
                               <InputGroupAddon addonType="prepend">
                                 ₹
                               </InputGroupAddon>
@@ -736,7 +884,9 @@ class Maps extends React.Component {
                                 type="button"
                                 onClick={this.handleCreate}
                               >
-                                Create Campaign
+                                {this.props.location.state.editing
+                                  ? "Update Campaign"
+                                  : "Create Campaign"}
                               </Button>
                             </Col>
                           </Row>
@@ -837,6 +987,142 @@ class Maps extends React.Component {
                               >
                                 Add credit
                               </Button>
+                            </Col>
+                          </Row>
+                        </div>
+                      </Form>
+                    </CardBody>
+                  </TabPane>
+                  <TabPane tabId="4">
+                    <CardHeader className="bg-white border-0">
+                      <Row className="align-items-center">
+                        <Col xs="8">
+                          <h3 className="mb-0">Campaign {this.state.name}</h3>
+                        </Col>
+                      </Row>
+                    </CardHeader>
+                    <CardBody>
+                      <Form>
+                        <h6 className="heading-small text-muted mb-4">
+                          Current Credits
+                        </h6>
+                        <div className="pl-lg-4">
+                          <Row>
+                            <Col lg="6">
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-age"
+                                >
+                                  Current Credit
+                                </label>
+                                <InputGroup>
+                                  <InputGroupAddon addonType="prepend">
+                                    ₹
+                                  </InputGroupAddon>
+                                  <Input
+                                    className="form-control-alternative"
+                                    value={this.state.current_balance}
+                                    name="cuurent_balance"
+                                    readOnly="readonly"
+                                    type="number"
+                                  />
+                                </InputGroup>
+                              </FormGroup>
+                            </Col>
+                          </Row>
+                        </div>
+                        <hr className="my-4" />
+                        {/* Address */}
+                        <h6 className="heading-small text-muted mb-4">
+                          Move Credit
+                        </h6>
+                        <div className="pl-lg-4">
+                          <Row>
+                            <Col lg="6">
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-gender"
+                                >
+                                  Move to
+                                </label>
+                                <Select
+                                  value={this.state.selectedOption}
+                                  onChange={this.handleSelect}
+                                  options={this.state.options}
+                                  name="selectedOption"
+                                />
+                              </FormGroup>
+                            </Col>
+                            <Col className="text-right">
+                              <Button
+                                className="my-4"
+                                color="primary"
+                                type="button"
+                                onClick={this.handleMoveCharge}
+                              >
+                                Confirm
+                              </Button>
+                            </Col>
+                          </Row>
+                        </div>
+
+                        <hr className="my-4" />
+                        <div className="">
+                          <Row>
+                            <Col className="mb-5 mb-xl-0">
+                              <Card
+                                className="shadow "
+                                style={{ height: "510px" }}
+                              >
+                                <CardHeader className="border-0">
+                                  <Row className="align-items-center">
+                                    <div className="col">
+                                      <h3 className="mb-0">
+                                        Transaction History
+                                      </h3>
+                                    </div>
+                                  </Row>
+                                </CardHeader>
+                                <Table
+                                  className="align-items-center table-flush"
+                                  responsive
+                                >
+                                  <thead
+                                    className="thead-light"
+                                    style={{
+                                      position: "relative",
+                                      overflow: "scroll",
+                                    }}
+                                  >
+                                    <tr>
+                                      <th scope="col">Campaign</th>
+
+                                      <th scope="col">Id</th>
+                                      <th scope="col">Amount</th>
+                                      {/* <th scope="col">Bounce rate</th> */}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {this.state.transaction_list.map(
+                                      (transactions) => (
+                                        <tr>
+                                          <th>{transactions.campaign.name}</th>
+
+                                          <td scope="row">
+                                            {transactions.transaction_id}
+                                          </td>
+                                          <td>
+                                            {"₹ " +
+                                              transactions.transaction_value}
+                                          </td>
+                                        </tr>
+                                      )
+                                    )}
+                                  </tbody>
+                                </Table>
+                              </Card>
                             </Col>
                           </Row>
                         </div>

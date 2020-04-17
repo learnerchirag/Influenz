@@ -148,7 +148,7 @@ class Index extends React.Component {
     });
 
     Axios.get(
-      `${api.protocol}${api.baseUrl}${api.campaignReacharge}${"?uuid="}${
+      `${api.protocol}${api.baseUrl}${api.campaignRechargeList}${"?uuid="}${
         this.state.current_user.uuid
       }`,
       { headers: { Authorization: "Bearer " + token } }

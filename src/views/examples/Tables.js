@@ -1,6 +1,7 @@
 import React from "react";
 import api from "../constants/api";
 import Cookies from "universal-cookie";
+import { Link } from "react-router-dom";
 
 // reactstrap components
 import {
@@ -46,12 +47,12 @@ class Tables extends React.Component {
     users: [],
     search: null,
     tableListFiltered: [],
+    editing: false,
   };
   componentDidMount = () => {
     const { myProp } = this.props;
     // myProp(true);
     const token = cookies.get("Auth-token");
-
     Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
       headers: { Authorization: "Bearer " + token },
     }).then((result) => {
@@ -149,6 +150,20 @@ class Tables extends React.Component {
         ],
       });
   };
+  handleEdit = (user) => {
+    this.setState(
+      {
+        users: user,
+        editing: true,
+      },
+      () => {
+        this.props.history.push({
+          pathname: "/admin/maps",
+          state: { users: this.state.users, editing: this.state.editing },
+        });
+      }
+    );
+  };
   render() {
     return (
       <>
@@ -183,10 +198,17 @@ class Tables extends React.Component {
                       </Form>
                     </div>
                     <div className="col-auto text-right">
-                      <Button color="primary" href="/admin/maps" size="md">
-                        {/* <h5 className="text-white">Create Campaign</h5> */}
-                        Create Campaign
-                      </Button>
+                      <Link
+                        to={{
+                          pathname: "/admin/maps",
+                          state: { editing: this.state.editing },
+                        }}
+                      >
+                        <Button color="primary" size="md">
+                          {/* <h5 className="text-white">Create Campaign</h5> */}
+                          Create Campaign
+                        </Button>
+                      </Link>
                     </div>
                   </Row>
                 </CardHeader>
@@ -309,8 +331,7 @@ class Tables extends React.Component {
                                   View Analytics
                                 </DropdownItem>
                                 <DropdownItem
-                                  href="#pablo"
-                                  onClick={(e) => e.preventDefault()}
+                                  onClick={() => this.handleEdit(user)}
                                 >
                                   Edit Campaign
                                 </DropdownItem>
