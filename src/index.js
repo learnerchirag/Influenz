@@ -14,6 +14,9 @@ import { transitions, positions, Provider as AlertProvider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
 import { loadReCaptcha } from "react-recaptcha-google";
 import Cookies from "universal-cookie";
+import Index from "views/Index";
+import Tables from "views/examples/Tables";
+import Edit from "views/examples/Edit";
 const cookies = new Cookies();
 // optional cofiguration
 const options = {
@@ -39,17 +42,20 @@ ReactDOM.render(
           <Route path="/register" render={(props) => <Auth {...props} />} />
           <Route path="/forgot" render={(props) => <Auth {...props} />} />
 
-          <Route exact path="/admin" render={(props) => <Admin {...props} />} />
+          <Route path="/dashboard" render={(props) => <Tables {...props} />} />
           <Route
-            path="/admin/dashboard"
-            render={(props) => <Admin {...props} />}
+            path="/campaign/:uuid/edit"
+            render={(props) => <Edit {...props} />}
           />
-          <Route path="/admin/maps" render={(props) => <Admin {...props} />} />
-          <Route path="/admin/index" render={(props) => <Admin {...props} />} />
+          <Route
+            path="/campaign/:uuid/analytics"
+            render={(props) => <Index {...props} />}
+          />
           <Route
             path="/admin/user-profile"
             render={(props) => <Admin {...props} />}
           />
+          {/* <Route path="/:user_uuid" */}
         </AlertProvider>
       </Switch>
     </BrowserRouter>

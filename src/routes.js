@@ -1,6 +1,6 @@
 import Index from "views/Index.js";
 import Profile from "views/examples/Profile.js";
-import Maps from "views/examples/Maps.js";
+import Edit from "views/examples/Edit.js";
 import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 import Forgot from "views/examples/Forgot.js";
@@ -26,7 +26,7 @@ var routes = [
     path: "/maps",
     name: "Maps",
     icon: "ni ni-pin-3 text-orange",
-    component: Maps,
+    component: Edit,
     layout: "/admin",
   },
   {

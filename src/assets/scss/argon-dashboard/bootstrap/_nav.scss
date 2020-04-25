@@ -53,8 +53,8 @@
 
   .nav-link.active,
   .nav-item.show .nav-link {
-    color: $nav-tabs-link-active-color;
-    background-color: $nav-tabs-link-active-bg;
+    color: var(--secondary);
+    background-color: var(--primary);
     border-color: $nav-tabs-link-active-border-color;
   }
 
@@ -65,7 +65,6 @@
     @include border-top-radius(0);
   }
 }
-
 
 //
 // Pills
@@ -82,7 +81,6 @@
     background-color: $nav-pills-link-active-bg;
   }
 }
-
 
 //
 // Justified variants
@@ -102,7 +100,6 @@
     text-align: center;
   }
 }
-
 
 // Tabbable tabs
 //

@@ -117,7 +117,7 @@ class Login extends React.Component {
               path: "/",
             });
             console.log(cookies.get("Auth-token"));
-            this.props.history.push("/admin");
+            this.props.history.push("/dashboard");
             // return <Redirect to="/admin" />;
           }
         })

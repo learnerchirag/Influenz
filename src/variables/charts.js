@@ -185,7 +185,7 @@ function chartOptions() {
         },
         elements: {
           point: {
-            radius: 0,
+            radius: "20%",
             backgroundColor: colors.theme["primary"],
           },
           line: {
@@ -207,7 +207,7 @@ function chartOptions() {
         tooltips: {
           enabled: true,
           mode: "index",
-          intersect: false,
+          intersect: true,
         },
       },
       doughnut: {
@@ -329,7 +329,7 @@ let chartExample1 = {
     //     //         ctx.fillText(dataset.data[index], bar._model.x - 5, bar._model.y + 3);
     //     //     }),this)
     //     // }),this);
-    //   },
+    //   },50px
     // },
   },
   data1: (labels, datasets) => {
@@ -345,6 +345,7 @@ let chartExample1 = {
 // Example 2 of Chart inside src/views/Index.js (Total orders - Card)
 let chartExample2 = {
   options: {
+    // maintainAspectRatio: true,
     legend: {
       display: true,
       position: "right",
@@ -353,21 +354,25 @@ let chartExample2 = {
         fontSize: 16,
       },
     },
-    label: {
-      display: true,
-      position: "bottom",
-      labels: {
-        fontColor: "#333",
-        fontSize: 16,
-      },
-    },
+
+    // label: {
+    //   display: true,
+    //   position: "bottom",
+    //   labels: {
+    //     fontColor: "#333",
+    //     fontSize: 16,
+    //   },
+    // },
   },
   data2: (labels, datasets) => {
     console.log(datasets, labels, "data2");
     return {
       labels: labels,
       datasets: datasets,
-      maxBarThickness: 10,
+
+      // maxBarThickness: 10,
+      // indexLabel: datasets.data,
+      // indexLabelPlacement: "inside",
     };
   },
   // data: {

@@ -11,7 +11,7 @@
   padding: $input-padding-y $input-padding-x;
   font-size: $font-size-base;
   line-height: $input-line-height;
-  color: $input-color;
+  color: #32325d;
   background-color: $input-bg;
   background-clip: padding-box;
   border: $input-border-width solid $input-border-color;
@@ -75,7 +75,10 @@ select.form-control {
   display: block;
   width: 100%;
 }
-
+// .form-control-file {
+//   background-color: var(--primary);
+//   color: var(--secondary);
+// }
 
 //
 // Labels
@@ -105,7 +108,6 @@ select.form-control {
   line-height: $input-line-height-sm;
 }
 
-
 // Readonly controls as plain text
 //
 // Apply class to a readonly input to make it appear like regular plain
@@ -129,7 +131,6 @@ select.form-control {
     padding-left: 0;
   }
 }
-
 
 // Form control sizing
 //
@@ -181,7 +182,6 @@ textarea.form-control {
   margin-top: $form-text-margin-top;
 }
 
-
 // Form grid
 //
 // Special replacement for our grid system's `.row` for tighter form layouts.
@@ -198,7 +198,6 @@ textarea.form-control {
     padding-left: 5px;
   }
 }
-
 
 // Checkboxes and radios
 //
@@ -238,7 +237,6 @@ textarea.form-control {
     margin-left: 0;
   }
 }
-
 
 // Form validation
 //

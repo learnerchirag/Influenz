@@ -36,6 +36,11 @@ import Header from "components/Headers/Header.js";
 import Axios from "axios";
 import { Redirect } from "react-router-dom";
 import { confirmAlert } from "react-confirm-alert";
+import { Spinner } from "reactstrap";
+import AdminNavbar from "../../components/Navbars/AdminNavbar.js";
+import AdminFooter from "../../components/Footers/AdminFooter.js";
+import cogoToast from "cogo-toast";
+import Popup from "reactjs-popup";
 
 const cookies = new Cookies();
 // const token = cookies.get("Auth-token");
@@ -48,15 +53,20 @@ class Tables extends React.Component {
     search: null,
     tableListFiltered: [],
     editing: false,
+    isLoading: false,
+    name: "",
+    open: false,
   };
   componentDidMount = () => {
-    const { myProp } = this.props;
+    // const { myProp } = this.props;
     // myProp(true);
     const token = cookies.get("Auth-token");
+    this.handleLoader(true);
     Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
       headers: { Authorization: "Bearer " + token },
     }).then((result) => {
-      myProp(false);
+      // myProp(false);
+      this.handleLoader(false);
       console.log(result);
       this.setState({
         tableListFiltered: result.data.payload,
@@ -73,8 +83,12 @@ class Tables extends React.Component {
       },
       () => {
         this.props.history.push({
-          pathname: "/admin/index",
-          state: { users: this.state.users },
+          pathname: "/campaign/" + this.state.users.uuid + "/analytics",
+          state: {
+            users: this.state.users,
+            // handleStatus: this.handleStatus,
+            // edit: this.handleEdit,
+          },
         });
       }
     );
@@ -158,205 +172,340 @@ class Tables extends React.Component {
       },
       () => {
         this.props.history.push({
-          pathname: "/admin/maps",
+          pathname: "/campaign/" + this.state.users.uuid + "/edit",
           state: { users: this.state.users, editing: this.state.editing },
         });
       }
     );
   };
+  handleCreate = (e) => {
+    e.preventDefault();
+    const token = cookies.get("Auth-token");
+    console.log("creating");
+    Axios.post(
+      `${api.protocol}${api.baseUrl}${api.campaign}`,
+      { name: this.state.name },
+      {
+        headers: { Authorization: "Bearer " + token },
+      }
+    ).then((result) => {
+      this.handleEdit(result.data.payload);
+    });
+  };
+  handleLoader = (status) => {
+    this.setState({
+      isLoading: status,
+    });
+  };
+  handleModal = () => {
+    this.setState({
+      open: true,
+    });
+  };
+  handleInputChange = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+  handleCookieRedirect = () => {
+    cogoToast.error("You need to Sign in first");
+    console.log("function");
+  };
+  getBrandText = (path) => {
+    return path.slice(1);
+  };
   render() {
     return (
       <>
-        <Header />
-        {/* Page content */}
-        <Container className="mt--7" fluid>
-          {/* Table */}
-          <Row>
-            <div className="col">
-              <Card className="shadow">
-                <CardHeader className="border-0" float="right">
-                  <Row>
-                    <div className="col-auto my-auto">
-                      <h2 className="mb-0">Campaigns</h2>
-                    </div>
-                    <div className="col offset-1 text-right">
-                      <Form className=" form-inline  d-none d-md-flex ">
-                        <FormGroup className="w-100 mb-0">
-                          <InputGroup className="w-75 input-group-alternative">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText>
-                                <i className="fas fa-search" />
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              placeholder="Search Campaign"
-                              type="text"
-                              onChange={this.handleSearch}
-                            />
-                          </InputGroup>
-                        </FormGroup>
-                      </Form>
-                    </div>
-                    <div className="col-auto text-right">
-                      <Link
-                        to={{
-                          pathname: "/admin/maps",
-                          state: { editing: this.state.editing },
-                        }}
-                      >
-                        <Button color="primary" size="md">
-                          {/* <h5 className="text-white">Create Campaign</h5> */}
-                          Create Campaign
-                        </Button>
-                      </Link>
-                    </div>
-                  </Row>
-                </CardHeader>
-                {this.state.tableListFiltered.length !== 0 ? (
-                  <Table className="align-items-center table-flush" responsive>
-                    <thead className="thead-light">
-                      <tr>
-                        <th scope="col">Campaigns</th>
-                        <th scope="col">Total Budget</th>
-                        <th scope="col">Rate</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Influencers</th>
-                        <th scope="col">Balance</th>
-                        <th scope="col" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {this.state.tableListFiltered.map((user, index) => (
-                        <tr>
-                          <th scope="row">
-                            <Media className="align-items-center">
-                              <a
-                                className="avatar rounded-circle mr-3"
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                <img alt="..." src={user.company_logo} />
-                              </a>
-                              <Media>
-                                <span className="mb-0 text-sm">
-                                  {user.company_name}
-                                </span>
-                              </Media>
-                            </Media>
-                          </th>
-                          <td>{"₹ " + user.total_balance}</td>
-                          <td>{"₹ " + user.payment_per_click}</td>
-
-                          <td>
-                            <Badge color="" className="badge-dot mr-4">
-                              <i
-                                className={
-                                  user.status === "active"
-                                    ? "bg-success"
-                                    : "bg-warning"
-                                }
-                              />
-                              {user.status}
-                            </Badge>
-                          </td>
-                          <td>
-                            <div className="avatar-group">
-                              {user.influencers.map((influencer, index) => (
-                                <React.Fragment>
-                                  <a
-                                    className="avatar avatar-sm"
-                                    href="#pablo"
-                                    id="tooltip742438047"
-                                    onClick={(e) => e.preventDefault()}
-                                  >
-                                    <img
-                                      alt="..."
-                                      className="rounded-circle"
-                                      src={influencer.profile_url}
-                                    />
-                                  </a>
-                                  <UncontrolledTooltip
-                                    delay={0}
-                                    target="tooltip742438047"
-                                  >
-                                    {influencer.first_name}
-                                  </UncontrolledTooltip>
-                                </React.Fragment>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <span className="mr-2">
-                                {"₹ " + user.balance}
-                              </span>
+        {!cookies.get("Auth-token") && (
+          <React.Fragment>
+            <Redirect to="/login"></Redirect>
+            {this.handleCookieRedirect()}
+            {/* {cogoToast.error("You need to Signin first")} */}
+          </React.Fragment>
+        )}
+        {cookies.get("Auth-token") && this.state.isLoading ? (
+          <Spinner
+            style={{
+              width: "3rem",
+              height: "3rem",
+              position: "absolute",
+              top: "50%",
+              color: "black",
+              display: "block",
+              right: "50%",
+            }}
+          />
+        ) : (
+          <React.Fragment>
+            <div className="main-content" ref="mainContent">
+              <AdminNavbar
+                {...this.props}
+                brandText={this.getBrandText(this.props.location.pathname)}
+              />
+              <Header />
+              {/* Page content */}
+              <Container className="mt--7" fluid>
+                {/* Table */}
+                <Row>
+                  <div className="col">
+                    <Card className="shadow">
+                      <CardHeader className="border-0" float="right">
+                        <Row>
+                          <div className="col-auto my-auto">
+                            <h2 className="mb-0">Campaigns</h2>
+                          </div>
+                          <div className="col offset-1 text-right">
+                            <Form className=" form-inline  d-none d-md-flex ">
+                              <FormGroup className="w-100 mb-0">
+                                <InputGroup className="w-75 input-group-alternative">
+                                  <InputGroupAddon addonType="prepend">
+                                    <InputGroupText>
+                                      <i className="fas fa-search" />
+                                    </InputGroupText>
+                                  </InputGroupAddon>
+                                  <Input
+                                    placeholder="Search Campaign"
+                                    type="text"
+                                    onChange={this.handleSearch}
+                                  />
+                                </InputGroup>
+                              </FormGroup>
+                            </Form>
+                          </div>
+                          <div className="col-auto text-right">
+                            {/* <Link
+                              to={{
+                                state: { editing: this.state.editing },
+                              }}
+                            > */}
+                            <Button
+                              color="primary"
+                              size="md"
+                              onClick={this.handleModal}
+                            >
+                              Create Campaign
+                              {/* <h5 className="text-white">Create Campaign</h5> */}
+                            </Button>
+                            {/* </Link> */}
+                            <Popup
+                              open={this.state.open}
+                              modal
+                              closeOnDocumentClick
+                              onClose={() =>
+                                this.setState({
+                                  open: false,
+                                })
+                              }
+                            >
                               <div>
-                                <Progress
-                                  max={user.total_balance}
-                                  value={user.total_balance - user.balance}
-                                  barClassName="bg-danger"
-                                />
+                                {/* <a className="close" onClick={this.closeModal}>
+                                  &times;
+                                </a> */}
+                                <Form role="form" onSubmit={this.handleCreate}>
+                                  <div className="p-lg-4">
+                                    <Row>
+                                      <Col>
+                                        <FormGroup className="text-left">
+                                          <label className="form-control-label">
+                                            Campaign Title
+                                          </label>
+                                          <Input
+                                            className="form-control-alternative"
+                                            value={this.state.name}
+                                            name="name"
+                                            onChange={this.handleInputChange}
+                                            placeholder="Title"
+                                            type="text"
+                                          ></Input>
+                                        </FormGroup>
+                                      </Col>
+                                    </Row>
+                                  </div>
+                                  <div className="text-right">
+                                    {/* <Row>
+                                      <Col> */}
+                                    <Button
+                                      className="mr-4 mb-2"
+                                      color="primary"
+                                      onClick={this.handleCreate}
+                                      type="submit"
+                                    >
+                                      Create
+                                    </Button>
+                                    {/* </Col>
+                                    </Row> */}
+                                  </div>
+                                </Form>
                               </div>
-                            </div>
-                          </td>
-                          <td className="text-right">
-                            <UncontrolledDropdown>
-                              <DropdownToggle
-                                className="btn-icon-only text-light"
-                                href="#pablo"
-                                role="button"
-                                size="sm"
-                                color=""
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                <i className="fas fa-ellipsis-v" />
-                              </DropdownToggle>
-                              <DropdownMenu
-                                className="dropdown-menu-arrow"
-                                right
-                              >
-                                <DropdownItem
-                                  onClick={() =>
-                                    this.handleStatus(user.status, user.uuid)
-                                  }
-                                >
-                                  {user.status === "active"
-                                    ? "Deactivate"
-                                    : "Activate"}
-                                </DropdownItem>
-                                <DropdownItem
-                                  // href="/admin/index"
-                                  onClick={() => this.handleAnalytics(user)}
-                                >
-                                  View Analytics
-                                </DropdownItem>
-                                <DropdownItem
-                                  onClick={() => this.handleEdit(user)}
-                                >
-                                  Edit Campaign
-                                </DropdownItem>
-                              </DropdownMenu>
-                            </UncontrolledDropdown>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                ) : (
-                  <Card>
-                    <div className="card align-middle text-center pt-8 pb-8 bg-lavender">
-                      <h4>No campaigns. Click on Create Campaign to add.</h4>
-                    </div>
-                  </Card>
-                )}
+                            </Popup>
+                          </div>
+                        </Row>
+                      </CardHeader>
+                      {this.state.tableListFiltered.length !== 0 ? (
+                        <Table
+                          className="align-items-center table-flush"
+                          responsive
+                        >
+                          <thead className="thead-light">
+                            <tr>
+                              <th scope="col">Campaigns</th>
+                              <th scope="col">Total Budget</th>
+                              <th scope="col">Rate</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">Influencers</th>
+                              <th scope="col">Balance</th>
+                              <th scope="col" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.tableListFiltered.map((user, index) => (
+                              <tr>
+                                <th scope="row">
+                                  <Media className="align-items-center">
+                                    <a
+                                      className="avatar rounded-circle mr-3"
+                                      href="#pablo"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      <img alt="..." src={user.company_logo} />
+                                    </a>
+                                    <Media>
+                                      <span className="mb-0 text-sm">
+                                        {user.company_name}
+                                      </span>
+                                    </Media>
+                                  </Media>
+                                </th>
+                                <td>{"₹ " + user.total_balance}</td>
+                                <td>{"₹ " + user.payment_per_click}</td>
 
-                <CardFooter className="py-4">
-                  <nav aria-label="..."></nav>
-                </CardFooter>
-              </Card>
+                                <td>
+                                  <Badge color="" className="badge-dot mr-4">
+                                    <i
+                                      className={
+                                        user.status === "active"
+                                          ? "bg-success"
+                                          : "bg-warning"
+                                      }
+                                    />
+                                    {user.status}
+                                  </Badge>
+                                </td>
+                                <td>
+                                  <div className="avatar-group">
+                                    {user.influencers.map(
+                                      (influencer, index) => (
+                                        <React.Fragment>
+                                          <a
+                                            className="avatar avatar-sm"
+                                            href="#pablo"
+                                            id={"pp" + index}
+                                            onClick={(e) => e.preventDefault()}
+                                          >
+                                            <img
+                                              alt="..."
+                                              className="rounded-circle"
+                                              src={influencer.profile_url}
+                                            />
+                                          </a>
+                                          <UncontrolledTooltip
+                                            delay={0}
+                                            target={"pp" + index}
+                                          >
+                                            {influencer.first_name}
+                                          </UncontrolledTooltip>
+                                        </React.Fragment>
+                                      )
+                                    )}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="d-flex align-items-center">
+                                    <span className="mr-2">
+                                      {"₹ " + user.balance}
+                                    </span>
+                                    <div>
+                                      <Progress
+                                        max={user.total_balance}
+                                        value={
+                                          user.total_balance - user.balance
+                                        }
+                                        barClassName="bg-danger"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="text-right">
+                                  <UncontrolledDropdown>
+                                    <DropdownToggle
+                                      className="btn-icon-only text-light"
+                                      href="#pablo"
+                                      role="button"
+                                      size="sm"
+                                      color=""
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      <i className="fas fa-ellipsis-v" />
+                                    </DropdownToggle>
+                                    <DropdownMenu
+                                      className="dropdown-menu-arrow"
+                                      right
+                                    >
+                                      <DropdownItem
+                                        onClick={() =>
+                                          this.handleStatus(
+                                            user.status,
+                                            user.uuid
+                                          )
+                                        }
+                                      >
+                                        {user.status === "active"
+                                          ? "Deactivate"
+                                          : "Activate"}
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        // href="/admin/index"
+                                        onClick={() =>
+                                          this.handleAnalytics(user)
+                                        }
+                                      >
+                                        View Analytics
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => this.handleEdit(user)}
+                                      >
+                                        Edit Campaign
+                                      </DropdownItem>
+                                    </DropdownMenu>
+                                  </UncontrolledDropdown>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      ) : (
+                        <Card>
+                          <div className="card align-middle text-center pt-8 pb-8 bg-lavender">
+                            <h4>
+                              No campaigns. Click on Create Campaign to add.
+                            </h4>
+                          </div>
+                        </Card>
+                      )}
+
+                      <CardFooter className="py-4">
+                        <nav aria-label="..."></nav>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                </Row>
+              </Container>
+
+              <Container fluid>
+                <AdminFooter />
+              </Container>
             </div>
-          </Row>
-        </Container>
+          </React.Fragment>
+        )}
       </>
     );
   }

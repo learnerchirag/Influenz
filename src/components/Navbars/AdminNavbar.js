@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Router, BrowserRouter } from "react-router-dom";
 import Cookies from "universal-cookie";
 // reactstrap components
 import {
@@ -47,9 +47,20 @@ class AdminNavbar extends React.Component {
       <>
         <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
           <Container fluid>
-            <Link className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block">
-              {this.props.brandText}
-            </Link>
+            <div className="h3 mb-0 text-white text-center text-uppercase d-none d-lg-inline-block">
+              <img
+                src={require("/home/chirag/dummy/topinfluenzer_webapp_client/src/assets/img/icons/left.png")}
+                height="28px"
+                textColor="white"
+                style={{ fontWeight: "bold" }}
+                onClick={() => this.props.history.goBack()}
+                style={{ cursor: "pointer" }}
+              ></img>
+              {console.log(this.props)}
+              <h3 className="ml-1 text-white text-center text-uppercase d-none d-lg-inline-block my-auto">
+                {this.props.brandText}
+              </h3>
+            </div>
 
             <Nav className="align-items-center d-none d-md-flex" navbar>
               <UncontrolledDropdown nav>

@@ -9,7 +9,7 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import { Spinner } from "reactstrap";
 import routes from "routes.js";
 import Tables from "views/examples/Tables";
-import Maps from "views/examples/Maps";
+import Edit from "views/examples/Edit";
 import Index from "views/Index";
 import Profile from "views/examples/Profile";
 import cogoToast from "cogo-toast";
@@ -19,18 +19,19 @@ class Admin extends React.Component {
   state = {
     isLoading: false,
   };
-  // componentDidUpdate(e) {
-  //   document.documentElement.scrollTop = 0;
-  //   document.scrollingElement.scrollTop = 0;
-  //   this.refs.mainContent.scrollTop = 0;
-  // }
+  componentDidUpdate(e) {
+    // document.documentElement.scrollTop = 0;
+    // document.scrollingElement.scrollTop = 0;
+    // this.refs.mainContent.scrollTop = 0;
+    console.log("working");
+  }
   handleComponent = (props) => {
     if (props.location.pathname === "/admin/dashboard") {
       console.log("i'm in /dashboard");
       return <Tables myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/admin/maps") {
       console.log("i'm in /maps");
-      return <Maps myProp={this.handleLoader} {...props} />;
+      return <Edit myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/admin/index") {
       console.log("i'm in /index");
       return <Index myProp={this.handleLoader} {...props} />;
