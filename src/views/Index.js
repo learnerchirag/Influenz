@@ -146,9 +146,7 @@ class Index extends React.Component {
         datasets2_updated: datasets2_updated,
         datasets3_updated: datasets3_updated,
       });
-      // chartref1.chartInstance.update();
-      // chartref2.chartInstance.update();
-      // chartref3.chartInstance.update();
+
       console.log(this.state.datasets3_updated);
       console.log(this.state.dates, "array of dates");
       console.log(
@@ -244,6 +242,12 @@ class Index extends React.Component {
 
     var dates = [];
     var dates_count = [];
+    var cities = [];
+    var cities_count = [];
+    var platforms = [];
+    var platforms_count = [];
+    var datasets3_updated = [];
+    var datasets2_updated = [];
     // const { myProp } = this.props;
     // this.handleLoader(true);
     index === 3
@@ -257,26 +261,35 @@ class Index extends React.Component {
           console.log(result, "year");
           var sorting = [];
           var final = [];
+          result.data.payload.city_data.map((object, index) => {
+            cities.push(object.city);
+            cities_count.push(object.click_count);
+          });
+          result.data.payload.platform_data.map((object, index) => {
+            platforms.push(object.platform);
+            platforms_count.push(object.click_count);
+          });
+
           result.data.payload.click_data.map((object, index) => {
             var a = new Date(object.month);
             var month = a.getMonth();
 
             const months = [
-              "Jan",
-              "Feb",
-              "Mar",
-              "Apr",
-              "May",
-              "Jun",
-              "Jul",
-              "Aug",
-              "Sep",
-              "Oct",
-              "Nov",
-              "Dec",
+              "Jan-",
+              "Feb-",
+              "Mar-",
+              "Apr-",
+              "May-",
+              "Jun-",
+              "Jul-",
+              "Aug-",
+              "Sep-",
+              "Oct-",
+              "Nov-",
+              "Dec-",
             ];
             sorting[index] = {
-              key: months[month],
+              key: months[month] + a.getFullYear(),
               value: object.count,
             };
           });
@@ -299,9 +312,28 @@ class Index extends React.Component {
             label: "Performance",
             data: dates_count,
           };
+          datasets2_updated[0] = {
+            label: "Performance",
+            data: cities_count,
+            backgroundColor: this.handleColor(pie_chart2, cities_count.length),
+          };
+          datasets3_updated[0] = {
+            label: "Performance",
+            data: platforms_count,
+            backgroundColor: this.handleColor(
+              pie_chart3,
+              platforms_count.length
+            ),
+          };
           this.setState({
             dates: dates,
             dates_count: dates_count,
+            cities,
+            cities_count,
+            platforms,
+            platforms_count,
+            datasets2_updated,
+            datasets3_updated,
           });
         })
       : Axios.get(
@@ -320,22 +352,44 @@ class Index extends React.Component {
         ).then((result) => {
           this.handleLoader(false);
           console.log(result, "month result");
-          index === 1
-            ? result.data.payload.click_data.map((object, index) => {
-                dates.push(object.date);
-                dates_count.push(object.count);
-              })
-            : result.data.payload.click_data.map((object, index) => {
-                dates.push(object.date);
-                dates_count.push(object.count);
-              });
+          result.data.payload.click_data.map((object, index) => {
+            dates.push(object.date);
+            dates_count.push(object.count);
+          });
+          result.data.payload.city_data.map((object, index) => {
+            cities.push(object.city);
+            cities_count.push(object.click_count);
+          });
+          result.data.payload.platform_data.map((object, index) => {
+            platforms.push(object.platform);
+            platforms_count.push(object.click_count);
+          });
           this.state.datasets1_updated[0] = {
             label: "Performance",
             data: dates_count,
           };
+          datasets2_updated[0] = {
+            label: "Performance",
+            data: cities_count,
+            backgroundColor: this.handleColor(pie_chart2, cities_count.length),
+          };
+          datasets3_updated[0] = {
+            label: "Performance",
+            data: platforms_count,
+            backgroundColor: this.handleColor(
+              pie_chart3,
+              platforms_count.length
+            ),
+          };
           this.setState({
             dates: dates,
             dates_count: dates_count,
+            cities,
+            cities_count,
+            platforms,
+            platforms_count,
+            datasets2_updated,
+            datasets3_updated,
           });
           console.log(this.state.dates, "array of dates");
           console.log(result);
@@ -406,7 +460,7 @@ class Index extends React.Component {
               <AdminNavbar
                 {...this.props}
                 brandText={this.getBrandText(this.props.location.pathname)}
-                title="Campiagn Performance"
+                title="Campaign Performance"
               />
               <Header />
 
@@ -730,7 +784,13 @@ class Index extends React.Component {
                                   </small>
                                 </h2>
                                 <h6>
-                                  From {weekStart} to {today}
+                                  From{" "}
+                                  {this.state.activeNav === 1
+                                    ? weekStart
+                                    : this.state.activeNav === 2
+                                    ? monthStart
+                                    : yearStart}{" "}
+                                  to {today}
                                 </h6>
                               </div>
                             </Row>
@@ -774,7 +834,13 @@ class Index extends React.Component {
                                   </small>
                                 </h2>
                                 <h6>
-                                  From {weekStart} to {today}
+                                  From{" "}
+                                  {this.state.activeNav === 1
+                                    ? weekStart
+                                    : this.state.activeNav === 2
+                                    ? monthStart
+                                    : yearStart}{" "}
+                                  to {today}
                                 </h6>
                               </div>
                             </Row>

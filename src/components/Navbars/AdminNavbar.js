@@ -58,7 +58,7 @@ class AdminNavbar extends React.Component {
                   style={{ cursor: "pointer" }}
                 ></img>
               )}
-              <h3 className="ml-1 text-white text-center text-uppercase d-none d-lg-inline-block my-auto">
+              <h3 className="ml-2 text-white text-center text-uppercase d-none d-lg-inline-block my-auto">
                 {this.props.title}
               </h3>
             </div>

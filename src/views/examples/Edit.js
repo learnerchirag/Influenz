@@ -1191,6 +1191,12 @@ class Edit extends React.Component {
                                               </label>
                                               <GooglePlacesAutocomplete
                                                 apiKey="AIzaSyAdnAIUyM6mOwNCkO_lMeAdKFXHln9R1t4"
+                                                autocompletionRequest={{
+                                                  componentRestrictions: {
+                                                    country: ["IN"],
+                                                  },
+                                                  types: ["(cities)"],
+                                                }}
                                                 onSelect={(event) => {
                                                   var city = "";
                                                   console.log(event);
