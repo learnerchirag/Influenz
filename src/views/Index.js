@@ -326,7 +326,7 @@ class Index extends React.Component {
                 dates_count.push(object.count);
               })
             : result.data.payload.click_data.map((object, index) => {
-                dates.push(object.month);
+                dates.push(object.date);
                 dates_count.push(object.count);
               });
           this.state.datasets1_updated[0] = {
@@ -367,10 +367,18 @@ class Index extends React.Component {
     console.log("function");
   };
   getBrandText = (path) => {
-    return "Campaign analytics";
+    return "Campaign performance";
   };
   render() {
-    console.log(this.props);
+    var sumCity = this.state.cities_count.reduce(function (a, b) {
+      return a + b;
+    }, 0);
+    var sumPlatform = this.state.platforms_count.reduce(function (a, b) {
+      return a + b;
+    }, 0);
+    var sumDates = this.state.dates_count.reduce(function (a, b) {
+      return a + b;
+    }, 0);
     return (
       <>
         {!cookies.get("Auth-token") && (
@@ -398,6 +406,7 @@ class Index extends React.Component {
               <AdminNavbar
                 {...this.props}
                 brandText={this.getBrandText(this.props.location.pathname)}
+                title="Campiagn Performance"
               />
               <Header />
 
@@ -422,7 +431,9 @@ class Index extends React.Component {
                           <CardHeader className="border-0" float="right">
                             <Row>
                               <div className="col">
-                                <h2 className="mb-0">Campaign</h2>
+                                <h2 className="mb-0">
+                                  {this.state.current_user.name}
+                                </h2>
                               </div>
                               <div className="col text-right">
                                 <Button
@@ -430,7 +441,7 @@ class Index extends React.Component {
                                   href="/dashboard"
                                   size="md"
                                 >
-                                  Campaigns List
+                                  My Campaigns
                                 </Button>
                               </div>
                             </Row>
@@ -441,12 +452,12 @@ class Index extends React.Component {
                           >
                             <thead className="thead-light">
                               <tr>
-                                <th scope="col">Campaign</th>
-                                <th scope="col">Total Budget</th>
-                                <th scope="col">Rate</th>
+                                <th scope="col">My Campaigns</th>
+                                <th scope="col">Total Spending</th>
+                                <th scope="col">Balance left</th>
+                                <th scope="col">Click Rate</th>
+                                {/* <th scope="col">Top Influencers</th> */}
                                 <th scope="col">Status</th>
-                                {/* <th scope="col">Influencers</th> */}
-                                <th scope="col">Balance</th>
                                 <th scope="col" />
                               </tr>
                             </thead>
@@ -477,25 +488,6 @@ class Index extends React.Component {
                                   {"₹ " + this.state.current_user.total_balance}
                                 </td>
                                 <td>
-                                  {"₹ " +
-                                    this.state.current_user.payment_per_click}
-                                </td>
-
-                                <td>
-                                  <Badge color="" className="badge-dot mr-4">
-                                    <i
-                                      className={
-                                        this.state.current_user.status ===
-                                        "active"
-                                          ? "bg-success"
-                                          : "bg-warning"
-                                      }
-                                    />
-                                    {this.state.current_user.status}
-                                  </Badge>
-                                </td>
-
-                                <td>
                                   <div className="d-flex align-items-center">
                                     <span className="mr-2">
                                       {"₹ " + this.state.current_user.balance}
@@ -515,6 +507,26 @@ class Index extends React.Component {
                                     </div>
                                   </div>
                                 </td>
+
+                                <td>
+                                  {"₹ " +
+                                    this.state.current_user.payment_per_click}
+                                </td>
+
+                                <td>
+                                  <Badge color="" className="badge-dot mr-4">
+                                    <i
+                                      className={
+                                        this.state.current_user.status ===
+                                        "active"
+                                          ? "bg-success"
+                                          : "bg-warning"
+                                      }
+                                    />
+                                    {this.state.current_user.status}
+                                  </Badge>
+                                </td>
+
                                 <td className="text-left">
                                   <UncontrolledDropdown>
                                     <DropdownToggle
@@ -546,7 +558,7 @@ class Index extends React.Component {
                                       </DropdownItem>
 
                                       <DropdownItem onClick={this.handleEdit}>
-                                        Edit Campaign
+                                        Edit Configuration
                                       </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>
@@ -628,7 +640,7 @@ class Index extends React.Component {
                           <CardBody>
                             {/* Chart */}
                             <div className="chart">
-                              {this.state.dates.length === 0 ? (
+                              {sumDates === 0 ? (
                                 <h4 className="text-white">No Data.</h4>
                               ) : (
                                 <Bar
@@ -663,6 +675,7 @@ class Index extends React.Component {
                           <Table
                             className="align-items-center table-flush"
                             responsive
+                            // style={{ height: "100%" }}
                           >
                             <thead
                               className="thead-light"
@@ -710,7 +723,12 @@ class Index extends React.Component {
                                 {/* <h6 className="text-uppercase text-muted ls-1 mb-1">
                 Performance
               </h6> */}
-                                <h2 className="mb-0">City-wise Data</h2>
+                                <h2 className="mb-0">
+                                  City-wise Data{" "}
+                                  <small>
+                                    {"(total clicks= " + sumCity + ")"}
+                                  </small>
+                                </h2>
                                 <h6>
                                   From {weekStart} to {today}
                                 </h6>
@@ -720,7 +738,7 @@ class Index extends React.Component {
                           <CardBody>
                             {/* Chart */}
                             <div className="chart">
-                              {this.state.cities.length === 0 ? (
+                              {sumCity === 0 ? (
                                 <div>
                                   <h4>No Data.</h4>
                                 </div>
@@ -749,7 +767,12 @@ class Index extends React.Component {
                                 {/* <h6 className="text-uppercase text-muted ls-1 mb-1">
                 Performance
               </h6> */}
-                                <h2 className="mb-0">Platform-wise Data</h2>
+                                <h2 className="mb-0">
+                                  Platform-wise Data{" "}
+                                  <small>
+                                    {"(total clicks= " + sumPlatform + ")"}
+                                  </small>
+                                </h2>
                                 <h6>
                                   From {weekStart} to {today}
                                 </h6>
@@ -759,7 +782,7 @@ class Index extends React.Component {
                           <CardBody>
                             {/* Chart */}
                             <div className="chart">
-                              {this.state.platforms.length === 0 ? (
+                              {sumPlatform === 0 ? (
                                 <div>
                                   <h4>No Data.</h4>
                                 </div>

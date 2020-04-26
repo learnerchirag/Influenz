@@ -48,17 +48,18 @@ class AdminNavbar extends React.Component {
         <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
           <Container fluid>
             <div className="h3 mb-0 text-white text-center text-uppercase d-none d-lg-inline-block">
-              <img
-                src={require("/home/chirag/dummy/topinfluenzer_webapp_client/src/assets/img/icons/left.png")}
-                height="28px"
-                textColor="white"
-                style={{ fontWeight: "bold" }}
-                onClick={() => this.props.history.goBack()}
-                style={{ cursor: "pointer" }}
-              ></img>
-              {console.log(this.props)}
+              {this.props.title !== "My Campaigns" && (
+                <img
+                  src={require("../../assets/img/icons/left.png")}
+                  height="28px"
+                  textColor="white"
+                  style={{ fontWeight: "bold" }}
+                  onClick={() => this.props.history.goBack()}
+                  style={{ cursor: "pointer" }}
+                ></img>
+              )}
               <h3 className="ml-1 text-white text-center text-uppercase d-none d-lg-inline-block my-auto">
-                {this.props.brandText}
+                {this.props.title}
               </h3>
             </div>
 
@@ -69,7 +70,7 @@ class AdminNavbar extends React.Component {
                     <span className="avatar avatar-sm rounded-circle">
                       <img
                         alt="..."
-                        src={require("assets/img/theme/team-4-800x800.jpg")}
+                        src={require("../../assets/img/icons/WhatsApp Image 2020-04-25 at 6.49.24 PM.jpeg")}
                       />
                     </span>
                     <Media className="ml-2 d-none d-lg-block">
@@ -87,18 +88,22 @@ class AdminNavbar extends React.Component {
                     <i className="ni ni-single-02" />
                     <span>My profile</span>
                   </DropdownItem>
-                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <DropdownItem to="/dashboard" tag={Link}>
                     <i className="ni ni-settings-gear-65" />
-                    <span>Settings</span>
+                    <span>My Campaigns</span>
                   </DropdownItem>
-                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <DropdownItem
+                    to="https://influenz.club/#gettouch"
+                    target="_blank"
+                    tag={Link}
+                  >
                     <i className="ni ni-calendar-grid-58" />
-                    <span>Activity</span>
+                    <span>Contact us</span>
                   </DropdownItem>
-                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                  {/* <DropdownItem to="/admin/user-profile" tag={Link}>
                     <i className="ni ni-support-16" />
                     <span>Support</span>
-                  </DropdownItem>
+                  </DropdownItem> */}
                   <DropdownItem divider />
                   <DropdownItem onClick={(e) => this.handleLogout(e)}>
                     <i className="ni ni-user-run" />

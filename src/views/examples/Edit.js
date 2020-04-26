@@ -29,6 +29,8 @@ import {
   Table,
   TabPane,
 } from "reactstrap";
+// import { Select } from "antd";
+// import { Dropdown } from "semantic-ui-react";
 // import FileUploadProgress from "react-fileupload-progress";
 import Progress from "react-progressbar";
 import validator from "validator";
@@ -48,13 +50,22 @@ import "react-confirm-alert/src/react-confirm-alert.css";
 import { Redirect } from "react-router-dom";
 import cogoToast from "cogo-toast";
 import Select from "react-select";
+import { Multiselect } from "multiselect-react-dropdown";
+
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import AdminFooter from "components/Footers/AdminFooter.js";
 // import Razorpay from "razorpay";
+import GooglePlacesAutocomplete, {
+  geocodeByAddress,
+  geocodeByPlaceId,
+  getLatLng,
+} from "react-google-places-autocomplete";
+import "react-google-places-autocomplete/dist/index.min.css";
 
 const cookies = new Cookies();
 const token = cookies.get("Auth-token");
 // mapTypeId={google.maps.MapTypeId.ROADMAP}
+var locations = [];
 
 var progress = 0;
 class Edit extends React.Component {
@@ -77,6 +88,7 @@ class Edit extends React.Component {
     age_max: null,
     age_min: null,
     gender: null,
+    locations: [],
     current_balance: 0,
     uuid: null,
     transaction_value: 0,
@@ -86,8 +98,10 @@ class Edit extends React.Component {
     tab_recharge: false,
     tab_transaction: false,
     options: [],
+    multiOptions: [],
     selectedOption: null,
     transaction_list: [],
+    cityTable: false,
   };
   componentDidMount = () => {
     this.props.location.state.editing &&
@@ -110,6 +124,7 @@ class Edit extends React.Component {
         age_max: this.props.location.state.users.age_max,
         age_min: this.props.location.state.users.age_min,
         gender: this.props.location.state.users.gender,
+        locations: [],
         current_balance: this.props.location.state.users.balance,
         uuid: this.props.location.state.users.uuid,
 
@@ -164,55 +179,109 @@ class Edit extends React.Component {
     });
   };
   handleUpload = async (event, index) => {
+    console.log(event.target.files[0].size);
     // firebase.app()
-    this.setState(
-      {
-        selected_image: event.target.files[0],
-      },
-      async () => {
-        const storage = firebase.storage();
-        const files = [this.state.selected_image.name];
+    index === 2
+      ? event.target.files[0].size <= 250000
+        ? this.setState(
+            {
+              selected_image: event.target.files[0],
+            },
+            async () => {
+              const storage = firebase.storage();
+              const files = [this.state.selected_image.name];
 
-        await storage
-          .ref(files[0])
-          .put(this.state.selected_image)
-          .then((snap) => {
-            progress = (snap.bytesTransferred / snap.totalBytes) * 100;
-            this.setState(
-              {
-                progress: progress,
-              },
-              () => {
-                console.log(this.state.progress);
-                progress === 100
+              await storage
+                .ref(files[0])
+                .put(this.state.selected_image)
+                .then((snap) => {
+                  progress = (snap.bytesTransferred / snap.totalBytes) * 100;
+                  this.setState(
+                    {
+                      progress: progress,
+                    },
+                    () => {
+                      console.log(this.state.progress);
+                      progress === 100
+                        ? this.setState({
+                            upload: true,
+                          })
+                        : this.setState({
+                            upload: false,
+                          });
+                    }
+                  );
+                  // console.log(this.state.progress, "progress");
+                });
+
+              console.log("posting");
+              console.log(this.state.selected_image);
+              storage
+                .ref(files[0])
+                .getDownloadURL()
+                .then((url) => {
+                  index === 1
+                    ? this.setState({
+                        company_logo: url,
+                      })
+                    : this.setState({
+                        image_url: url,
+                      });
+                  console.log("downloaded url image_url", url);
+                });
+            }
+          )
+        : cogoToast.error("File size exceeded")
+      : event.target.files[0].size <= 50000
+      ? this.setState(
+          {
+            selected_image: event.target.files[0],
+          },
+          async () => {
+            const storage = firebase.storage();
+            const files = [this.state.selected_image.name];
+
+            await storage
+              .ref(files[0])
+              .put(this.state.selected_image)
+              .then((snap) => {
+                progress = (snap.bytesTransferred / snap.totalBytes) * 100;
+                this.setState(
+                  {
+                    progress: progress,
+                  },
+                  () => {
+                    console.log(this.state.progress);
+                    progress === 100
+                      ? this.setState({
+                          upload: true,
+                        })
+                      : this.setState({
+                          upload: false,
+                        });
+                  }
+                );
+                // console.log(this.state.progress, "progress");
+              });
+
+            console.log("posting");
+            console.log(this.state.selected_image);
+            storage
+              .ref(files[0])
+              .getDownloadURL()
+              .then((url) => {
+                index === 1
                   ? this.setState({
-                      upload: true,
+                      company_logo: url,
                     })
                   : this.setState({
-                      upload: false,
+                      image_url: url,
                     });
-              }
-            );
-            // console.log(this.state.progress, "progress");
-          });
-
-        console.log("posting");
-        console.log(this.state.selected_image);
-        storage
-          .ref(files[0])
-          .getDownloadURL()
-          .then((url) => {
-            index === 1
-              ? this.setState({
-                  company_logo: url,
-                })
-              : this.setState({
-                  image_url: url,
-                });
-            console.log("downloaded url image_url", url);
-          });
-      }
-    );
+                console.log("downloaded url image_url", url);
+              });
+          }
+        )
+      : cogoToast.error("File size exceeded");
   };
   handleToggle = (index) => {
     if (this.state.activeTab !== index) {
@@ -230,18 +299,13 @@ class Edit extends React.Component {
       }
     });
     if (isNull === false) {
-      // if (!validator.isEmail(this.state.facebook_url)) {
-      //   cogoToast.error("Please type a valid facebook id");
-      // } else if (!validator.isEmail(this.state.instagram_url)) {
-      //   cogoToast.error("Please type a valid instagram id");
-      // } else if (!validator.isEmail(this.state.twitter_url)) {
-      //   cogoToast.error("Please type a valid twitter id");
-      // } else if (!validator.isEmail(this.state.linkedin_url)) {
-      //   cogoToast.error("Please type a valid linkedin id");
-      // } else {
-      this.setState({
-        activeTab: "2",
-        tab_preference: true,
+      Axios.put(`${api.protocol}${api.baseUrl}${api.campaign}`, this.state, {
+        headers: { Authorization: "Bearer " + token },
+      }).then((result) => {
+        this.setState({
+          activeTab: "2",
+          tab_preference: true,
+        });
       });
       // }
     } else {
@@ -263,8 +327,8 @@ class Edit extends React.Component {
       var modelOpen = true;
       modelOpen &&
         confirmAlert({
-          title: "Confirm to create campaign",
-          message: "Click recharge to Confirm campaign and recharge",
+          title: "Confirm to update campaign",
+          message: "Click recharge to Update campaign and recharge",
           buttons: [
             {
               label: "Recharge",
@@ -412,6 +476,11 @@ class Edit extends React.Component {
     return "Campaign Name";
   };
   render() {
+    const ageCount = [];
+    for (let index = 13; index < 61; index++) {
+      ageCount.push(index);
+    }
+
     // const { selectedOption } = this.state;
     return (
       <>
@@ -440,6 +509,7 @@ class Edit extends React.Component {
               <AdminNavbar
                 {...this.props}
                 brandText={this.getBrandText(this.props.location.pathname)}
+                title={this.props.location.state.users.name}
               />
               <Header />
 
@@ -475,7 +545,7 @@ class Edit extends React.Component {
                                   }
                                   onClick={() => this.handleToggle("2")}
                                 >
-                                  Preferences
+                                  Campaign Preferences
                                 </NavLink>
                               </NavItem>
                               <NavItem className="w-25 text-center">
@@ -639,7 +709,7 @@ class Edit extends React.Component {
                                                   <h3>Sponsor name</h3>
                                                   <div>
                                                     <small>
-                                                      * company Name displayed
+                                                      * company name displayed
                                                       to Influencer
                                                     </small>
                                                   </div>
@@ -718,70 +788,6 @@ class Edit extends React.Component {
                                 <Col>
                                   <Card>
                                     <CardHeader>
-                                      <h3>Sponsor logo</h3>
-                                      <div>
-                                        <small>
-                                          * sponsor logo displayed to Influencer
-                                        </small>
-                                      </div>
-                                    </CardHeader>
-                                    <CardBody>
-                                      <Row>
-                                        <Col lg="7">
-                                          <FormGroup>
-                                            <label
-                                              className="btn btn-primary size-sm"
-                                              for="image-1"
-                                            >
-                                              Upload image
-                                            </label>
-                                            <Input
-                                              style={{ visibility: "hidden" }}
-                                              id="image-1"
-                                              color="primary"
-                                              name="selected_company_logo"
-                                              onChange={(event) =>
-                                                this.handleUpload(event, 1)
-                                              }
-                                              type="file"
-                                            />
-                                            <div className="mt--4">
-                                              <small>
-                                                * max 250*250<br></br>* shown to
-                                                Influencers
-                                              </small>
-                                            </div>
-                                          </FormGroup>
-                                        </Col>
-                                        <Col
-                                          lg="5"
-                                          className="text-center my-auto"
-                                        >
-                                          {this.state.upload === true && (
-                                            <img
-                                              className="img-responsive"
-                                              src={this.state.company_logo}
-                                              height="200px"
-                                              width="200px"
-                                            ></img>
-                                          )}
-                                          {this.state.upload === false && (
-                                            <div>
-                                              {/* <h3>Uploading...</h3> */}
-                                              <Progress
-                                                completed={this.state.progress}
-                                              />
-                                            </div>
-                                          )}
-                                          {/* <Progress completed={this.state.progress} /> */}
-                                        </Col>
-                                      </Row>
-                                    </CardBody>
-                                  </Card>
-                                </Col>
-                                <Col>
-                                  <Card>
-                                    <CardHeader>
                                       <h3>Campaign image</h3>
                                       <div>
                                         <small>
@@ -812,7 +818,8 @@ class Edit extends React.Component {
                                             />
                                             <div className="mt--4">
                                               <small>
-                                                * max 1280*800 <br></br>* mobile
+                                                * max 1280*800 <br></br>* max
+                                                file size 250KB<br></br>* mobile
                                                 screen resolution works best
                                               </small>
                                             </div>
@@ -848,6 +855,71 @@ class Edit extends React.Component {
                                     </CardBody>
                                   </Card>
                                 </Col>
+                                <Col>
+                                  <Card>
+                                    <CardHeader>
+                                      <h3>Sponsor logo</h3>
+                                      <div>
+                                        <small>
+                                          * sponsor logo displayed to Influencer
+                                        </small>
+                                      </div>
+                                    </CardHeader>
+                                    <CardBody>
+                                      <Row>
+                                        <Col lg="7">
+                                          <FormGroup>
+                                            <label
+                                              className="btn btn-primary size-sm"
+                                              for="image-1"
+                                            >
+                                              Upload image
+                                            </label>
+                                            <Input
+                                              style={{ visibility: "hidden" }}
+                                              id="image-1"
+                                              color="primary"
+                                              name="selected_company_logo"
+                                              onChange={(event) =>
+                                                this.handleUpload(event, 1)
+                                              }
+                                              type="file"
+                                            />
+                                            <div className="mt--4">
+                                              <small>
+                                                * max 250*250<br></br>* max file
+                                                size 50KB<br></br> * shown to
+                                                Influencers
+                                              </small>
+                                            </div>
+                                          </FormGroup>
+                                        </Col>
+                                        <Col
+                                          lg="5"
+                                          className="text-center my-auto"
+                                        >
+                                          {this.state.upload === true && (
+                                            <img
+                                              className="img-responsive"
+                                              src={this.state.company_logo}
+                                              height="200px"
+                                              width="200px"
+                                            ></img>
+                                          )}
+                                          {this.state.upload === false && (
+                                            <div>
+                                              {/* <h3>Uploading...</h3> */}
+                                              <Progress
+                                                completed={this.state.progress}
+                                              />
+                                            </div>
+                                          )}
+                                          {/* <Progress completed={this.state.progress} /> */}
+                                        </Col>
+                                      </Row>
+                                    </CardBody>
+                                  </Card>
+                                </Col>
                                 {/* </Row>
                                     </CardBody>
                                   </Card>
@@ -859,7 +931,7 @@ class Edit extends React.Component {
                                 <Col>
                                   <Card>
                                     <CardHeader>
-                                      <h3>Social media</h3>
+                                      <h3>Sponsor Social Media Links</h3>
                                     </CardHeader>
                                     <CardBody>
                                       <Row>
@@ -869,14 +941,14 @@ class Edit extends React.Component {
                                               className="form-control-label"
                                               htmlFor="input-address"
                                             >
-                                              Facebook
+                                              Facebook page
                                             </label>
                                             <Input
                                               className="form-control-alternative"
                                               value={this.state.facebook_url}
                                               name="facebook_url"
                                               onChange={this.handleInputChange}
-                                              placeholder="Facebook"
+                                              placeholder="https://facebook.com/influenz"
                                               type="text"
                                             />
                                           </FormGroup>
@@ -885,17 +957,17 @@ class Edit extends React.Component {
                                           <FormGroup>
                                             <label
                                               className="form-control-label"
-                                              htmlFor="input-city"
+                                              htmlFor="input-country"
                                             >
-                                              Instagram
+                                              LinkedIn page
                                             </label>
                                             <Input
                                               className="form-control-alternative"
-                                              value={this.state.instagram_url}
-                                              // id="input-city"
-                                              name="instagram_url"
+                                              // id="input-postal-code"
+                                              value={this.state.linkedin_url}
+                                              name="linkedin_url"
                                               onChange={this.handleInputChange}
-                                              placeholder="Instagram"
+                                              placeholder="https://linkedin.com/influenz"
                                               type="text"
                                             />
                                           </FormGroup>
@@ -908,7 +980,7 @@ class Edit extends React.Component {
                                               className="form-control-label"
                                               // htmlFor="input-country"
                                             >
-                                              Twitter
+                                              Twitter handle
                                             </label>
                                             <Input
                                               className="form-control-alternative"
@@ -916,7 +988,7 @@ class Edit extends React.Component {
                                               // id="input-country"
                                               name="twitter_url"
                                               onChange={this.handleInputChange}
-                                              placeholder="Twitter"
+                                              placeholder="@influenz"
                                               type="text"
                                             />
                                           </FormGroup>
@@ -925,17 +997,17 @@ class Edit extends React.Component {
                                           <FormGroup>
                                             <label
                                               className="form-control-label"
-                                              htmlFor="input-country"
+                                              htmlFor="input-city"
                                             >
-                                              LinkedIn
+                                              Instagram handle
                                             </label>
                                             <Input
                                               className="form-control-alternative"
-                                              // id="input-postal-code"
-                                              value={this.state.linkedin_url}
-                                              name="linkedin_url"
+                                              value={this.state.instagram_url}
+                                              // id="input-city"
+                                              name="instagram_url"
                                               onChange={this.handleInputChange}
-                                              placeholder="Linkedin"
+                                              placeholder="@influenz"
                                               type="text"
                                             />
                                           </FormGroup>
@@ -949,17 +1021,24 @@ class Edit extends React.Component {
                               <hr className="my-4" />
                               {/* Description */}
 
-                              <div className="text-center">
+                              <div className="text-right">
                                 <Row>
                                   <Col>
                                     <Button
-                                      className="my-4"
+                                      className="my-2"
                                       color="primary"
                                       type="button"
                                       onClick={this.handleSave}
                                     >
-                                      Save
+                                      Save Campaign Details
                                     </Button>
+                                    <div>
+                                      {" "}
+                                      <small>
+                                        Save and proceed to Preferences to
+                                        select Influencer profile
+                                      </small>
+                                    </div>
                                   </Col>
                                 </Row>
                               </div>
@@ -972,7 +1051,13 @@ class Edit extends React.Component {
                                   <Col>
                                     <Card>
                                       <CardHeader>
-                                        <h3>Age preferences</h3>
+                                        <h3>Age preference</h3>
+                                        <div>
+                                          <small>
+                                            * we will showcase this campaign to
+                                            Influencers within this age range
+                                          </small>
+                                        </div>
                                       </CardHeader>
                                       <CardBody>
                                         <Row>
@@ -982,17 +1067,25 @@ class Edit extends React.Component {
                                                 className="form-control-label"
                                                 htmlFor="input-age"
                                               >
-                                                Age Max
+                                                Maximum age
                                               </label>
                                               <Input
                                                 className="form-control-alternative"
-                                                value={this.state.age_max}
+                                                value={
+                                                  this.state.age_max
+                                                    ? this.state.age_max
+                                                    : 35
+                                                }
                                                 name="age_max"
                                                 onChange={
                                                   this.handleInputChange
                                                 }
-                                                type="number"
-                                              />
+                                                type="select"
+                                              >
+                                                {ageCount.map((age) => (
+                                                  <option>{age}</option>
+                                                ))}
+                                              </Input>
                                             </FormGroup>
                                           </Col>
                                           <Col>
@@ -1001,17 +1094,25 @@ class Edit extends React.Component {
                                                 className="form-control-label"
                                                 htmlFor="input-age"
                                               >
-                                                Age Min
+                                                Minimum age
                                               </label>
                                               <Input
                                                 className="form-control-alternative"
-                                                value={this.state.age_min}
+                                                value={
+                                                  this.state.age_min
+                                                    ? this.state.age_min
+                                                    : 25
+                                                }
                                                 name="age_min"
                                                 onChange={
                                                   this.handleInputChange
                                                 }
-                                                type="number"
-                                              />
+                                                type="select"
+                                              >
+                                                {ageCount.map((age) => (
+                                                  <option>{age}</option>
+                                                ))}
+                                              </Input>
                                             </FormGroup>
                                           </Col>
                                         </Row>
@@ -1026,7 +1127,13 @@ class Edit extends React.Component {
                                   <Col>
                                     <Card>
                                       <CardHeader>
-                                        <h3>Gender preferences</h3>
+                                        <h3>Gender preference</h3>
+                                        <div>
+                                          <small>
+                                            * we will try to promote the
+                                            campaign to this gender.
+                                          </small>
+                                        </div>
                                       </CardHeader>
                                       <CardBody>
                                         <Row>
@@ -1045,8 +1152,12 @@ class Edit extends React.Component {
                                                 onChange={
                                                   this.handleInputChange
                                                 }
-                                                type="text"
-                                              />
+                                                type="select"
+                                              >
+                                                <option value="">All</option>
+                                                <option>Male</option>
+                                                <option>Female</option>
+                                              </Input>
                                             </FormGroup>
                                           </Col>
                                         </Row>
@@ -1056,6 +1167,140 @@ class Edit extends React.Component {
                                 </Row>
 
                                 <hr className="my-4" />
+                                <Row>
+                                  <Col>
+                                    <Card>
+                                      <CardHeader>
+                                        <h3>Location preferences</h3>
+                                        <div>
+                                          <small>
+                                            * we will try to push the campaign
+                                            in these locations
+                                          </small>
+                                        </div>
+                                      </CardHeader>
+                                      <CardBody>
+                                        <Row>
+                                          <Col>
+                                            <FormGroup>
+                                              <label
+                                                className="form-control-label"
+                                                htmlFor="input-gender"
+                                              >
+                                                Location
+                                              </label>
+                                              <GooglePlacesAutocomplete
+                                                apiKey="AIzaSyAdnAIUyM6mOwNCkO_lMeAdKFXHln9R1t4"
+                                                onSelect={(event) => {
+                                                  var city = "";
+                                                  console.log(event);
+                                                  city = event.description;
+                                                  geocodeByPlaceId(
+                                                    event.place_id
+                                                  ).then((result) => {
+                                                    getLatLng(result[0]).then(
+                                                      (result) => {
+                                                        console.log(result);
+                                                        locations.push({
+                                                          city: city,
+                                                          latitude: result.lat,
+                                                          longitude: result.lng,
+                                                        });
+                                                        console.log(locations);
+                                                        this.setState({
+                                                          locations,
+                                                          cityTable: true,
+                                                        });
+                                                      }
+                                                    );
+                                                  });
+                                                }}
+                                              />
+                                            </FormGroup>
+                                          </Col>
+                                          {this.state.cityTable && (
+                                            <Col>
+                                              {/* <Card> */}
+                                              <h3>Selected locations</h3>
+                                              {/* </Card> */}
+                                              <Table
+                                                className="align-items-center table-flush"
+                                                responsive
+                                              >
+                                                <thead
+                                                  className="thead-light"
+                                                  style={{
+                                                    position: "relative",
+                                                    overflow: "scroll",
+                                                  }}
+                                                >
+                                                  <tr>
+                                                    <th scope="col">
+                                                      Cities Selected
+                                                    </th>
+
+                                                    <th scope="col">
+                                                      Latitude
+                                                    </th>
+                                                    <th scope="col">
+                                                      Longitude
+                                                    </th>
+                                                    {/* <th scope="col">Bounce rate</th> */}
+                                                  </tr>
+                                                </thead>
+                                                <tbody>
+                                                  {this.state.locations.map(
+                                                    (location, index) => (
+                                                      <tr>
+                                                        <th>{location.city}</th>
+
+                                                        <td scope="row">
+                                                          {location.latitude}
+                                                        </td>
+                                                        <td>
+                                                          {location.longitude}
+                                                        </td>
+                                                        <td>
+                                                          <img
+                                                            src={require("../../assets/img/icons/x-mark.png")}
+                                                            height="25px"
+                                                            style={{
+                                                              fontWeight:
+                                                                "bold",
+                                                            }}
+                                                            onClick={() => {
+                                                              this.state.locations.splice(
+                                                                index,
+                                                                1
+                                                              );
+                                                              this.setState({
+                                                                locations,
+                                                              });
+                                                              this.state
+                                                                .locations
+                                                                .length === 0 &&
+                                                                this.setState({
+                                                                  cityTable: false,
+                                                                });
+                                                            }}
+                                                            style={{
+                                                              cursor: "pointer",
+                                                            }}
+                                                          ></img>
+                                                        </td>
+                                                      </tr>
+                                                    )
+                                                  )}
+                                                </tbody>
+                                              </Table>
+                                            </Col>
+                                          )}{" "}
+                                        </Row>
+                                      </CardBody>
+                                    </Card>
+                                  </Col>
+                                </Row>
+
                                 <div className="text-right">
                                   <Row>
                                     <Col>
@@ -1066,7 +1311,7 @@ class Edit extends React.Component {
                                         onClick={this.handleCreate}
                                       >
                                         {this.props.location.state.editing
-                                          ? "Update Campaign"
+                                          ? "Update Campaign Preferences"
                                           : "Create Campaign"}
                                       </Button>
                                     </Col>
@@ -1169,133 +1414,159 @@ class Edit extends React.Component {
                           <TabPane tabId="4">
                             <CardBody>
                               <Form>
-                                <div className="pl-lg-4">
-                                  <Row>
-                                    <Col lg="8">
-                                      <FormGroup>
-                                        <label
-                                          className="form-control-label"
-                                          htmlFor="input-age"
-                                        >
-                                          <h3>Current Credit</h3>
-                                        </label>
-                                        <InputGroup>
-                                          <InputGroupAddon addonType="prepend">
-                                            ₹
-                                          </InputGroupAddon>
-                                          <Input
-                                            className="form-control-alternative"
-                                            value={this.state.current_balance}
-                                            name="cuurent_balance"
-                                            readOnly="readonly"
-                                            type="number"
-                                          />
-                                        </InputGroup>
-                                      </FormGroup>
-                                    </Col>
-                                  </Row>
-                                </div>
-                                <hr className="my-4" />
-                                <Card>
-                                  {/* Address */}
-                                  <CardHeader>
-                                    <h3>Move Credit</h3>
-                                  </CardHeader>
-                                  <CardBody>
-                                    <div className="pl-lg-0">
+                                <Row>
+                                  <Col>
+                                    <Card className="shadow">
                                       <Row>
-                                        <Col lg="8">
-                                          <FormGroup>
-                                            <label
-                                              className="form-control-label"
-                                              htmlFor="input-gender"
-                                            >
-                                              Move to
-                                            </label>
-                                            <Select
-                                              value={this.state.selectedOption}
-                                              onChange={this.handleSelect}
-                                              options={this.state.options}
-                                              name="selectedOption"
-                                            />
-                                          </FormGroup>
-                                        </Col>
-                                        <Col className="text-right">
-                                          <Button
-                                            className="my-4"
-                                            color="primary"
-                                            type="button"
-                                            onClick={this.handleMoveCharge}
-                                          >
-                                            Confirm
-                                          </Button>
+                                        <Col>
+                                          <Card className="shadow">
+                                            <CardHeader>
+                                              <h3>Current balance</h3>
+                                            </CardHeader>
+                                            <CardBody className="shadow m-4">
+                                              <div>
+                                                <h5 class="text-uppercase text-muted mb-0 card-title">
+                                                  Balance
+                                                </h5>
+                                                <span class="h2 font-weight-bold mb-0">
+                                                  {"₹ " +
+                                                    this.state.current_balance}
+                                                </span>
+                                              </div>
+                                              <div class="col-auto col">
+                                                <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                                  <i class="fas fa-chart-bar"></i>
+                                                </div>
+                                              </div>
+                                            </CardBody>
+                                          </Card>
                                         </Col>
                                       </Row>
-                                    </div>
-                                  </CardBody>
-                                </Card>
-                                <hr className="my-4" />
-                                <div className="pl-lg-4">
-                                  <Row>
-                                    <Col lg="8" className="mb-5 mb-xl-0">
-                                      <Card
-                                        className="shadow "
-                                        style={{ height: "510px" }}
-                                      >
-                                        <CardHeader className="border-0">
-                                          <Row className="align-items-center">
-                                            <div className="col">
-                                              <h3 className="mb-0">
-                                                Transaction History
-                                              </h3>
-                                            </div>
-                                          </Row>
-                                        </CardHeader>
-                                        <Table
-                                          className="align-items-center table-flush"
-                                          responsive
-                                        >
-                                          <thead
-                                            className="thead-light"
-                                            style={{
-                                              position: "relative",
-                                              overflow: "scroll",
-                                            }}
-                                          >
-                                            <tr>
-                                              <th scope="col">Campaign</th>
-
-                                              <th scope="col">Id</th>
-                                              <th scope="col">Amount</th>
-                                              {/* <th scope="col">Bounce rate</th> */}
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                            {this.state.transaction_list.map(
-                                              (transactions) => (
-                                                <tr>
-                                                  <th>
-                                                    {transactions.campaign.name}
-                                                  </th>
-
-                                                  <td scope="row">
-                                                    {
-                                                      transactions.transaction_id
+                                      <Row>
+                                        <Col>
+                                          <Card>
+                                            <CardHeader>
+                                              <h3>Move Balance</h3>
+                                            </CardHeader>
+                                            <CardBody>
+                                              <Row>
+                                                <Col>
+                                                  <FormGroup>
+                                                    <label
+                                                      className="form-control-label"
+                                                      htmlFor="input-gender"
+                                                    >
+                                                      Select campaign to credit
+                                                      balance
+                                                    </label>
+                                                    <Select
+                                                      value={
+                                                        this.state
+                                                          .selectedOption
+                                                      }
+                                                      onChange={
+                                                        this.handleSelect
+                                                      }
+                                                      options={
+                                                        this.state.options
+                                                      }
+                                                      name="selectedOption"
+                                                    />
+                                                  </FormGroup>
+                                                </Col>
+                                                <Col
+                                                  className="text-right"
+                                                  xs="auto"
+                                                >
+                                                  <Button
+                                                    className="my-4"
+                                                    color="primary"
+                                                    type="button"
+                                                    onClick={
+                                                      this.handleMoveCharge
                                                     }
-                                                  </td>
-                                                  <td>
-                                                    {"₹ " +
-                                                      transactions.transaction_value}
-                                                  </td>
+                                                  >
+                                                    Confirm
+                                                  </Button>
+                                                </Col>
+                                              </Row>
+                                            </CardBody>
+                                          </Card>
+                                        </Col>
+                                      </Row>
+                                    </Card>
+                                  </Col>
+                                  <Col>
+                                    <Card>
+                                      <Row>
+                                        <Col
+                                          className="mb-5 mb-xl-0"
+                                          // style={{ height: "100%" }}
+                                        >
+                                          <Card
+                                            className="shadow "
+                                            style={{ height: "600px" }}
+                                          >
+                                            <CardHeader className="border-0">
+                                              <Row className="align-items-center">
+                                                <div className="col">
+                                                  <h3 className="">
+                                                    Transaction History
+                                                  </h3>
+                                                </div>
+                                              </Row>
+                                            </CardHeader>
+                                            <Table
+                                              className="align-items-center table-flush"
+                                              responsive
+                                              // style={{ height: "100%" }}
+                                            >
+                                              <thead
+                                                className="thead-light"
+                                                style={{
+                                                  position: "relative",
+                                                  overflow: "scroll",
+                                                }}
+                                              >
+                                                <tr>
+                                                  <th scope="col">Campaign</th>
+
+                                                  <th scope="col">Id</th>
+                                                  <th scope="col">Amount</th>
+                                                  {/* <th scope="col">Bounce rate</th> */}
                                                 </tr>
-                                              )
-                                            )}
-                                          </tbody>
-                                        </Table>
-                                      </Card>
-                                    </Col>
-                                  </Row>
-                                </div>
+                                              </thead>
+                                              <tbody>
+                                                {this.state.transaction_list.map(
+                                                  (transactions) => (
+                                                    <tr>
+                                                      <th>
+                                                        {
+                                                          transactions.campaign
+                                                            .name
+                                                        }
+                                                      </th>
+
+                                                      <td scope="row">
+                                                        {
+                                                          transactions.transaction_id
+                                                        }
+                                                      </td>
+                                                      <td>
+                                                        {"₹ " +
+                                                          transactions.transaction_value}
+                                                      </td>
+                                                    </tr>
+                                                  )
+                                                )}
+                                              </tbody>
+                                            </Table>
+                                          </Card>
+                                        </Col>
+                                      </Row>
+                                    </Card>
+                                  </Col>
+                                </Row>
                               </Form>
                             </CardBody>
                           </TabPane>

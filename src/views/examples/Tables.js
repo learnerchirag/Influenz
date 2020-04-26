@@ -210,7 +210,7 @@ class Tables extends React.Component {
     console.log("function");
   };
   getBrandText = (path) => {
-    return path.slice(1);
+    return "My Campaigns";
   };
   render() {
     return (
@@ -240,6 +240,7 @@ class Tables extends React.Component {
               <AdminNavbar
                 {...this.props}
                 brandText={this.getBrandText(this.props.location.pathname)}
+                title="My Campaigns"
               />
               <Header />
               {/* Page content */}
@@ -251,7 +252,7 @@ class Tables extends React.Component {
                       <CardHeader className="border-0" float="right">
                         <Row>
                           <div className="col-auto my-auto">
-                            <h2 className="mb-0">Campaigns</h2>
+                            <h2 className="mb-0">My Campaigns</h2>
                           </div>
                           <div className="col offset-1 text-right">
                             <Form className=" form-inline  d-none d-md-flex ">
@@ -263,7 +264,7 @@ class Tables extends React.Component {
                                     </InputGroupText>
                                   </InputGroupAddon>
                                   <Input
-                                    placeholder="Search Campaign"
+                                    placeholder="Search my campaigns"
                                     type="text"
                                     onChange={this.handleSearch}
                                   />
@@ -306,14 +307,14 @@ class Tables extends React.Component {
                                       <Col>
                                         <FormGroup className="text-left">
                                           <label className="form-control-label">
-                                            Campaign Title
+                                            New Campaign Name
                                           </label>
                                           <Input
                                             className="form-control-alternative"
                                             value={this.state.name}
                                             name="name"
                                             onChange={this.handleInputChange}
-                                            placeholder="Title"
+                                            placeholder="Campaign name"
                                             type="text"
                                           ></Input>
                                         </FormGroup>
@@ -329,7 +330,7 @@ class Tables extends React.Component {
                                       onClick={this.handleCreate}
                                       type="submit"
                                     >
-                                      Create
+                                      Start new campaign
                                     </Button>
                                     {/* </Col>
                                     </Row> */}
@@ -347,12 +348,12 @@ class Tables extends React.Component {
                         >
                           <thead className="thead-light">
                             <tr>
-                              <th scope="col">Campaigns</th>
-                              <th scope="col">Total Budget</th>
-                              <th scope="col">Rate</th>
+                              <th scope="col">My Campaigns</th>
+                              <th scope="col">Total Spending</th>
+                              <th scope="col">Balance left</th>
+                              <th scope="col">Click Rate</th>
+                              <th scope="col">Top Influencers</th>
                               <th scope="col">Status</th>
-                              <th scope="col">Influencers</th>
-                              <th scope="col">Balance</th>
                               <th scope="col" />
                             </tr>
                           </thead>
@@ -376,48 +377,6 @@ class Tables extends React.Component {
                                   </Media>
                                 </th>
                                 <td>{"₹ " + user.total_balance}</td>
-                                <td>{"₹ " + user.payment_per_click}</td>
-
-                                <td>
-                                  <Badge color="" className="badge-dot mr-4">
-                                    <i
-                                      className={
-                                        user.status === "active"
-                                          ? "bg-success"
-                                          : "bg-warning"
-                                      }
-                                    />
-                                    {user.status}
-                                  </Badge>
-                                </td>
-                                <td>
-                                  <div className="avatar-group">
-                                    {user.influencers.map(
-                                      (influencer, index) => (
-                                        <React.Fragment>
-                                          <a
-                                            className="avatar avatar-sm"
-                                            href="#pablo"
-                                            id={"pp" + index}
-                                            onClick={(e) => e.preventDefault()}
-                                          >
-                                            <img
-                                              alt="..."
-                                              className="rounded-circle"
-                                              src={influencer.profile_url}
-                                            />
-                                          </a>
-                                          <UncontrolledTooltip
-                                            delay={0}
-                                            target={"pp" + index}
-                                          >
-                                            {influencer.first_name}
-                                          </UncontrolledTooltip>
-                                        </React.Fragment>
-                                      )
-                                    )}
-                                  </div>
-                                </td>
                                 <td>
                                   <div className="d-flex align-items-center">
                                     <span className="mr-2">
@@ -434,6 +393,50 @@ class Tables extends React.Component {
                                     </div>
                                   </div>
                                 </td>
+
+                                <td>{"₹ " + user.payment_per_click}</td>
+
+                                <td>
+                                  <div className="avatar-group">
+                                    {user.influencers.map(
+                                      (influencer, index) => (
+                                        <React.Fragment>
+                                          <a
+                                            className="avatar avatar-sm"
+                                            href="#pablo"
+                                            id={influencer.first_name}
+                                            onClick={(e) => e.preventDefault()}
+                                          >
+                                            <img
+                                              alt="..."
+                                              className="rounded-circle"
+                                              src={influencer.profile_url}
+                                            />
+                                          </a>
+                                          <UncontrolledTooltip
+                                            delay={0}
+                                            target={influencer.first_name}
+                                          >
+                                            {influencer.first_name}
+                                          </UncontrolledTooltip>
+                                        </React.Fragment>
+                                      )
+                                    )}
+                                  </div>
+                                </td>
+                                <td>
+                                  <Badge color="" className="badge-dot mr-4">
+                                    <i
+                                      className={
+                                        user.status === "active"
+                                          ? "bg-success"
+                                          : "bg-warning"
+                                      }
+                                    />
+                                    {user.status}
+                                  </Badge>
+                                </td>
+
                                 <td className="text-right">
                                   <UncontrolledDropdown>
                                     <DropdownToggle
@@ -468,12 +471,12 @@ class Tables extends React.Component {
                                           this.handleAnalytics(user)
                                         }
                                       >
-                                        View Analytics
+                                        View Performance
                                       </DropdownItem>
                                       <DropdownItem
                                         onClick={() => this.handleEdit(user)}
                                       >
-                                        Edit Campaign
+                                        Edit Configuration
                                       </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>
