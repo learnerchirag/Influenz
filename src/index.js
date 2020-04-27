@@ -17,6 +17,7 @@ import Cookies from "universal-cookie";
 import Index from "views/Index";
 import Tables from "views/examples/Tables";
 import Edit from "views/examples/Edit";
+import cogoToast from "cogo-toast";
 const cookies = new Cookies();
 // optional cofiguration
 const options = {
@@ -29,7 +30,11 @@ const options = {
 };
 
 const store = createStore(reducer, applyMiddleware(thunk));
-
+function handleCookiesRedirect() {
+  console.log("i am here");
+  cogoToast.error("You need to sign in first");
+  return <Redirect to="/login" />;
+}
 // export default store;
 
 ReactDOM.render(
@@ -41,21 +46,28 @@ ReactDOM.render(
           <Route path="/login" render={(props) => <Auth {...props} />} />
           <Route path="/register" render={(props) => <Auth {...props} />} />
           <Route path="/forgot" render={(props) => <Auth {...props} />} />
-
-          <Route path="/dashboard" render={(props) => <Tables {...props} />} />
-          <Route
-            path="/campaign/:uuid/edit"
-            render={(props) => <Edit {...props} />}
-          />
-          <Route
-            path="/campaign/:uuid/analytics"
-            render={(props) => <Index {...props} />}
-          />
-          <Route
-            path="/admin/user-profile"
-            render={(props) => <Admin {...props} />}
-          />
-          {/* <Route path="/:user_uuid" */}
+          {cookies.get("Auth-token") ? (
+            <React.Fragment>
+              <Route
+                path="/dashboard"
+                render={(props) => <Tables {...props} />}
+              />
+              <Route
+                path="/campaign/:uuid/edit"
+                render={(props) => <Edit {...props} />}
+              />
+              <Route
+                path="/campaign/:uuid/analytics"
+                render={(props) => <Index {...props} />}
+              />
+              <Route
+                path="/admin/user-profile"
+                render={(props) => <Admin {...props} />}
+              />
+            </React.Fragment>
+          ) : (
+            handleCookiesRedirect()
+          )}
         </AlertProvider>
       </Switch>
     </BrowserRouter>

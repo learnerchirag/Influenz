@@ -505,7 +505,8 @@ class Index extends React.Component {
                               <div className="col text-right">
                                 <Button
                                   color="primary"
-                                  href="/dashboard"
+                                  // href="/dashboard"
+                                  onClick={() => this.props.history.goBack()}
                                   size="md"
                                 >
                                   My Campaigns
