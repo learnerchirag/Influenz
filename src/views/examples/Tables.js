@@ -86,7 +86,7 @@ class Tables extends React.Component {
           pathname: "/campaign/" + this.state.users.uuid + "/analytics",
           state: {
             users: this.state.users,
-            is_admin: this.props.location.state.is_admin,
+            is_admin: this.props.history.location.state.is_admin,
             // handleStatus: this.handleStatus,
             // edit: this.handleEdit,
           },
@@ -187,7 +187,10 @@ class Tables extends React.Component {
       () => {
         this.props.history.push({
           pathname: "/campaign/" + this.state.users.uuid + "/edit",
-          state: { users: this.state.users, editing: this.state.editing },
+          state: {
+            users: user.uuid,
+            editing: this.state.editing,
+          },
         });
       }
     );
@@ -231,7 +234,7 @@ class Tables extends React.Component {
     return "My Campaigns";
   };
   render() {
-    console.log(this.props.location);
+    console.log(this.props.history.location);
     return (
       <>
         {!cookies.get("Auth-token") && (
@@ -474,7 +477,8 @@ class Tables extends React.Component {
                                       className="dropdown-menu-arrow"
                                       right
                                     >
-                                      {this.props.location.state.is_admin &&
+                                      {this.props.history.location.state
+                                        .is_admin &&
                                         user.status === "processing" && (
                                           <DropdownItem
                                             onClick={() =>

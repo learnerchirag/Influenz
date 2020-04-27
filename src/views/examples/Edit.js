@@ -75,12 +75,13 @@ class Edit extends React.Component {
     company_logo: "",
     content: "",
     cta_url: "",
+    payment_per_click: "",
+    image_url: "",
     facebook_url: "",
     instagram_url: "",
     twitter_url: "",
     linkedin_url: "",
-    payment_per_click: "",
-    image_url: "",
+
     selected_image: "",
     progress: 0,
     upload: false,
@@ -104,35 +105,6 @@ class Edit extends React.Component {
     cityTable: "",
   };
   componentDidMount = () => {
-    locations = this.props.location.state.users.locations;
-    this.props.location.state.editing &&
-      // var users= this.props.location.state.users
-      // console.log(this.props.location.state.editing);
-      this.setState({
-        name: this.props.location.state.users.name,
-        company_name: this.props.location.state.users.company_name,
-        company_logo: this.props.location.state.users.company_logo,
-        content: this.props.location.state.users.content,
-        cta_url: this.props.location.state.users.cta_url,
-        facebook_url: this.props.location.state.users.facebook_url,
-        instagram_url: this.props.location.state.users.instagram_url,
-        twitter_url: this.props.location.state.users.twitter_url,
-        linkedin_url: this.props.location.state.users.linkedin_url,
-        payment_per_click: this.props.location.state.users.payment_per_click,
-        image_url: this.props.location.state.users.image_url,
-        upload: true,
-        activeTab: "1",
-        age_max: this.props.location.state.users.age_max,
-        age_min: this.props.location.state.users.age_min,
-        gender: this.props.location.state.users.gender,
-        locations: this.props.location.state.users.locations,
-        current_balance: this.props.location.state.users.balance,
-        uuid: this.props.location.state.users.uuid,
-
-        tab_preference: true,
-        tab_recharge: true,
-        tab_transaction: true,
-      });
     var config = {
       apiKey: "AIzaSyDaH6y6-TmOgugETzqMuKgoj3HxTkDmGV0",
       authDomain: "influenz-7d329.web.app",
@@ -141,9 +113,51 @@ class Edit extends React.Component {
       projectId: "influenz-7d329",
       storageBucket: "influenz-7d329.appspot.com",
     };
+    const token = cookies.get("Auth-token");
+
     if (!firebase.apps.length) {
       firebase.initializeApp(config);
     }
+    Axios.get(
+      `${api.protocol}${api.baseUrl}${api.campaign}${"?uuid="}${
+        this.props.history.location.state.users
+      }`,
+      {
+        headers: { Authorization: "Bearer " + token },
+      }
+    ).then((result) => {
+      this.setState(
+        {
+          name: result.data.payload.name,
+          company_name: result.data.payload.company_name,
+          company_logo: result.data.payload.company_logo,
+          content: result.data.payload.content,
+          cta_url: result.data.payload.cta_url,
+          facebook_url: result.data.payload.facebook_url,
+          instagram_url: result.data.payload.instagram_url,
+          twitter_url: result.data.payload.twitter_url,
+          linkedin_url: result.data.payload.linkedin_url,
+          payment_per_click: result.data.payload.payment_per_click,
+          image_url: result.data.payload.image_url,
+          upload: true,
+          activeTab: "1",
+          age_max: result.data.payload.age_max,
+          age_min: result.data.payload.age_min,
+          gender: result.data.payload.gender,
+          locations: result.data.payload.locations,
+          current_balance: result.data.payload.balance,
+          uuid: result.data.payload.uuid,
+
+          tab_preference: true,
+          tab_recharge: true,
+          tab_transaction: true,
+        },
+        () => {
+          console.log(this.state, "debugging state");
+        }
+      );
+      locations = result.data.payload.locations;
+    });
     Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
       headers: { Authorization: "Bearer " + token },
     }).then((result) => {
@@ -159,9 +173,10 @@ class Edit extends React.Component {
         options,
       });
     });
+    console.log(this.props.location.state.users, this.props);
     Axios.get(
       `${api.protocol}${api.baseUrl}${api.campaignRechargeList}${"?uuid="}${
-        this.props.location.state.users.uuid
+        this.props.location.state.users
       }`,
       {
         headers: { Authorization: "Bearer " + token },
@@ -296,10 +311,23 @@ class Edit extends React.Component {
     }
   };
   handleSave = () => {
+    const token = cookies.get("Auth-token");
+
+    console.log(this.state);
     var isNull = false;
     Object.values(this.state).map((item, index) => {
-      if (index !== 15 && index !== 16 && index !== 17 && index !== 11) {
-        if (item === "") {
+      if (
+        index === 0 ||
+        index === 1 ||
+        index === 2 ||
+        index === 3 ||
+        index === 4 ||
+        index === 5 ||
+        index === 6
+      ) {
+        console.log(index);
+        console.log(item);
+        if (item === "" || item === null) {
           isNull = true;
           console.log(index);
         }
@@ -309,6 +337,7 @@ class Edit extends React.Component {
       Axios.put(`${api.protocol}${api.baseUrl}${api.campaign}`, this.state, {
         headers: { Authorization: "Bearer " + token },
       }).then((result) => {
+        console.log(result);
         this.setState({
           activeTab: "2",
           tab_preference: true,
@@ -321,16 +350,10 @@ class Edit extends React.Component {
   };
   handleCreate = () => {
     var isNull = false;
-    Object.values(this.state).map((item, index) => {
-      if (index === 15 || index === 16 || index === 17) {
-        if (item === null) {
-          isNull = true;
-          console.log(index);
-        }
-      }
-    });
+    const token = cookies.get("Auth-token");
+
     if (isNull === false) {
-      console.log(this.state);
+      console.log(this.state, this.props.location.state.users);
       var modelOpen = true;
       modelOpen &&
         confirmAlert({
@@ -351,7 +374,7 @@ class Edit extends React.Component {
                       this.setState({
                         // activeTab: "3",
                         current_balance: result.data.payload.balance,
-                        uuid: result.data.payload.uuid,
+                        // uuid: result.data.payload.uuid,
                       });
                       console.log(result);
                     })
@@ -373,32 +396,7 @@ class Edit extends React.Component {
                     });
               },
             },
-            // {
-            //   label: "Later",
-            //   onClick: () => {
-            //     this.props.location.state.editing
-            //       ? Axios.put(
-            //           `${api.protocol}${api.baseUrl}${api.campaign}`,
-            //           this.state,
-            //           {
-            //             headers: { Authorization: "Bearer " + token },
-            //           }
-            //         ).then((result) => {
-            //           // this.props.history.push("/dashboard");
-            //           console.log(result);
-            //         })
-            //       : Axios.post(
-            //           `${api.protocol}${api.baseUrl}${api.campaign}`,
-            //           this.state,
-            //           {
-            //             headers: { Authorization: "Bearer " + token },
-            //           }
-            //         ).then((result) => {
-            //           // this.props.history.push("/dashboard");
-            //           console.log(result);
-            //         });
-            //   },
-            // },
+
             {
               label: "Cancel",
               onClick: () => (modelOpen = false),
@@ -410,6 +408,8 @@ class Edit extends React.Component {
     }
   };
   handleTransaction = () => {
+    const token = cookies.get("Auth-token");
+
     let instance = new window.Razorpay({
       key: "rzp_test_Rwji71ovjqAObr",
       key_secret: "jxKNEN2gyH2uxbZqLjt4tYeN",
@@ -465,6 +465,8 @@ class Edit extends React.Component {
   };
   handleMoveCharge = () => {
     var modelOpen = true;
+    const token = cookies.get("Auth-token");
+
     this.state.selectedOption
       ? modelOpen &&
         confirmAlert({
@@ -536,7 +538,7 @@ class Edit extends React.Component {
               <AdminNavbar
                 {...this.props}
                 brandText={this.getBrandText(this.props.location.pathname)}
-                title={this.props.location.state.users.name}
+                title={this.state.name}
               />
               <Header />
 
@@ -1176,7 +1178,7 @@ class Edit extends React.Component {
                                                 }
                                                 type="select"
                                               >
-                                                <option value="">All</option>
+                                                <option>All</option>
                                                 <option>Male</option>
                                                 <option>Female</option>
                                               </Input>

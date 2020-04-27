@@ -176,7 +176,7 @@ class Index extends React.Component {
         this.props.history.push({
           pathname: "/campaign/" + this.state.current_user.uuid + "/edit",
           state: {
-            users: this.state.current_user,
+            users: this.state.current_user.uuid,
             editing: this.state.editing,
           },
         });
