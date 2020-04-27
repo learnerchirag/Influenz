@@ -474,8 +474,7 @@ class Tables extends React.Component {
                                       className="dropdown-menu-arrow"
                                       right
                                     >
-                                      {this.props.history.location.state
-                                        .is_admin &&
+                                      {this.props.location.state.is_admin &&
                                         user.status === "processing" && (
                                           <DropdownItem
                                             onClick={() =>
