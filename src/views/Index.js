@@ -31,6 +31,7 @@ import {
   Row,
   Col,
   UncontrolledDropdown,
+  UncontrolledTooltip,
   DropdownToggle,
 } from "reactstrap";
 
@@ -182,7 +183,7 @@ class Index extends React.Component {
       }
     );
   };
-  handleStatus = (status, uuid) => {
+  handleStatus = (status, uuid, activating) => {
     const token = cookies.get("Auth-token");
     var modelOpen = true;
     console.log(status, uuid);
@@ -190,7 +191,13 @@ class Index extends React.Component {
       confirmAlert({
         title:
           "Click confirm to " +
-          (status === "active" ? "deactivate" : "activate"),
+          (activating
+            ? "activate"
+            : status === "active"
+            ? "deacivate"
+            : status === "inactive"
+            ? "submit for review"
+            : "decativate"),
         // message: "Click recharge to Confirm campaign and recharge",
         buttons: [
           {
@@ -201,7 +208,13 @@ class Index extends React.Component {
 
                 {
                   uuid: uuid,
-                  status: status === "active" ? "inactive" : "active",
+                  status: activating
+                    ? "active"
+                    : status === "active"
+                    ? "inactive"
+                    : status === "inactive"
+                    ? "processing"
+                    : "inactive",
                 },
                 {
                   headers: { Authorization: "Bearer " + token },
@@ -460,7 +473,7 @@ class Index extends React.Component {
               <AdminNavbar
                 {...this.props}
                 brandText={this.getBrandText(this.props.location.pathname)}
-                title="Campaign Performance"
+                title={this.state.current_user.name}
               />
               <Header />
 
@@ -509,8 +522,8 @@ class Index extends React.Component {
                                 <th scope="col">My Campaigns</th>
                                 <th scope="col">Total Spending</th>
                                 <th scope="col">Balance left</th>
-                                <th scope="col">Click Rate</th>
-                                {/* <th scope="col">Top Influencers</th> */}
+                                <th scope="col">Payment per click</th>
+                                <th scope="col">Top Influencers</th>
                                 <th scope="col">Status</th>
                                 <th scope="col" />
                               </tr>
@@ -566,6 +579,34 @@ class Index extends React.Component {
                                   {"₹ " +
                                     this.state.current_user.payment_per_click}
                                 </td>
+                                <td>
+                                  <div className="avatar-group">
+                                    {this.state.current_user.influencers.map(
+                                      (influencer, index) => (
+                                        <React.Fragment>
+                                          <a
+                                            className="avatar avatar-sm"
+                                            href="#pablo"
+                                            id={influencer.first_name}
+                                            onClick={(e) => e.preventDefault()}
+                                          >
+                                            <img
+                                              alt="..."
+                                              className="rounded-circle"
+                                              src={influencer.profile_url}
+                                            />
+                                          </a>
+                                          <UncontrolledTooltip
+                                            delay={0}
+                                            target={influencer.first_name}
+                                          >
+                                            {influencer.first_name}
+                                          </UncontrolledTooltip>
+                                        </React.Fragment>
+                                      )
+                                    )}
+                                  </div>
+                                </td>
 
                                 <td>
                                   <Badge color="" className="badge-dot mr-4">
@@ -574,6 +615,9 @@ class Index extends React.Component {
                                         this.state.current_user.status ===
                                         "active"
                                           ? "bg-success"
+                                          : this.state.current_user.status ===
+                                            "processing"
+                                          ? "bg-info"
                                           : "bg-warning"
                                       }
                                     />
@@ -581,7 +625,7 @@ class Index extends React.Component {
                                   </Badge>
                                 </td>
 
-                                <td className="text-left">
+                                <td className="">
                                   <UncontrolledDropdown>
                                     <DropdownToggle
                                       className="btn-icon-only text-light"
@@ -597,6 +641,22 @@ class Index extends React.Component {
                                       className="dropdown-menu-arrow"
                                       right
                                     >
+                                      {this.props.history.location.state
+                                        .is_admin &&
+                                        this.state.current_user.status ===
+                                          "processing" && (
+                                          <DropdownItem
+                                            onClick={() =>
+                                              this.handleStatus(
+                                                this.state.current_user.status,
+                                                this.state.current_user.uuid,
+                                                true
+                                              )
+                                            }
+                                          >
+                                            Activate
+                                          </DropdownItem>
+                                        )}
                                       <DropdownItem
                                         onClick={() =>
                                           this.handleStatus(
@@ -608,7 +668,10 @@ class Index extends React.Component {
                                         {this.state.current_user.status ===
                                         "active"
                                           ? "Deactivate"
-                                          : "Activate"}
+                                          : this.state.current_user.status ===
+                                            "inactive"
+                                          ? "Submit for review"
+                                          : "Cancel review"}
                                       </DropdownItem>
 
                                       <DropdownItem onClick={this.handleEdit}>

@@ -18,6 +18,8 @@ import {
   Container,
   Media,
 } from "reactstrap";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 const cookies = new Cookies();
 class AdminNavbar extends React.Component {
   constructor(props) {
@@ -28,24 +30,45 @@ class AdminNavbar extends React.Component {
   }
   handleLogout(event) {
     event.preventDefault();
-    // const { history } = this.props;
-    console.log("logout", this.props);
-    // cookies.set("Auth-token", null);
-    cookies.remove("Auth-token", { path: "/" });
-    cookies.remove("Auth-token", { path: "/admin" });
-    console.log(cookies.get("Auth-token"));
-    // setTimeout(() => {
-    //   this.props.history.push("/login");
-    // }, 1000);
+    var modelOpen = true;
+    modelOpen &&
+      confirmAlert({
+        title: "Are you sure to logout",
+        // message: "Click confirm to Move balance",
+        buttons: [
+          {
+            label: "Confirm",
+            onClick: () => {
+              console.log("logout", this.props);
+              cookies.remove("Auth-token", { path: "/" });
+              cookies.remove("Auth-token", { path: "/dashboard" });
+              cookies.remove("Auth-token", { path: "/campaign/:uuid/edit" });
+              cookies.remove("Auth-token", {
+                path: "/campaign/:uuid/analytics",
+              });
 
-    setTimeout(() => {
-      window.location = "/login";
-    }, 1000);
+              console.log(cookies.get("Auth-token"));
+              setTimeout(() => {
+                window.location = "/login";
+              }, 1000);
+            },
+          },
+          {
+            label: "Cancel",
+            onClick: () => (modelOpen = false),
+          },
+        ],
+      });
   }
   render() {
     return (
       <>
-        <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
+        <Navbar
+          className="navbar-top navbar-dark bg-gradient-info"
+          style={{ position: "fixed" }}
+          expand="md"
+          id="navbar-main"
+        >
           <Container fluid>
             <div className="h3 mb-0 text-white text-center text-uppercase d-none d-lg-inline-block">
               {this.props.title !== "My Campaigns" && (

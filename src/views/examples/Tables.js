@@ -86,6 +86,7 @@ class Tables extends React.Component {
           pathname: "/campaign/" + this.state.users.uuid + "/analytics",
           state: {
             users: this.state.users,
+            is_admin: this.props.location.state.is_admin,
             // handleStatus: this.handleStatus,
             // edit: this.handleEdit,
           },
@@ -127,15 +128,21 @@ class Tables extends React.Component {
       }
     );
   };
-  handleStatus = (status, uuid) => {
+  handleStatus = (status, uuid, activating) => {
     const token = cookies.get("Auth-token");
     var modelOpen = true;
-    console.log(status, uuid);
+    console.log(status, uuid, activating);
     modelOpen &&
       confirmAlert({
         title:
           "Click confirm to " +
-          (status === "active" ? "deactivate" : "activate"),
+          (activating
+            ? "activate"
+            : status === "active"
+            ? "deacivate"
+            : status === "inactive"
+            ? "submit for review"
+            : "decativate"),
         // message: "Click recharge to Confirm campaign and recharge",
         buttons: [
           {
@@ -146,13 +153,20 @@ class Tables extends React.Component {
 
                 {
                   uuid: uuid,
-                  status: status === "active" ? "inactive" : "active",
+                  status: activating
+                    ? "active"
+                    : status === "active"
+                    ? "inactive"
+                    : status === "inactive"
+                    ? "processing"
+                    : "inactive",
                 },
                 {
                   headers: { Authorization: "Bearer " + token },
                 }
               ).then((result) => {
                 window.location.reload(true);
+                console.log(result);
               });
             },
           },
@@ -182,15 +196,19 @@ class Tables extends React.Component {
     e.preventDefault();
     const token = cookies.get("Auth-token");
     console.log("creating");
-    Axios.post(
-      `${api.protocol}${api.baseUrl}${api.campaign}`,
-      { name: this.state.name },
-      {
-        headers: { Authorization: "Bearer " + token },
-      }
-    ).then((result) => {
-      this.handleEdit(result.data.payload);
-    });
+    if (this.state.name.length > 4) {
+      Axios.post(
+        `${api.protocol}${api.baseUrl}${api.campaign}`,
+        { name: this.state.name },
+        {
+          headers: { Authorization: "Bearer " + token },
+        }
+      ).then((result) => {
+        this.handleEdit(result.data.payload);
+      });
+    } else {
+      cogoToast.error("Campaign name should contain 5 or more leters");
+    }
   };
   handleLoader = (status) => {
     this.setState({
@@ -213,6 +231,7 @@ class Tables extends React.Component {
     return "My Campaigns";
   };
   render() {
+    console.log(this.props.location);
     return (
       <>
         {!cookies.get("Auth-token") && (
@@ -351,7 +370,7 @@ class Tables extends React.Component {
                               <th scope="col">My Campaigns</th>
                               <th scope="col">Total Spending</th>
                               <th scope="col">Balance left</th>
-                              <th scope="col">Click Rate</th>
+                              <th scope="col">Payment per click</th>
                               <th scope="col">Top Influencers</th>
                               <th scope="col">Status</th>
                               <th scope="col" />
@@ -430,6 +449,8 @@ class Tables extends React.Component {
                                       className={
                                         user.status === "active"
                                           ? "bg-success"
+                                          : user.status === "processing"
+                                          ? "bg-info"
                                           : "bg-warning"
                                       }
                                     />
@@ -453,6 +474,21 @@ class Tables extends React.Component {
                                       className="dropdown-menu-arrow"
                                       right
                                     >
+                                      {this.props.history.location.state
+                                        .is_admin &&
+                                        user.status === "processing" && (
+                                          <DropdownItem
+                                            onClick={() =>
+                                              this.handleStatus(
+                                                user.status,
+                                                user.uuid,
+                                                true
+                                              )
+                                            }
+                                          >
+                                            Activate
+                                          </DropdownItem>
+                                        )}
                                       <DropdownItem
                                         onClick={() =>
                                           this.handleStatus(
@@ -463,8 +499,11 @@ class Tables extends React.Component {
                                       >
                                         {user.status === "active"
                                           ? "Deactivate"
-                                          : "Activate"}
+                                          : user.status === "inactive"
+                                          ? "Submit for review"
+                                          : "Cancel review"}
                                       </DropdownItem>
+
                                       <DropdownItem
                                         // href="/admin/index"
                                         onClick={() =>

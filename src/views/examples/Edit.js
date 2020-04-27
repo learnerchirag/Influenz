@@ -101,9 +101,10 @@ class Edit extends React.Component {
     multiOptions: [],
     selectedOption: null,
     transaction_list: [],
-    cityTable: false,
+    cityTable: "",
   };
   componentDidMount = () => {
+    locations = this.props.location.state.users.locations;
     this.props.location.state.editing &&
       // var users= this.props.location.state.users
       // console.log(this.props.location.state.editing);
@@ -124,7 +125,7 @@ class Edit extends React.Component {
         age_max: this.props.location.state.users.age_max,
         age_min: this.props.location.state.users.age_min,
         gender: this.props.location.state.users.gender,
-        locations: [],
+        locations: this.props.location.state.users.locations,
         current_balance: this.props.location.state.users.balance,
         uuid: this.props.location.state.users.uuid,
 
@@ -148,18 +149,24 @@ class Edit extends React.Component {
     }).then((result) => {
       const options = [];
       result.data.payload.map((users) => {
-        options.push({
-          value: users.uuid,
-          label: users.name,
-        });
+        users.uuid !== this.state.uuid &&
+          options.push({
+            value: users.uuid,
+            label: users.name,
+          });
       });
       this.setState({
         options,
       });
     });
-    Axios.get(`${api.protocol}${api.baseUrl}${api.transactionList}`, {
-      headers: { Authorization: "Bearer " + token },
-    }).then((result) => {
+    Axios.get(
+      `${api.protocol}${api.baseUrl}${api.campaignRechargeList}${"?uuid="}${
+        this.props.location.state.users.uuid
+      }`,
+      {
+        headers: { Authorization: "Bearer " + token },
+      }
+    ).then((result) => {
       this.setState({
         transaction_list: result.data.payload,
       });
@@ -328,10 +335,10 @@ class Edit extends React.Component {
       modelOpen &&
         confirmAlert({
           title: "Confirm to update campaign",
-          message: "Click recharge to Update campaign and recharge",
+          message: "Click confirm to Update campaign",
           buttons: [
             {
-              label: "Recharge",
+              label: "Confirm",
               onClick: () => {
                 this.props.location.state.editing
                   ? Axios.put(
@@ -342,7 +349,7 @@ class Edit extends React.Component {
                       }
                     ).then((result) => {
                       this.setState({
-                        activeTab: "3",
+                        // activeTab: "3",
                         current_balance: result.data.payload.balance,
                         uuid: result.data.payload.uuid,
                       });
@@ -366,32 +373,32 @@ class Edit extends React.Component {
                     });
               },
             },
-            {
-              label: "Later",
-              onClick: () => {
-                this.props.location.state.editing
-                  ? Axios.put(
-                      `${api.protocol}${api.baseUrl}${api.campaign}`,
-                      this.state,
-                      {
-                        headers: { Authorization: "Bearer " + token },
-                      }
-                    ).then((result) => {
-                      this.props.history.push("/dashboard");
-                      console.log(result);
-                    })
-                  : Axios.post(
-                      `${api.protocol}${api.baseUrl}${api.campaign}`,
-                      this.state,
-                      {
-                        headers: { Authorization: "Bearer " + token },
-                      }
-                    ).then((result) => {
-                      this.props.history.push("/dashboard");
-                      console.log(result);
-                    });
-              },
-            },
+            // {
+            //   label: "Later",
+            //   onClick: () => {
+            //     this.props.location.state.editing
+            //       ? Axios.put(
+            //           `${api.protocol}${api.baseUrl}${api.campaign}`,
+            //           this.state,
+            //           {
+            //             headers: { Authorization: "Bearer " + token },
+            //           }
+            //         ).then((result) => {
+            //           // this.props.history.push("/dashboard");
+            //           console.log(result);
+            //         })
+            //       : Axios.post(
+            //           `${api.protocol}${api.baseUrl}${api.campaign}`,
+            //           this.state,
+            //           {
+            //             headers: { Authorization: "Bearer " + token },
+            //           }
+            //         ).then((result) => {
+            //           // this.props.history.push("/dashboard");
+            //           console.log(result);
+            //         });
+            //   },
+            // },
             {
               label: "Cancel",
               onClick: () => (modelOpen = false),
@@ -457,24 +464,45 @@ class Edit extends React.Component {
     // instance.open();
   };
   handleMoveCharge = () => {
-    Axios.post(
-      `${api.protocol}${api.baseUrl}${api.campaignMoveCharge}`,
-      {
-        old_uuid: this.state.uuid,
-        neew_uuid: this.state.selectedOption.value,
-      },
-      {
-        headers: { Authorization: "Bearer " + token },
-      }
-    );
+    var modelOpen = true;
+    this.state.selectedOption
+      ? modelOpen &&
+        confirmAlert({
+          title: "Confirm to Move balance",
+          message: "Click confirm to Move balance",
+          buttons: [
+            {
+              label: "Confirm",
+              onClick: () =>
+                Axios.post(
+                  `${api.protocol}${api.baseUrl}${api.campaignMoveCharge}`,
+                  {
+                    old_uuid: this.state.uuid,
+                    new_uuid: this.state.selectedOption.value,
+                  },
+                  {
+                    headers: { Authorization: "Bearer " + token },
+                  }
+                ),
+            },
+            {
+              label: "Cancel",
+              onClick: () => (modelOpen = false),
+            },
+          ],
+        })
+      : cogoToast.error("Select a campaign to move balance");
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
     console.log("function");
+
+    return <Redirect to="/login"></Redirect>;
   };
   getBrandText = (path) => {
     return "Campaign Name";
   };
+
   render() {
     const ageCount = [];
     for (let index = 13; index < 61; index++) {
@@ -486,7 +514,6 @@ class Edit extends React.Component {
       <>
         {!cookies.get("Auth-token") && (
           <React.Fragment>
-            <Redirect to="/login"></Redirect>
             {this.handleCookieRedirect()}
             {/* {cogoToast.error("You need to Signin first")} */}
           </React.Fragment>
@@ -1054,7 +1081,7 @@ class Edit extends React.Component {
                                         <h3>Age preference</h3>
                                         <div>
                                           <small>
-                                            * we will showcase this campaign to
+                                            * we will show this campaign to
                                             Influencers within this age range
                                           </small>
                                         </div>
@@ -1119,11 +1146,6 @@ class Edit extends React.Component {
                                       </CardBody>
                                     </Card>
                                   </Col>
-                                </Row>
-
-                                <hr className="my-4" />
-                                {/* Address */}
-                                <Row>
                                   <Col>
                                     <Card>
                                       <CardHeader>
@@ -1213,10 +1235,17 @@ class Edit extends React.Component {
                                                           longitude: result.lng,
                                                         });
                                                         console.log(locations);
-                                                        this.setState({
-                                                          locations,
-                                                          cityTable: true,
-                                                        });
+                                                        this.setState(
+                                                          {
+                                                            locations,
+                                                            cityTable: "",
+                                                          },
+                                                          () => {
+                                                            document.getElementById(
+                                                              "react-google-places-autocomplete-input"
+                                                            ).value = "";
+                                                          }
+                                                        );
                                                       }
                                                     );
                                                   });
@@ -1224,83 +1253,71 @@ class Edit extends React.Component {
                                               />
                                             </FormGroup>
                                           </Col>
-                                          {this.state.cityTable && (
-                                            <Col>
-                                              {/* <Card> */}
-                                              <h3>Selected locations</h3>
-                                              {/* </Card> */}
-                                              <Table
-                                                className="align-items-center table-flush"
-                                                responsive
+
+                                          <Col>
+                                            {/* <Card> */}
+                                            <h3>Selected locations</h3>
+                                            {/* </Card> */}
+                                            <Table
+                                              className="align-items-center table-flush"
+                                              responsive
+                                            >
+                                              <thead
+                                                className="thead-light"
+                                                style={{
+                                                  position: "relative",
+                                                  overflow: "scroll",
+                                                }}
                                               >
-                                                <thead
-                                                  className="thead-light"
-                                                  style={{
-                                                    position: "relative",
-                                                    overflow: "scroll",
-                                                  }}
-                                                >
-                                                  <tr>
-                                                    <th scope="col">
-                                                      Cities Selected
-                                                    </th>
+                                                <tr>
+                                                  <th scope="col">
+                                                    Cities Selected
+                                                  </th>
 
-                                                    <th scope="col">
-                                                      Latitude
-                                                    </th>
-                                                    <th scope="col">
-                                                      Longitude
-                                                    </th>
-                                                    {/* <th scope="col">Bounce rate</th> */}
-                                                  </tr>
-                                                </thead>
-                                                <tbody>
-                                                  {this.state.locations.map(
-                                                    (location, index) => (
-                                                      <tr>
-                                                        <th>{location.city}</th>
+                                                  <th scope="col">Latitude</th>
+                                                  <th scope="col">Longitude</th>
+                                                  {/* <th scope="col">Bounce rate</th> */}
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {this.state.locations.map(
+                                                  (location, index) => (
+                                                    <tr>
+                                                      <th>{location.city}</th>
 
-                                                        <td scope="row">
-                                                          {location.latitude}
-                                                        </td>
-                                                        <td>
-                                                          {location.longitude}
-                                                        </td>
-                                                        <td>
-                                                          <img
-                                                            src={require("../../assets/img/icons/x-mark.png")}
-                                                            height="25px"
-                                                            style={{
-                                                              fontWeight:
-                                                                "bold",
-                                                            }}
-                                                            onClick={() => {
-                                                              this.state.locations.splice(
-                                                                index,
-                                                                1
-                                                              );
-                                                              this.setState({
-                                                                locations,
-                                                              });
-                                                              this.state
-                                                                .locations
-                                                                .length === 0 &&
-                                                                this.setState({
-                                                                  cityTable: false,
-                                                                });
-                                                            }}
-                                                            style={{
-                                                              cursor: "pointer",
-                                                            }}
-                                                          ></img>
-                                                        </td>
-                                                      </tr>
-                                                    )
-                                                  )}
-                                                </tbody>
-                                              </Table>
-                                            </Col>
-                                          )}{" "}
+                                                      <td scope="row">
+                                                        {location.latitude}
+                                                      </td>
+                                                      <td>
+                                                        {location.longitude}
+                                                      </td>
+                                                      <td>
+                                                        <img
+                                                          src={require("../../assets/img/icons/x-mark.png")}
+                                                          height="25px"
+                                                          style={{
+                                                            fontWeight: "bold",
+                                                          }}
+                                                          onClick={() => {
+                                                            this.state.locations.splice(
+                                                              index,
+                                                              1
+                                                            );
+                                                            this.setState({
+                                                              locations,
+                                                            });
+                                                          }}
+                                                          style={{
+                                                            cursor: "pointer",
+                                                          }}
+                                                        ></img>
+                                                      </td>
+                                                    </tr>
+                                                  )
+                                                )}
+                                              </tbody>
+                                            </Table>
+                                          </Col>
                                         </Row>
                                       </CardBody>
                                     </Card>
@@ -1311,7 +1328,7 @@ class Edit extends React.Component {
                                   <Row>
                                     <Col>
                                       <Button
-                                        className="my-4"
+                                        className="my-2"
                                         color="primary"
                                         type="button"
                                         onClick={this.handleCreate}
@@ -1320,6 +1337,11 @@ class Edit extends React.Component {
                                           ? "Update Campaign Preferences"
                                           : "Create Campaign"}
                                       </Button>
+                                      <div className="mr-2">
+                                        <small>
+                                          * save and proceed to recharge
+                                        </small>
+                                      </div>
                                     </Col>
                                   </Row>
                                 </div>
@@ -1430,20 +1452,35 @@ class Edit extends React.Component {
                                               <h3>Current balance</h3>
                                             </CardHeader>
                                             <CardBody className="shadow m-4">
-                                              <div>
-                                                <h5 class="text-uppercase text-muted mb-0 card-title">
-                                                  Balance
-                                                </h5>
-                                                <span class="h2 font-weight-bold mb-0">
-                                                  {"₹ " +
-                                                    this.state.current_balance}
-                                                </span>
-                                              </div>
-                                              <div class="col-auto col">
-                                                <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
-                                                  <i class="fas fa-chart-bar"></i>
-                                                </div>
-                                              </div>
+                                              <Row>
+                                                <Col>
+                                                  <h5 class="text-uppercase text-muted mb-0 card-title">
+                                                    Balance
+                                                  </h5>
+                                                  <span class="h2 font-weight-bold mb-0">
+                                                    {"₹ " +
+                                                      this.state
+                                                        .current_balance}
+                                                  </span>
+                                                </Col>
+                                                <Col
+                                                  className="text-right"
+                                                  xs="auto"
+                                                >
+                                                  <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                  </div>
+                                                </Col>
+                                              </Row>
+                                              <Row>
+                                                <small className="mt-3 col-auto">
+                                                  Total Budget={" "}
+                                                  {
+                                                    this.props.location.state
+                                                      .users.total_balance
+                                                  }{" "}
+                                                </small>
+                                              </Row>
                                             </CardBody>
                                           </Card>
                                         </Col>

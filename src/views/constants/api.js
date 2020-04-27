@@ -7,6 +7,7 @@ module.exports = {
   transactionList: "transaction/list",
   campaign: "campaign/",
   campaignList: "campaign/list",
+  campaignTransaction: "campaign/transaction/list",
   campaignAnalytics: "campaign/analytics",
   campaignRecharge: "campaign/recharge",
   campaignRechargeList: "campaign/recharge/list",
