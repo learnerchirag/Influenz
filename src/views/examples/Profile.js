@@ -36,14 +36,113 @@ import { Redirect } from "react-router-dom";
 import { Spinner } from "reactstrap";
 import Cookies from "universal-cookie";
 import cogoToast from "cogo-toast";
-
+import api from "../constants/api";
 import AdminNavbar from "../../components/Navbars/AdminNavbar.js";
 import AdminFooter from "../../components/Footers/AdminFooter.js";
+import Axios from "axios";
+import { confirmAlert } from "react-confirm-alert";
 const cookies = new Cookies();
 
 class Profile extends React.Component {
   state = {
     isLoading: false,
+    name: "",
+    email: "",
+    designation: "",
+    company_name: "",
+    company_logo: "",
+    country_code: "",
+    phone_number: "",
+    pancard: "",
+    address: "",
+    city: "",
+    country: "",
+    pincode: "",
+    uuid: "",
+    original_password: "",
+    new_password: "",
+    new_password_confirm: "",
+    hidden: true,
+  };
+  componentDidMount = () => {
+    const token = cookies.get("Auth-token");
+    Axios.get(`${api.protocol}${api.baseUrl}${api.profile}`, {
+      headers: { Authorization: "Bearer " + token },
+    }).then((result) => {
+      console.log(result);
+      this.setState({
+        uuid: result.data.payload.uuid,
+        name: result.data.payload.name,
+        company_name: result.data.payload.company_name,
+        designation: result.data.payload.designation,
+        country_code: result.data.payload.country_code,
+        phone_number: result.data.payload.phone_number,
+        pancard: result.data.payload.pancard,
+        address: result.data.payload.address,
+        city: result.data.payload.city,
+        country: result.data.payload.country,
+        pincode: result.data.payload.pincode,
+      });
+    });
+  };
+  handleInputChange = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+  handleProfile = () => {
+    const token = cookies.get("Auth-token");
+    Axios.put(`${api.protocol}${api.baseUrl}${api.profile}`, this.state, {
+      headers: { Authorization: "Bearer " + token },
+    }).then((result) => {
+      window.location.reload(true);
+    });
+  };
+  handlePassword = () => {
+    const token = cookies.get("Auth-token");
+    if (
+      this.state.original_password === "" ||
+      this.state.new_password === "" ||
+      this.state.new_password_confirm === ""
+    ) {
+      cogoToast.error("All the fields are required");
+    } else if (this.state.new_password_confirm !== this.state.new_password) {
+      cogoToast.error("New password did not match");
+    } else {
+      var modelOpen = true;
+      modelOpen &&
+        confirmAlert({
+          title: "Cofirm to change password",
+          message: "Click confirm to change password",
+          buttons: [
+            {
+              label: "Confirm",
+              onClick: () => {
+                Axios.put(
+                  `${api.protocol}${api.baseUrl}${api.password}`,
+                  {
+                    original_password: this.state.original_password,
+                    new_password: this.state.new_password,
+                    new_password_confirm: this.state.new_password_confirm,
+                  },
+                  {
+                    headers: { Authorization: "Bearer " + token },
+                  }
+                ).then((result) => {
+                  result.data.status &&
+                    cogoToast.success("Password changed successfully");
+                  !result.data.status &&
+                    cogoToast.error("Password entered is incorrect");
+
+                  modelOpen = false;
+                });
+              },
+            },
+            {
+              label: "Cancel",
+              onClick: () => (modelOpen = false),
+            },
+          ],
+        });
+    }
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
@@ -85,117 +184,154 @@ class Profile extends React.Component {
               <AdminNavbar
                 {...this.props}
                 brandText={this.getBrandText(this.props.location.pathname)}
-                title="User Profile"
+                title="My Profile"
               />
               <UserHeader />
               {/* Page content */}
               <Container className="mt--7" fluid>
                 <Row>
-                  {/* <Col className="order-xl-2 mb-5 mb-xl-0" xl="4">
+                  <Col className="order-2  mb-xl-0" xl="4">
                     <Card className="card-profile shadow">
-                      <Row className="justify-content-center">
-                        <Col className="order-lg-2" lg="3">
-                          <div className="card-profile-image">
-                            <a
-                              href="#pablo"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                className="rounded-circle"
-                                src={require("assets/img/theme/team-4-800x800.jpg")}
-                              />
-                            </a>
-                          </div>
-                        </Col>
-                      </Row>
                       <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                         <div className="d-flex justify-content-between">
-                          <Button
-                            className="mr-4"
-                            color="info"
-                            href="#pablo"
-                            onClick={(e) => e.preventDefault()}
-                            size="sm"
-                          >
-                            Connect
-                          </Button>
+                          <h2>Change password</h2>
                           <Button
                             className="float-right"
-                            color="default"
-                            href="#pablo"
-                            onClick={(e) => e.preventDefault()}
+                            color="primary"
+                            onClick={this.handlePassword}
                             size="sm"
                           >
-                            Message
+                            Change
                           </Button>
                         </div>
                       </CardHeader>
                       <CardBody className="pt-0 pt-md-4">
-                        <Row>
-                          <div className="col">
-                            <div className="card-profile-stats d-flex justify-content-center mt-md-5">
-                              <div>
-                                <span className="heading">22</span>
-                                <span className="description">Friends</span>
-                              </div>
-                              <div>
-                                <span className="heading">10</span>
-                                <span className="description">Photos</span>
-                              </div>
-                              <div>
-                                <span className="heading">89</span>
-                                <span className="description">Comments</span>
-                              </div>
-                            </div>
+                        <Form>
+                          <h6 className="heading-small text-muted mb-4">
+                            Change password
+                          </h6>
+                          <div className="pl-lg-4">
+                            <Row>
+                              <Col>
+                                <FormGroup>
+                                  <label
+                                    className="form-control-label"
+                                    htmlFor="input-password"
+                                  >
+                                    Old-password
+                                  </label>
+                                  <Input
+                                    className="form-control-alternative"
+                                    id="input-password"
+                                    placeholder="old password"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.original_password}
+                                    name="original_password"
+                                    type={
+                                      this.state.hidden ? "password" : "text"
+                                    }
+                                  />
+                                </FormGroup>
+                              </Col>
+                            </Row>
+
+                            <Row>
+                              <Col>
+                                <FormGroup>
+                                  <label
+                                    className="form-control-label"
+                                    htmlFor="input-new-password"
+                                  >
+                                    New-password
+                                  </label>
+                                  <Input
+                                    className="form-control-alternative"
+                                    id="input-new-password"
+                                    placeholder="new password"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.new_password}
+                                    name="new_password"
+                                    type={
+                                      this.state.hidden ? "password" : "text"
+                                    }
+                                  />
+                                </FormGroup>
+                              </Col>
+                            </Row>
+                            <Row>
+                              <Col>
+                                <FormGroup>
+                                  <label
+                                    className="form-control-label"
+                                    htmlFor="input-confirm-password"
+                                  >
+                                    Confirm-password
+                                  </label>
+                                  <Input
+                                    invalid={
+                                      this.state.new_password_confirm !==
+                                      this.state.new_password
+                                        ? true
+                                        : false
+                                    }
+                                    className="form-control-alternative"
+                                    id="input-confirm-password"
+                                    placeholder="rewrite new password"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.new_password_confirm}
+                                    name="new_password_confirm"
+                                    type={
+                                      this.state.hidden ? "password" : "text"
+                                    }
+                                  />
+                                </FormGroup>
+                              </Col>
+                            </Row>
+                            <Row>
+                              <Col>
+                                <FormGroup>
+                                  <label
+                                    className="form-control-label"
+                                    style={{ marginLeft: "1.5rem" }}
+                                  >
+                                    <Input
+                                      // className="form-control-alternative"
+                                      type="checkbox"
+                                      size="md"
+                                      onClick={() => {
+                                        this.setState({
+                                          hidden: this.state.hidden
+                                            ? false
+                                            : true,
+                                        });
+                                      }}
+                                    ></Input>
+                                    Show password
+                                  </label>
+                                </FormGroup>
+                              </Col>
+                            </Row>
                           </div>
-                        </Row>
-                        <div className="text-center">
-                          <h3>
-                            Jessica Jones
-                            <span className="font-weight-light">, 27</span>
-                          </h3>
-                          <div className="h5 font-weight-300">
-                            <i className="ni location_pin mr-2" />
-                            Bucharest, Romania
-                          </div>
-                          <div className="h5 mt-4">
-                            <i className="ni business_briefcase-24 mr-2" />
-                            Solution Manager - Creative Tim Officer
-                          </div>
-                          <div>
-                            <i className="ni education_hat mr-2" />
-                            University of Computer Science
-                          </div>
-                          <hr className="my-4" />
-                          <p>
-                            Ryan — the name taken by Melbourne-raised,
-                            Brooklyn-based Nick Murphy — writes, performs and
-                            records all of his own music.
-                          </p>
-                          <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                            Show more
-                          </a>
-                        </div>
+                        </Form>
                       </CardBody>
                     </Card>
                   </Col>
-                  */}
-                  <Col className="order-xl-1 mx-auto" xs="8">
-                    <Card className="bg-secondary shadow">
+
+                  <Col className="order-1 mb-5 mb-xl-0" xl="8">
+                    <Card className=" shadow">
                       <CardHeader className="bg-white border-0">
                         <Row className="align-items-center">
                           <Col xs="8">
-                            <h3 className="mb-0">My account</h3>
+                            <h2 className="mb-0">My account</h2>
                           </Col>
                           <Col className="text-right" xs="4">
                             <Button
                               color="primary"
-                              href="#pablo"
-                              onClick={(e) => e.preventDefault()}
-                              size="sm"
+                              // href="#pablo"
+                              onClick={this.handleProfile}
+                              size="md"
                             >
-                              Settings
+                              Save
                             </Button>
                           </Col>
                         </Row>
@@ -219,6 +355,9 @@ class Profile extends React.Component {
                                     className="form-control-alternative"
                                     id="input-first-name"
                                     placeholder="First name"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.name}
+                                    name="name"
                                     type="text"
                                   />
                                 </FormGroup>
@@ -254,7 +393,29 @@ class Profile extends React.Component {
                                     className="form-control-alternative"
                                     id="input-phone-number"
                                     placeholder="phone"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.phone_number}
+                                    name="phone_number"
                                     type="number"
+                                  />
+                                </FormGroup>
+                              </Col>
+                              <Col>
+                                <FormGroup>
+                                  <label
+                                    className="form-control-label"
+                                    htmlFor="input-designation"
+                                  >
+                                    Designation
+                                  </label>
+                                  <Input
+                                    className="form-control-alternative"
+                                    id="input-designation"
+                                    placeholder="Designation"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.designation}
+                                    name="designation"
+                                    type="text"
                                   />
                                 </FormGroup>
                               </Col>
@@ -279,6 +440,9 @@ class Profile extends React.Component {
                                     className="form-control-alternative"
                                     id="input-address"
                                     placeholder="Home Address"
+                                    name="address"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.address}
                                     type="text"
                                   />
                                 </FormGroup>
@@ -297,6 +461,9 @@ class Profile extends React.Component {
                                     className="form-control-alternative"
                                     id="input-city"
                                     placeholder="City"
+                                    name="city"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.city}
                                     type="text"
                                   />
                                 </FormGroup>
@@ -313,6 +480,9 @@ class Profile extends React.Component {
                                     className="form-control-alternative"
                                     id="input-country"
                                     placeholder="Country"
+                                    name="country"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.country}
                                     type="text"
                                   />
                                 </FormGroup>
@@ -329,6 +499,9 @@ class Profile extends React.Component {
                                     className="form-control-alternative"
                                     id="input-postal-code"
                                     placeholder="Postal code"
+                                    name="pincode"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.pincode}
                                     type="number"
                                   />
                                 </FormGroup>
@@ -347,9 +520,11 @@ class Profile extends React.Component {
                                   <label>Company name</label>
                                   <Input
                                     className="form-control-alternative"
-                                    placeholder="A few words about you ..."
+                                    placeholder="Company name"
                                     // rows="4"
-
+                                    name="company_name"
+                                    onChange={this.handleInputChange}
+                                    value={this.state.company_name}
                                     type="text"
                                   />
                                 </FormGroup>
@@ -361,7 +536,8 @@ class Profile extends React.Component {
                                     className="form-control-alternative"
                                     placeholder="Pan Card"
                                     // rows="4"
-
+                                    name="pincode"
+                                    vlaue={this.state.pincode}
                                     type="text"
                                   />
                                 </FormGroup>

@@ -5,6 +5,8 @@ module.exports = {
   userSignup: "signup",
   forgotPassword: "forgot",
   transactionList: "transaction/list",
+  profile: "me/",
+  password: "me/password",
   campaign: "campaign/",
   campaignList: "campaign/list",
   campaignTransaction: "campaign/transaction/list",
