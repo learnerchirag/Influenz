@@ -80,6 +80,7 @@ class Index extends React.Component {
     transactionList: [],
     isLoading: false,
     editing: false,
+    is_admin: null,
   };
 
   componentDidMount = () => {
@@ -87,7 +88,9 @@ class Index extends React.Component {
       parseOptions(Chart, chartOptions());
     }
     const token = cookies.get("Auth-token");
-
+    this.setState({
+      is_admin: this.props.location.state.is_admin,
+    });
     // const { myProp } = this.props;
     this.handleLoader(true);
     console.log("mounted");
@@ -547,7 +550,7 @@ class Index extends React.Component {
                                     </a>
                                     <Media>
                                       <span className="mb-0 text-sm">
-                                        {this.state.current_user.company_name}
+                                        {this.state.current_user.name}
                                       </span>
                                     </Media>
                                   </Media>
@@ -642,8 +645,7 @@ class Index extends React.Component {
                                       className="dropdown-menu-arrow"
                                       right
                                     >
-                                      {this.props.history.location.state
-                                        .is_admin &&
+                                      {this.state.is_admin &&
                                         this.state.current_user.status ===
                                           "processing" && (
                                           <DropdownItem

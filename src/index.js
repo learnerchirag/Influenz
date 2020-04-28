@@ -18,6 +18,7 @@ import Index from "views/Index";
 import Tables from "views/examples/Tables";
 import Edit from "views/examples/Edit";
 import cogoToast from "cogo-toast";
+import Profile from "views/examples/Profile";
 const cookies = new Cookies();
 // optional cofiguration
 const options = {
@@ -46,28 +47,22 @@ ReactDOM.render(
           <Route path="/login" render={(props) => <Auth {...props} />} />
           <Route path="/register" render={(props) => <Auth {...props} />} />
           <Route path="/forgot" render={(props) => <Auth {...props} />} />
-          {cookies.get("Auth-token") ? (
-            <React.Fragment>
-              <Route
-                path="/dashboard"
-                render={(props) => <Tables {...props} />}
-              />
-              <Route
-                path="/campaign/:uuid/edit"
-                render={(props) => <Edit {...props} />}
-              />
-              <Route
-                path="/campaign/:uuid/analytics"
-                render={(props) => <Index {...props} />}
-              />
-              <Route
-                path="/admin/user-profile"
-                render={(props) => <Admin {...props} />}
-              />
-            </React.Fragment>
-          ) : (
-            handleCookiesRedirect()
-          )}
+          {/* {cookies.get("Auth-token") ? ( */}
+          {/* <React.Fragment> */}
+          <Route path="/dashboard" render={(props) => <Tables {...props} />} />
+          <Route
+            path="/campaign/:uuid/edit"
+            render={(props) => <Edit {...props} />}
+          />
+          <Route
+            path="/campaign/:uuid/analytics"
+            render={(props) => <Index {...props} />}
+          />
+          <Route path="/profile" render={(props) => <Profile {...props} />} />
+          {/* </React.Fragment> */}
+          {/* // ) : (
+          //   handleCookiesRedirect()
+          // )} */}
         </AlertProvider>
       </Switch>
     </BrowserRouter>

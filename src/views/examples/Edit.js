@@ -91,6 +91,7 @@ class Edit extends React.Component {
     gender: null,
     locations: [],
     current_balance: 0,
+    total_balance: 0,
     uuid: null,
     transaction_value: 0,
     transaction_id: null,
@@ -146,6 +147,7 @@ class Edit extends React.Component {
           gender: result.data.payload.gender,
           locations: result.data.payload.locations,
           current_balance: result.data.payload.balance,
+          total_balance: result.data.payload.total_balance,
           uuid: result.data.payload.uuid,
 
           tab_preference: true,
@@ -363,37 +365,20 @@ class Edit extends React.Component {
             {
               label: "Confirm",
               onClick: () => {
-                this.props.location.state.editing
-                  ? Axios.put(
-                      `${api.protocol}${api.baseUrl}${api.campaign}`,
-                      this.state,
-                      {
-                        headers: { Authorization: "Bearer " + token },
-                      }
-                    ).then((result) => {
-                      this.setState({
-                        // activeTab: "3",
-                        current_balance: result.data.payload.balance,
-                        // uuid: result.data.payload.uuid,
-                      });
-                      console.log(result);
-                    })
-                  : Axios.post(
-                      `${api.protocol}${api.baseUrl}${api.campaign}`,
-                      this.state,
-                      {
-                        headers: { Authorization: "Bearer " + token },
-                      }
-                    ).then((result) => {
-                      this.setState({
-                        activeTab: "3",
-                        current_balance: result.data.payload.balance,
-                        uuid: result.data.payload.uuid,
-                        tab_recharge: true,
-                        tab_transaction: true,
-                      });
-                      console.log(result);
-                    });
+                Axios.put(
+                  `${api.protocol}${api.baseUrl}${api.campaign}`,
+                  this.state,
+                  {
+                    headers: { Authorization: "Bearer " + token },
+                  }
+                ).then((result) => {
+                  this.setState({
+                    // activeTab: "3",
+                    current_balance: result.data.payload.balance,
+                    // uuid: result.data.payload.uuid,
+                  });
+                  console.log(result);
+                });
               },
             },
 
@@ -1335,9 +1320,7 @@ class Edit extends React.Component {
                                         type="button"
                                         onClick={this.handleCreate}
                                       >
-                                        {this.props.location.state.editing
-                                          ? "Update Campaign Preferences"
-                                          : "Create Campaign"}
+                                        Update Campaign Preferences
                                       </Button>
                                       <div className="mr-2">
                                         <small>
@@ -1477,10 +1460,7 @@ class Edit extends React.Component {
                                               <Row>
                                                 <small className="mt-3 col-auto">
                                                   Total Budget={" "}
-                                                  {
-                                                    this.props.location.state
-                                                      .users.total_balance
-                                                  }{" "}
+                                                  {this.state.total_balance}{" "}
                                                 </small>
                                               </Row>
                                             </CardBody>

@@ -25,12 +25,18 @@ class Auth extends React.Component {
   }
   handleComponent(props) {
     if (props.location.pathname === "/login") {
+      console.log("i'mm in login");
       return <Login myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/register") {
+      console.log("i'mm in register");
       return <Register myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/forgot") {
+      console.log("i'mm in forgot");
       return <Forgot myProp={this.handleLoader} {...props} />;
-    } else return <Redirect from="/" to="/login" />;
+    } else {
+      console.log("i'mm in /");
+      return <Redirect from="/" to="/login" />;
+    }
   }
 
   handleLoader = (status) => {
@@ -108,7 +114,7 @@ class Auth extends React.Component {
               <AuthFooter />
             </div>
           ))}
-        {cookies.get("Auth-token") && <Redirect to="/dashboard" />}
+        {cookies.get("Auth-token") && this.props.history.goForward()}
       </>
     );
   }

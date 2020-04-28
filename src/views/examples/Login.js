@@ -35,21 +35,6 @@ class Login extends React.Component {
     errors: {},
   };
 
-  // constructor(props) {
-  //   // debugger;
-  //   super(props);
-  //   this.state = {
-  //     isRemember: true,
-  //     email: "",
-  //     password: "",
-  //     user: {},
-  //     errors: {}
-  //   };
-
-  //   this.handleInputChange = this.handleInputChange.bind(this);
-  //   this.handleSubmit = this.handleSubmit.bind(this);
-  // }
-
   handleInputChange = (event) => {
     // debugger;
     const target = event.target;
@@ -85,8 +70,7 @@ class Login extends React.Component {
     }
     if (this.state.errors) {
       event.preventDefault();
-      // console.log(this.props, "these are props");
-      // const handleLoader = this.props.location.handleLoader.handleLoader();
+
       const { myProp } = this.props;
       const cookies = new Cookies();
       // console.log(myProp);
@@ -95,32 +79,30 @@ class Login extends React.Component {
       Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
         .then((result) => {
           myProp(false);
-          // this.props.location.handleLoader(false);
+
           console.log(result);
           console.log("hello");
           if (result.status === 200) {
             console.log("chalja bhai");
             const user = result.data.payload;
             console.log(user);
-            // this.setState(
-            //   {
-            //     user: user
-            //   },
-            //   function() {
-            //     console.log("user");
-            //   }
-            // );
+
             cookies.set("Auth-token", result.data.payload.access_token, {
               path: "/",
             });
             cookies.set("User", result.data.payload.name, {
               path: "/",
             });
-            console.log(cookies.get("Auth-token"));
+            cookies.set("Is-admin", result.data.payload.is_admin, {
+              path: "/",
+            });
+            console.log("running");
             this.props.history.push({
               pathname: "/dashboard",
               state: { is_admin: result.data.payload.is_admin },
             });
+            console.log(cookies.get("Auth-token"), this.props.history);
+
             // return <Redirect to="/admin" />;
           }
         })
@@ -178,9 +160,7 @@ class Login extends React.Component {
                   Sign in with your credentials
                 </small>
               </div>
-              {/* <div className="text-center text-muted mb-4">
-                <small>Or sign in with credentials</small>
-              </div> */}
+
               <Form role="form" onSubmit={this.handleSubmit}>
                 <FormGroup className="mb-3">
                   <InputGroup className="input-group-alternative">

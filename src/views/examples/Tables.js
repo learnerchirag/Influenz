@@ -56,10 +56,12 @@ class Tables extends React.Component {
     isLoading: false,
     name: "",
     open: false,
+    is_admin: null,
   };
   componentDidMount = () => {
-    // const { myProp } = this.props;
-    // myProp(true);
+    this.setState({
+      is_admin: cookies.get("Is-admin"),
+    });
     const token = cookies.get("Auth-token");
     this.handleLoader(true);
     Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
@@ -86,7 +88,7 @@ class Tables extends React.Component {
           pathname: "/campaign/" + this.state.users.uuid + "/analytics",
           state: {
             users: this.state.users,
-            is_admin: this.props.history.location.state.is_admin,
+            is_admin: this.state.is_admin,
             // handleStatus: this.handleStatus,
             // edit: this.handleEdit,
           },
@@ -393,7 +395,7 @@ class Tables extends React.Component {
                                     </a>
                                     <Media>
                                       <span className="mb-0 text-sm">
-                                        {user.company_name}
+                                        {user.name}
                                       </span>
                                     </Media>
                                   </Media>
@@ -477,8 +479,7 @@ class Tables extends React.Component {
                                       className="dropdown-menu-arrow"
                                       right
                                     >
-                                      {this.props.history.location.state
-                                        .is_admin &&
+                                      {this.state.is_admin &&
                                         user.status === "processing" && (
                                           <DropdownItem
                                             onClick={() =>
