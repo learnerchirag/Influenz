@@ -598,6 +598,11 @@ pre code {
   margin-right: auto;
   margin-left: auto;
 }
+.button-2:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background-color: var(--secondary);
+}
 @media (min-width: 576px) {
   .container {
     max-width: 540px;
@@ -13316,6 +13321,9 @@ a.text-lighter:focus {
 .btn:hover {
   box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
+  color: var(--primary);
+  border-color: var(--primary);
+  background-color: var(--secondary);
 }
 .btn:not(:last-child) {
   margin-right: 0.5rem;
@@ -18862,7 +18870,9 @@ pre > code.highlight {
 }
 
 .rdtPicker button:hover {
-  background-color: #eee;
+  background-color: var(--secondary);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .rdtPicker thead button {

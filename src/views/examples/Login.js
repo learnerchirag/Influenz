@@ -1,11 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { userActions } from "../../_actions/user.actions";
 // import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Axios from "axios";
 import api from "../constants/api";
 import cogoToast from "cogo-toast";
+import Cookies from "universal-cookie";
 // reactstrap components
 import {
   Button,
@@ -21,41 +22,33 @@ import {
   InputGroup,
   Row,
   NavLink,
-  Col
+  Col,
 } from "reactstrap";
 // const alert = useAlert();
 class Login extends React.Component {
-  debugger;
+  // debugger;
+  state = {
+    isRemember: true,
+    email: "",
+    password: "",
+    user: null,
+    errors: {},
+  };
 
-  constructor(props) {
-    // debugger;
-    super(props);
-    this.state = {
-      isRemember: true,
-      email: "",
-      password: "",
-      user: {},
-      errors: {}
-    };
-
-    this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleInputChange(event) {
+  handleInputChange = (event) => {
     // debugger;
     const target = event.target;
     const value = target.name === "isRemember" ? target.checked : target.value;
     const name = target.name;
 
     this.setState({
-      [name]: value
+      [name]: value,
     });
-  }
-  handleSubmit(event) {
+  };
+  handleSubmit = (event) => {
     // debugger;
     this.setState({
-      errors: {}
+      errors: {},
     });
     let errors = {};
 
@@ -63,41 +56,58 @@ class Login extends React.Component {
     const { history } = this.props;
     const serverport = {
       email: this.state.email,
-      password: this.state.password
+      password: this.state.password,
     };
     if (this.state.email === "" || this.state.password === "") {
       errors["Required"] = "Fill all the fields required";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error(errors.Required);
-      console.log(this.state);
+      // console.log(this.state);
       return;
     }
     if (this.state.errors) {
       event.preventDefault();
-      console.log(this.props, "these are props");
-      // const handleLoader = this.props.location.handleLoader.handleLoader();
+
       const { myProp } = this.props;
-      console.log(myProp);
+      const cookies = new Cookies();
+      // console.log(myProp);
       myProp(true);
       // 'https://devapi.influenz.club/v1/client/signin '
       Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
-        .then(result => {
+        .then((result) => {
           myProp(false);
-          // this.props.location.handleLoader(false);
+
           console.log(result);
           console.log("hello");
           if (result.status === 200) {
-            history.push("/admin/index");
-            this.setState({
-              user: result.data.payload
+            console.log("chalja bhai");
+            const user = result.data.payload;
+            console.log(user);
+
+            cookies.set("Auth-token", result.data.payload.access_token, {
+              path: "/",
+              maxAge: "3600",
             });
-            console.log(this.state.user);
+            cookies.set("User", result.data.payload.name, {
+              path: "/",
+            });
+            cookies.set("Is-admin", result.data.payload.is_admin, {
+              path: "/",
+            });
+            console.log("running");
+            this.props.history.push({
+              pathname: "/dashboard",
+              state: { is_admin: result.data.payload.is_admin },
+            });
+            console.log(cookies.get("Auth-token"), this.props.history);
+
+            // return <Redirect to="/admin" />;
           }
         })
-        .catch(error => {
+        .catch((error) => {
           myProp(false);
           // this.props.location.handleLoader(false);
           console.log(error);
@@ -122,8 +132,9 @@ class Login extends React.Component {
     }
     console.log(this.state.errors);
     console.log(this.state);
-    console.log("This is user" + this.state.user);
-  }
+    console.log("This is user", this.state.user);
+    console.log(this.props);
+  };
   render() {
     // const alert = useAlert();
     return (
@@ -137,54 +148,21 @@ class Login extends React.Component {
                     <Col lg="9" md="6">
                       <h1 className="#5e72e4">Welcome!</h1>
                       <p className="text-lead #8898aa">
-                        Let Influencers Spread The Word.
+                        Influenz Campaign Management
                       </p>
                     </Col>
                   </Row>
                 </div>
               </Container>
-              {/* <div className="text-muted text-center mt-2 mb-3">
-                <small>Sign in with</small>
-              </div> */}
-              {/* <div className="btn-wrapper text-center">
-                <Button
-                  className="btn-neutral btn-icon"
-                  color="default"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={require("assets/img/icons/common/github.svg")}
-                    />
-                  </span>
-                  <span className="btn-inner--text">Github</span>
-                </Button>
-                <Button
-                  className="btn-neutral btn-icon"
-                  color="default"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={require("assets/img/icons/common/google.svg")}
-                    />
-                  </span>
-                  <span className="btn-inner--text">Google</span>
-                </Button>
-              </div> */}
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
               <div class="text-center py-lg-3">
-                <small style={{ color: "#8898aa" }}>Sign in with </small>
+                <small style={{ color: "#8898aa" }}>
+                  Sign in with your credentials
+                </small>
               </div>
-              {/* <div className="text-center text-muted mb-4">
-                <small>Or sign in with credentials</small>
-              </div> */}
-              <Form role="form">
+
+              <Form role="form" onSubmit={this.handleSubmit}>
                 <FormGroup className="mb-3">
                   <InputGroup className="input-group-alternative">
                     <InputGroupAddon addonType="prepend">
@@ -239,8 +217,8 @@ class Login extends React.Component {
                   <Button
                     className="my-4"
                     color="primary"
-                    type="button"
-                    onClick={this.handleSubmit}
+                    type="submit"
+                    onSubmit={this.handleSubmit}
                   >
                     Sign in
                   </Button>
@@ -267,17 +245,17 @@ class Login extends React.Component {
 }
 
 //export default Login;
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isLoginPending: state.isLoginPending,
     isLoginSuccess: state.isLoginSuccess,
-    loginError: state.loginError
+    loginError: state.loginError,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    login: (email, password) => dispatch(userActions.login(email, password))
+    login: (email, password) => dispatch(userActions.login(email, password)),
   };
 };
 

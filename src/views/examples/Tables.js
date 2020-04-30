@@ -1,14 +1,23 @@
-
 import React from "react";
+import api from "../constants/api";
+import Cookies from "universal-cookie";
+import { Link } from "react-router-dom";
 
 // reactstrap components
 import {
   Badge,
+  Button,
   Card,
   CardHeader,
   CardFooter,
   DropdownMenu,
   DropdownItem,
+  Form,
+  FormGroup,
+  InputGroupAddon,
+  InputGroupText,
+  Input,
+  InputGroup,
   UncontrolledDropdown,
   DropdownToggle,
   Media,
@@ -19,1622 +28,607 @@ import {
   Table,
   Container,
   Row,
-  UncontrolledTooltip
+  UncontrolledTooltip,
+  Col,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
+import Axios from "axios";
+import { Redirect } from "react-router-dom";
+import { confirmAlert } from "react-confirm-alert";
+import { Spinner } from "reactstrap";
+import AdminNavbar from "../../components/Navbars/AdminNavbar.js";
+import AdminFooter from "../../components/Footers/AdminFooter.js";
+import cogoToast from "cogo-toast";
+import Popup from "reactjs-popup";
+import ReactPaginate from "react-paginate";
+
+const cookies = new Cookies();
+// const token = cookies.get("Auth-token");
 
 class Tables extends React.Component {
+  state = {
+    tableList: [],
+    influencersList: [],
+    users: [],
+    search: "",
+    tableListFiltered: [],
+    editing: false,
+    isLoading: false,
+    name: "",
+    open: false,
+    is_admin: null,
+    pageCount: null,
+    pageSelected: 0,
+  };
+  componentDidMount = () => {
+    this.setState({
+      is_admin: cookies.get("Is-admin"),
+    });
+    const token = cookies.get("Auth-token");
+    this.handleLoader(true);
+    Axios.get(
+      `${api.protocol}${api.baseUrl}${api.campaignList}${"?page="}${
+        this.state.pageSelected + 1
+      }${"&limit=10"}`,
+      {
+        headers: { Authorization: "Bearer " + token },
+      }
+    ).then((result) => {
+      // myProp(false);
+      this.handleLoader(false);
+      console.log(result);
+      this.setState({
+        tableListFiltered: result.data.payload.campaigns,
+        tableList: result.data.payload.campaigns,
+        pageCount: result.data.payload.page_count,
+      });
+      console.log(this.state.tableList);
+      console.log(this.state.tableListFiltered, "before");
+    });
+  };
+  handleAnalytics = (user) => {
+    this.setState(
+      {
+        users: user,
+      },
+      () => {
+        this.props.history.push({
+          pathname: "/campaign/" + this.state.users.uuid + "/analytics",
+          state: {
+            users: this.state.users,
+            is_admin: this.state.is_admin,
+            // handleStatus: this.handleStatus,
+            // edit: this.handleEdit,
+          },
+        });
+      }
+    );
+
+    console.log("handling analytics");
+    console.log(user, "this is the user");
+  };
+  handleSearch = (event) => {
+    event.preventDefault();
+    const token = cookies.get("Auth-token");
+    console.log(event.target.value);
+    this.setState(
+      {
+        search: event.target.value.toLowerCase(),
+        tableListFiltered: [],
+      },
+      () => {
+        console.log(this.state.search);
+        let temp = [];
+        Axios.get(
+          `${api.protocol}${api.baseUrl}${api.campaignList}${"?search="}${
+            this.state.search
+          }`,
+          {
+            headers: { Authorization: "Bearer " + token },
+          }
+        ).then((result) => {
+          console.log(result);
+          this.setState({
+            tableListFiltered: result.data.payload.campaigns,
+            pageCount: result.data.payload.page_count,
+          });
+        });
+        // for (let i = 0; i < this.state.tableList.length; i++) {
+        //   if (
+        //     this.state.tableList[i].name
+        //       .toLowerCase()
+        //       .includes(this.state.search)
+        //   ) {
+        //     console.log(this.state.tableListFiltered, "afterfiltering");
+        //     temp = [...temp, this.state.tableList[i]];
+        //     this.setState({
+        //       tableListFiltered: temp,
+        //     });
+        //   }
+        //   console.log(
+        //     this.state.search,
+        //     this.state.tableList[i].name,
+        //     this.state.tableList[i].name.includes(this.state.search),
+        //     "out ofloop"
+        //   );
+        // }
+      }
+    );
+  };
+  handleStatus = (status, uuid, activating) => {
+    const token = cookies.get("Auth-token");
+    var modelOpen = true;
+    console.log(status, uuid, activating);
+    modelOpen &&
+      confirmAlert({
+        title:
+          "Click confirm to " +
+          (activating
+            ? "activate"
+            : status === "active"
+            ? "deacivate"
+            : status === "inactive"
+            ? "submit for review"
+            : "decativate"),
+        // message: "Click recharge to Confirm campaign and recharge",
+        buttons: [
+          {
+            label: "Confirm",
+            onClick: () => {
+              Axios.put(
+                `${api.protocol}${api.baseUrl}${api.campaignStatus}`,
+
+                {
+                  uuid: uuid,
+                  status: activating
+                    ? "active"
+                    : status === "active"
+                    ? "inactive"
+                    : status === "inactive"
+                    ? "processing"
+                    : "inactive",
+                },
+                {
+                  headers: { Authorization: "Bearer " + token },
+                }
+              ).then((result) => {
+                window.location.reload(true);
+                console.log(result);
+              });
+            },
+          },
+
+          {
+            label: "Cancel",
+            onClick: () => (modelOpen = false),
+          },
+        ],
+      });
+  };
+  handleEdit = (user) => {
+    this.setState(
+      {
+        users: user,
+        editing: true,
+      },
+      () => {
+        this.props.history.push({
+          pathname: "/campaign/" + this.state.users.uuid + "/edit",
+          state: {
+            users: user.uuid,
+            editing: this.state.editing,
+          },
+        });
+      }
+    );
+  };
+  handleCreate = (e) => {
+    e.preventDefault();
+    const token = cookies.get("Auth-token");
+    console.log("creating");
+    if (this.state.name.length > 4) {
+      Axios.post(
+        `${api.protocol}${api.baseUrl}${api.campaign}`,
+        { name: this.state.name },
+        {
+          headers: { Authorization: "Bearer " + token },
+        }
+      ).then((result) => {
+        this.handleEdit(result.data.payload);
+      });
+    } else {
+      cogoToast.error("Campaign name should contain 5 or more leters");
+    }
+  };
+  handleLoader = (status) => {
+    this.setState({
+      isLoading: status,
+    });
+  };
+  handleModal = () => {
+    this.setState({
+      open: true,
+    });
+  };
+  handleInputChange = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+  handleCookieRedirect = () => {
+    cogoToast.error("You need to Sign in first");
+    console.log("function");
+  };
+  handlePagination = (event) => {
+    const token = cookies.get("Auth-token");
+    this.setState(
+      {
+        pageSelected: event.selected,
+      },
+      () => {
+        console.log(this.state.pageSelected);
+        Axios.get(
+          `${api.protocol}${api.baseUrl}${api.campaignList}${"?page="}${
+            this.state.pageSelected + 1
+          }${"&limit=10&search="}${this.state.search}`,
+          {
+            headers: { Authorization: "Bearer " + token },
+          }
+        ).then((result) => {
+          // myProp(false);
+          console.log(result);
+          this.setState({
+            tableListFiltered: result.data.payload.campaigns,
+            tableList: result.data.payload.campaigns,
+            pageCount: result.data.payload.page_count,
+          });
+          // this.componentDidMount();
+        });
+      }
+    );
+    console.log(event);
+  };
+  getBrandText = (path) => {
+    return "My Campaigns";
+  };
   render() {
+    console.log(this.props.history.location);
     return (
       <>
-        <Header />
-        {/* Page content */}
-        <Container className="mt--7" fluid>
-          {/* Table */}
-          <Row>
-            <div className="col">
-              <Card className="shadow">
-                <CardHeader className="border-0">
-                  <h3 className="mb-0">Card tables</h3>
-                </CardHeader>
-                <Table className="align-items-center table-flush" responsive>
-                  <thead className="thead-light">
-                    <tr>
-                      <th scope="col">Project</th>
-                      <th scope="col">Budget</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Users</th>
-                      <th scope="col">Completion</th>
-                      <th scope="col" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/bootstrap.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Argon Design System
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$2,500 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot mr-4">
-                          <i className="bg-warning" />
-                          pending
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip742438047"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip742438047"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip941738690"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip941738690"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip804044742"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip804044742"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip996637554"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip996637554"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">60%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="60"
-                              barClassName="bg-danger"
-                            />
+        {!cookies.get("Auth-token") && (
+          <React.Fragment>
+            <Redirect to="/login"></Redirect>
+            {this.handleCookieRedirect()}
+            {/* {cogoToast.error("You need to Signin first")} */}
+          </React.Fragment>
+        )}
+        {cookies.get("Auth-token") && this.state.isLoading ? (
+          <Spinner
+            style={{
+              width: "3rem",
+              height: "3rem",
+              position: "absolute",
+              top: "50%",
+              color: "black",
+              display: "block",
+              right: "50%",
+            }}
+          />
+        ) : (
+          <React.Fragment>
+            <div className="main-content" ref="mainContent">
+              <AdminNavbar
+                {...this.props}
+                brandText={this.getBrandText(this.props.location.pathname)}
+                title="My Campaigns"
+              />
+              <Header />
+              {/* Page content */}
+              <Container className="mt--7" fluid>
+                {/* Table */}
+                <Row>
+                  <div className="col">
+                    <Card className="shadow">
+                      <CardHeader className="border-0" float="right">
+                        <Row>
+                          <div className="col-auto my-auto">
+                            <h2 className="mb-0">My Campaigns</h2>
                           </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/angular.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Angular Now UI Kit PRO
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$1,800 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot">
-                          <i className="bg-success" />
-                          completed
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip746418347"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip746418347"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip102182364"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip102182364"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip406489510"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip406489510"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip476840018"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip476840018"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">100%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="100"
-                              barClassName="bg-success"
-                            />
+                          <div className="col offset-1 text-right">
+                            <Form className=" form-inline  d-none d-md-flex ">
+                              <FormGroup className="w-100 mb-0">
+                                <InputGroup className="w-75 input-group-alternative">
+                                  <InputGroupAddon addonType="prepend">
+                                    <InputGroupText>
+                                      <i className="fas fa-search" />
+                                    </InputGroupText>
+                                  </InputGroupAddon>
+                                  <Input
+                                    placeholder="Search my campaigns"
+                                    type="text"
+                                    onChange={this.handleSearch}
+                                    // onKeyDown={this.handleSearch}
+                                  />
+                                </InputGroup>
+                              </FormGroup>
+                            </Form>
                           </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
+                          <div className="col-auto text-right">
+                            {/* <Link
+                         s     to={{
+                                state: { editing: this.state.editing },
+                              }}
+                            > */}
+                            <Button
+                              color="primary"
+                              size="md"
+                              onClick={this.handleModal}
                             >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
+                              Create Campaign
+                              {/* <h5 className="text-white">Create Campaign</h5> */}
+                            </Button>
+                            {/* </Link> */}
+                            <Popup
+                              open={this.state.open}
+                              modal
+                              closeOnDocumentClick
+                              onClose={() =>
+                                this.setState({
+                                  open: false,
+                                })
+                              }
                             >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/sketch.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Black Dashboard
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$3,150 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot mr-4">
-                          <i className="bg-danger" />
-                          delayed
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip753056318"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip753056318"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip441753266"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip441753266"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip188462246"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip188462246"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip621168444"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip621168444"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">72%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="72"
-                              barClassName="bg-danger"
-                            />
+                              <div>
+                                {/* <a className="close" onClick={this.closeModal}>
+                                  &times;
+                                </a> */}
+                                <Form role="form" onSubmit={this.handleCreate}>
+                                  <div className="p-lg-4">
+                                    <Row>
+                                      <Col>
+                                        <FormGroup className="text-left">
+                                          <label className="form-control-label">
+                                            New Campaign Name
+                                          </label>
+                                          <Input
+                                            className="form-control-alternative"
+                                            value={this.state.name}
+                                            name="name"
+                                            onChange={this.handleInputChange}
+                                            placeholder="Campaign name"
+                                            type="text"
+                                          ></Input>
+                                        </FormGroup>
+                                      </Col>
+                                    </Row>
+                                  </div>
+                                  <div className="text-right">
+                                    {/* <Row>
+                                      <Col> */}
+                                    <Button
+                                      className="mr-4 mb-2"
+                                      color="primary"
+                                      onClick={this.handleCreate}
+                                      type="submit"
+                                    >
+                                      Start new campaign
+                                    </Button>
+                                    {/* </Col>
+                                    </Row> */}
+                                  </div>
+                                </Form>
+                              </div>
+                            </Popup>
                           </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/react.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              React Material Dashboard
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$4,400 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot">
-                          <i className="bg-info" />
-                          on schedule
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip875258217"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip875258217"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip834416663"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip834416663"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip372449339"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip372449339"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip108714769"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip108714769"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">90%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="90"
-                              barClassName="bg-info"
-                            />
+                        </Row>
+                      </CardHeader>
+                      {this.state.tableListFiltered.length !== 0 ? (
+                        <Table
+                          className="align-items-center table-flush"
+                          responsive
+                        >
+                          <thead className="thead-light">
+                            <tr>
+                              <th scope="col">My Campaigns</th>
+                              <th scope="col">Total Spending</th>
+                              <th scope="col">Balance left</th>
+                              <th scope="col">Payment per click</th>
+                              <th scope="col">Top Influencers</th>
+                              <th scope="col">Status</th>
+                              <th scope="col" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.tableListFiltered.map((user, index) => (
+                              <tr>
+                                <th scope="row">
+                                  <Media className="align-items-center">
+                                    <a
+                                      className="avatar rounded-circle mr-3"
+                                      href="#pablo"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      <img alt="..." src={user.company_logo} />
+                                    </a>
+                                    <Media>
+                                      <span className="mb-0 text-sm">
+                                        {user.name}
+                                      </span>
+                                    </Media>
+                                  </Media>
+                                </th>
+                                <td>{"₹ " + user.total_balance}</td>
+                                <td>
+                                  <div className="d-flex align-items-center">
+                                    <span className="mr-2">
+                                      {"₹ " + user.balance}
+                                    </span>
+                                    <div>
+                                      <Progress
+                                        max={user.total_balance}
+                                        value={
+                                          user.total_balance - user.balance
+                                        }
+                                        barClassName="bg-danger"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td>{"₹ " + user.payment_per_click}</td>
+
+                                <td>
+                                  <div className="avatar-group">
+                                    {user.influencers.map(
+                                      (influencer, index) => (
+                                        <React.Fragment>
+                                          <a
+                                            className="avatar avatar-sm"
+                                            href="#pablo"
+                                            id={influencer.first_name}
+                                            onClick={(e) => e.preventDefault()}
+                                          >
+                                            <img
+                                              alt="..."
+                                              className="rounded-circle"
+                                              src={influencer.profile_url}
+                                            />
+                                          </a>
+                                          <UncontrolledTooltip
+                                            delay={0}
+                                            target={influencer.first_name}
+                                          >
+                                            {influencer.first_name}
+                                          </UncontrolledTooltip>
+                                        </React.Fragment>
+                                      )
+                                    )}
+                                  </div>
+                                </td>
+                                <td>
+                                  <Badge color="" className="badge-dot mr-4">
+                                    <i
+                                      className={
+                                        user.status === "active"
+                                          ? "bg-success"
+                                          : user.status === "processing"
+                                          ? "bg-yellow"
+                                          : "bg-warning"
+                                      }
+                                    />
+                                    {user.status}
+                                  </Badge>
+                                </td>
+
+                                <td className="text-right">
+                                  <UncontrolledDropdown>
+                                    <DropdownToggle
+                                      className="btn-icon-only text-light"
+                                      href="#pablo"
+                                      role="button"
+                                      size="sm"
+                                      color=""
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      <i className="fas fa-ellipsis-v" />
+                                    </DropdownToggle>
+                                    <DropdownMenu
+                                      className="dropdown-menu-arrow"
+                                      right
+                                    >
+                                      {this.state.is_admin &&
+                                        user.status === "processing" && (
+                                          <DropdownItem
+                                            onClick={() =>
+                                              this.handleStatus(
+                                                user.status,
+                                                user.uuid,
+                                                true
+                                              )
+                                            }
+                                          >
+                                            Activate
+                                          </DropdownItem>
+                                        )}
+                                      <DropdownItem
+                                        onClick={() =>
+                                          this.handleStatus(
+                                            user.status,
+                                            user.uuid
+                                          )
+                                        }
+                                      >
+                                        {user.status === "active"
+                                          ? "Deactivate"
+                                          : user.status === "inactive"
+                                          ? "Submit for review"
+                                          : "Cancel review"}
+                                      </DropdownItem>
+
+                                      <DropdownItem
+                                        // href="/admin/index"
+                                        onClick={() =>
+                                          this.handleAnalytics(user)
+                                        }
+                                      >
+                                        View Performance
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => this.handleEdit(user)}
+                                      >
+                                        Edit Configuration
+                                      </DropdownItem>
+                                    </DropdownMenu>
+                                  </UncontrolledDropdown>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      ) : (
+                        <Card>
+                          <div className="card align-middle text-center pt-8 pb-8 bg-lavender">
+                            <h4>
+                              No campaigns. Click on Create Campaign to add.
+                            </h4>
                           </div>
+                        </Card>
+                      )}
+
+                      <CardFooter className="py-4 text-right">
+                        <div className="pagination justify-content-end ">
+                          {" "}
+                          <ReactPaginate
+                            pageCount={this.state.pageCount}
+                            pageRangeDisplayed={2}
+                            marginPagesDisplayed={2}
+                            initialPage={0}
+                            forcePage={this.state.pageSelected}
+                            breakLabel="..."
+                            nextLabel={<i className="fas fa-angle-right" />}
+                            previousLabel={<i className="fas fa-angle-left" />}
+                            onPageChange={this.handlePagination}
+                            containerClassName="pagination justify-content-end "
+                            previousClassName="page-item"
+                            previousLinkClassName="page-link"
+                            nextClassName="page-item"
+                            nextLinkClassName="page-link"
+                            pageClassName="page-item"
+                            pageLinkClassName="page-link"
+                            activeClassName="active"
+                          ></ReactPaginate>
                         </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/vue.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Vue Paper UI Kit PRO
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$2,200 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot mr-4">
-                          <i className="bg-success" />
-                          completed
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip664029969"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip664029969"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip806693074"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip806693074"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip844096937"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip844096937"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip757459971"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip757459971"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">100%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="100"
-                              barClassName="bg-success"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-                <CardFooter className="py-4">
-                  <nav aria-label="...">
-                    <Pagination
-                      className="pagination justify-content-end mb-0"
-                      listClassName="justify-content-end mb-0"
-                    >
-                      <PaginationItem className="disabled">
-                        <PaginationLink
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                          tabIndex="-1"
-                        >
-                          <i className="fas fa-angle-left" />
-                          <span className="sr-only">Previous</span>
-                        </PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem className="active">
-                        <PaginationLink
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          1
-                        </PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationLink
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          2 <span className="sr-only">(current)</span>
-                        </PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationLink
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          3
-                        </PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationLink
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          <i className="fas fa-angle-right" />
-                          <span className="sr-only">Next</span>
-                        </PaginationLink>
-                      </PaginationItem>
-                    </Pagination>
-                  </nav>
-                </CardFooter>
-              </Card>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                </Row>
+              </Container>
+
+              <Container fluid>
+                <AdminFooter />
+              </Container>
             </div>
-          </Row>
-          {/* Dark table */}
-          <Row className="mt-5">
-            <div className="col">
-              <Card className="bg-default shadow">
-                <CardHeader className="bg-transparent border-0">
-                  <h3 className="text-white mb-0">Card tables</h3>
-                </CardHeader>
-                <Table
-                  className="align-items-center table-dark table-flush"
-                  responsive
-                >
-                  <thead className="thead-dark">
-                    <tr>
-                      <th scope="col">Project</th>
-                      <th scope="col">Budget</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Users</th>
-                      <th scope="col">Completion</th>
-                      <th scope="col" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/bootstrap.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Argon Design System
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$2,500 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot mr-4">
-                          <i className="bg-warning" />
-                          pending
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip731399078"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip731399078"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip491083084"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip491083084"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip528540780"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip528540780"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip237898869"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip237898869"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">60%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="60"
-                              barClassName="bg-warning"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/angular.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Angular Now UI Kit PRO
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$1,800 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot">
-                          <i className="bg-success" />
-                          completed
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip188614932"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip188614932"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip66535734"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip66535734"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip427561578"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip427561578"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip904098289"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip904098289"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">100%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="100"
-                              barClassName="bg-success"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/sketch.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Black Dashboard
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$3,150 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot mr-4">
-                          <i className="bg-danger" />
-                          delayed
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip707904950"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip707904950"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip353988222"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip353988222"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip467171202"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip467171202"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip362118155"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip362118155"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">72%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="72"
-                              barClassName="bg-danger"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/react.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              React Material Dashboard
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$4,400 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot">
-                          <i className="bg-info" />
-                          on schedule
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip226319315"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip226319315"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip711961370"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip711961370"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip216246707"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip216246707"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip638048561"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip638048561"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">90%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="90"
-                              barClassName="bg-info"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/vue.jpg")}
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Vue Paper UI Kit PRO
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>$2,200 USD</td>
-                      <td>
-                        <Badge color="" className="badge-dot mr-4">
-                          <i className="bg-success" />
-                          completed
-                        </Badge>
-                      </td>
-                      <td>
-                        <div className="avatar-group">
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip781594051"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-1-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip781594051"
-                          >
-                            Ryan Tompson
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip840372212"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-2-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip840372212"
-                          >
-                            Romina Hadid
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip497647175"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-3-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip497647175"
-                          >
-                            Alexander Smith
-                          </UncontrolledTooltip>
-                          <a
-                            className="avatar avatar-sm"
-                            href="#pablo"
-                            id="tooltip951447946"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
-                          </a>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip951447946"
-                          >
-                            Jessica Doe
-                          </UncontrolledTooltip>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="mr-2">100%</span>
-                          <div>
-                            <Progress
-                              max="100"
-                              value="100"
-                              barClassName="bg-danger"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-right">
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            className="btn-icon-only text-light"
-                            href="#pablo"
-                            role="button"
-                            size="sm"
-                            color=""
-                            onClick={e => e.preventDefault()}
-                          >
-                            <i className="fas fa-ellipsis-v" />
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Another action
-                            </DropdownItem>
-                            <DropdownItem
-                              href="#pablo"
-                              onClick={e => e.preventDefault()}
-                            >
-                              Something else here
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </Card>
-            </div>
-          </Row>
-        </Container>
+          </React.Fragment>
+        )}
       </>
     );
   }

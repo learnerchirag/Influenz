@@ -1,6 +1,6 @@
-
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Router, BrowserRouter } from "react-router-dom";
+import Cookies from "universal-cookie";
 // reactstrap components
 import {
   DropdownMenu,
@@ -16,46 +16,76 @@ import {
   Navbar,
   Nav,
   Container,
-  Media
+  Media,
 } from "reactstrap";
-
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
+const cookies = new Cookies();
 class AdminNavbar extends React.Component {
   constructor(props) {
-    debugger;
+    // debugger;
     super(props);
-    this.state = {
-      
-    };
+    this.state = {};
     this.handleLogout = this.handleLogout.bind(this);
   }
-  handleLogout(event){
+  handleLogout(event) {
     event.preventDefault();
-    const { history } = this.props;
-    history.push('/auth/login');
+    var modelOpen = true;
+    modelOpen &&
+      confirmAlert({
+        title: "Are you sure to logout",
+        // message: "Click confirm to Move balance",
+        buttons: [
+          {
+            label: "Confirm",
+            onClick: () => {
+              console.log("logout", this.props);
+              cookies.remove("Auth-token", { path: "/" });
+              cookies.remove("Auth-token", { path: "/dashboard" });
+              cookies.remove("Auth-token", { path: "/campaign/:uuid/edit" });
+              cookies.remove("Auth-token", {
+                path: "/campaign/:uuid/analytics",
+              });
+
+              console.log(cookies.get("Auth-token"));
+              setTimeout(() => {
+                window.location = "/login";
+              }, 1000);
+            },
+          },
+          {
+            label: "Cancel",
+            onClick: () => (modelOpen = false),
+          },
+        ],
+      });
   }
   render() {
     return (
       <>
-        <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
+        <Navbar
+          className="navbar-top navbar-dark bg-gradient-info"
+          style={{ position: "fixed" }}
+          expand="md"
+          id="navbar-main"
+        >
           <Container fluid>
-            <Link
-              className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
-              to="/"
-            >
-              {this.props.brandText}
-            </Link>
-            <Form className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto">
-              <FormGroup className="mb-0">
-                <InputGroup className="input-group-alternative">
-                  <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                      <i className="fas fa-search" />
-                    </InputGroupText>
-                  </InputGroupAddon>
-                  <Input placeholder="Search" type="text" />
-                </InputGroup>
-              </FormGroup>
-            </Form>
+            <div className="h3 mb-0 text-white text-center text-uppercase d-none d-lg-inline-block">
+              {this.props.title !== "My Campaigns" && (
+                <img
+                  src={require("../../assets/img/icons/left.png")}
+                  height="28px"
+                  textColor="white"
+                  style={{ fontWeight: "bold" }}
+                  onClick={() => this.props.history.goBack()}
+                  style={{ cursor: "pointer" }}
+                ></img>
+              )}
+              <h3 className="ml-2 text-white text-center text-uppercase d-none d-lg-inline-block my-auto">
+                {this.props.title}
+              </h3>
+            </div>
+
             <Nav className="align-items-center d-none d-md-flex" navbar>
               <UncontrolledDropdown nav>
                 <DropdownToggle className="pr-0" nav>
@@ -63,12 +93,12 @@ class AdminNavbar extends React.Component {
                     <span className="avatar avatar-sm rounded-circle">
                       <img
                         alt="..."
-                        src={require("assets/img/theme/team-4-800x800.jpg")}
+                        src={require("../../assets/img/icons/WhatsApp Image 2020-04-25 at 6.49.24 PM.jpeg")}
                       />
                     </span>
                     <Media className="ml-2 d-none d-lg-block">
                       <span className="mb-0 text-sm font-weight-bold">
-                        Jessica Jones
+                        {cookies.get("User")}
                       </span>
                     </Media>
                   </Media>
@@ -77,24 +107,28 @@ class AdminNavbar extends React.Component {
                   <DropdownItem className="noti-title" header tag="div">
                     <h6 className="text-overflow m-0">Welcome!</h6>
                   </DropdownItem>
-                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <DropdownItem to="/profile" tag={Link}>
                     <i className="ni ni-single-02" />
                     <span>My profile</span>
                   </DropdownItem>
-                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <DropdownItem to="/dashboard" tag={Link}>
                     <i className="ni ni-settings-gear-65" />
-                    <span>Settings</span>
+                    <span>My Campaigns</span>
                   </DropdownItem>
-                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <DropdownItem
+                    to="https://influenz.club/#gettouch"
+                    target="_blank"
+                    tag={Link}
+                  >
                     <i className="ni ni-calendar-grid-58" />
-                    <span>Activity</span>
+                    <span>Contact us</span>
                   </DropdownItem>
-                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                  {/* <DropdownItem to="/admin/user-profile" tag={Link}>
                     <i className="ni ni-support-16" />
                     <span>Support</span>
-                  </DropdownItem>
+                  </DropdownItem> */}
                   <DropdownItem divider />
-                  <DropdownItem href="#pablo" onClick={this.handleLogout}>
+                  <DropdownItem onClick={(e) => this.handleLogout(e)}>
                     <i className="ni ni-user-run" />
                     <span>Logout</span>
                   </DropdownItem>

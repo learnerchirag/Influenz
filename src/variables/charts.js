@@ -1,8 +1,6 @@
-
 const Chart = require("chart.js");
 
-
-Chart.elements.Rectangle.prototype.draw = function() {
+Chart.elements.Rectangle.prototype.draw = function () {
   var ctx = this._chart.ctx;
   var vm = this._view;
   var left, right, top, bottom, signX, signY, borderSkipped, radius;
@@ -65,7 +63,12 @@ Chart.elements.Rectangle.prototype.draw = function() {
   // Corner points, from bottom-left to bottom-right clockwise
   // | 1 2 |
   // | 0 3 |
-  var corners = [[left, bottom], [left, top], [right, top], [right, bottom]];
+  var corners = [
+    [left, bottom],
+    [left, top],
+    [right, top],
+    [right, bottom],
+  ];
 
   // Find first (starting) corner with fallback to 'bottom'
   var borders = ["bottom", "left", "top", "right"];
@@ -96,7 +99,7 @@ Chart.elements.Rectangle.prototype.draw = function() {
     let x = corners[1][0];
     let y = corners[1][1];
     // eslint-disable-next-line
-    var radius: any = cornerRadius;
+    var radius = cornerRadius;
 
     // Fix radius being too large
     if (radius > height / 2) {
@@ -125,7 +128,7 @@ Chart.elements.Rectangle.prototype.draw = function() {
 
 var mode = "light"; //(themeMode) ? themeMode : 'light';
 var fonts = {
-  base: "Open Sans"
+  base: "Open Sans",
 };
 
 // Colors
@@ -139,7 +142,7 @@ var colors = {
     600: "#8898aa",
     700: "#525f7f",
     800: "#32325d",
-    900: "#212529"
+    900: "#212529",
   },
   theme: {
     default: "#172b4d",
@@ -148,11 +151,11 @@ var colors = {
     info: "#11cdef",
     success: "#2dce89",
     danger: "#f5365c",
-    warning: "#fb6340"
+    warning: "#fb6340",
   },
   black: "#12263F",
   white: "#FFFFFF",
-  transparent: "transparent"
+  transparent: "transparent",
 };
 
 // Methods
@@ -170,50 +173,51 @@ function chartOptions() {
         defaultFontFamily: fonts.base,
         defaultFontSize: 13,
         layout: {
-          padding: 0
+          padding: 0,
         },
         legend: {
           display: false,
           position: "bottom",
+
           labels: {
             usePointStyle: true,
-            padding: 16
-          }
+            padding: 16,
+          },
         },
         elements: {
           point: {
-            radius: 0,
-            backgroundColor: colors.theme["primary"]
+            radius: "20%",
+            backgroundColor: colors.theme["primary"],
           },
           line: {
             tension: 0.4,
             borderWidth: 4,
             borderColor: colors.theme["primary"],
             backgroundColor: colors.transparent,
-            borderCapStyle: "rounded"
+            borderCapStyle: "rounded",
           },
           rectangle: {
-            backgroundColor: colors.theme["warning"]
+            backgroundColor: colors.theme["warning"],
           },
           arc: {
             backgroundColor: colors.theme["primary"],
             borderColor: mode === "dark" ? colors.gray[800] : colors.white,
-            borderWidth: 4
-          }
+            borderWidth: 4,
+          },
         },
         tooltips: {
           enabled: true,
           mode: "index",
-          intersect: false
-        }
+          intersect: true,
+        },
       },
       doughnut: {
         cutoutPercentage: 83,
-        legendCallback: function(chart) {
+        legendCallback: function (chart) {
           var data = chart.data;
           var content = "";
 
-          data.labels.forEach(function(label, index) {
+          data.labels.forEach(function (label, index) {
             var bgColor = data.datasets[0].backgroundColor[index];
 
             content += '<span class="chart-legend-item">';
@@ -226,9 +230,9 @@ function chartOptions() {
           });
 
           return content;
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   // yAxes
@@ -243,17 +247,17 @@ function chartOptions() {
       zeroLineWidth: 0,
       zeroLineColor: mode === "dark" ? colors.gray[900] : colors.gray[300],
       zeroLineBorderDash: [2],
-      zeroLineBorderDashOffset: [2]
+      zeroLineBorderDashOffset: [2],
     },
     ticks: {
       beginAtZero: true,
       padding: 10,
-      callback: function(value) {
+      callback: function (value) {
         if (!(value % 10)) {
           return value;
         }
-      }
-    }
+      },
+    },
   });
 
   // xAxes
@@ -261,11 +265,11 @@ function chartOptions() {
     gridLines: {
       drawBorder: false,
       drawOnChartArea: false,
-      drawTicks: false
+      drawTicks: false,
     },
     ticks: {
-      padding: 20
-    }
+      padding: 20,
+    },
   });
 
   return options;
@@ -288,23 +292,20 @@ let chartExample1 = {
     scales: {
       yAxes: [
         {
-          gridLines: {
-            color: colors.gray[900],
-            zeroLineColor: colors.gray[900]
-          },
           ticks: {
-            callback: function(value) {
-              if (!(value % 10)) {
-                return "$" + value + "k";
+            callback: function (value) {
+              if (!(value % 1)) {
+                //return '$' + value + 'k'
+                return value;
               }
-            }
-          }
-        }
-      ]
+            },
+          },
+        },
+      ],
     },
     tooltips: {
       callbacks: {
-        label: function(item, data) {
+        label: function (item, data) {
           var label = data.datasets[item.datasetIndex].label || "";
           var yLabel = item.yLabel;
           var content = "";
@@ -313,83 +314,83 @@ let chartExample1 = {
             content += label;
           }
 
-          content += "$" + yLabel + "k";
+          content += yLabel;
           return content;
-        }
-      }
-    }
+        },
+      },
+    },
+    // animation: {
+    //   onComplete: function () {
+    //     var chartInstance = this.Chart;
+    //     var ctx = chartInstance.ctx;
+    //     ctx.up;
+    //     // Chart.helpers.each(this.data.datasets.forEach(function (dataset, i) {
+    //     //     var meta = chartInstance.controller.getDatasetMeta(i);
+    //     //     Chart.helpers.each(meta.data.forEach(function (bar, index) {
+    //     //         ctx.fillText(dataset.data[index], bar._model.x - 5, bar._model.y + 3);
+    //     //     }),this)
+    //     // }),this);
+    //   },50px
+    // },
   },
-  data1: canvas => {
+  data1: (labels, datasets) => {
+    console.log(datasets, labels, "data1");
     return {
-      labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      datasets: [
-        {
-          label: "Performance",
-          data: [0, 20, 10, 30, 15, 40, 20, 60, 60]
-        }
-      ]
+      labels: labels,
+      datasets: datasets,
+      maxBarThickness: 10,
     };
   },
-  data2: canvas => {
-    return {
-      labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      datasets: [
-        {
-          label: "Performance",
-          data: [0, 20, 5, 25, 10, 30, 15, 40, 40]
-        }
-      ]
-    };
-  }
 };
 
 // Example 2 of Chart inside src/views/Index.js (Total orders - Card)
 let chartExample2 = {
   options: {
-    scales: {
-      yAxes: [
-        {
-          ticks: {
-            callback: function(value) {
-              if (!(value % 10)) {
-                //return '$' + value + 'k'
-                return value;
-              }
-            }
-          }
-        }
-      ]
+    // maintainAspectRatio: true,
+    legend: {
+      display: true,
+      position: "right",
+      labels: {
+        fontColor: "#333",
+        fontSize: 16,
+      },
     },
-    tooltips: {
-      callbacks: {
-        label: function(item, data) {
-          var label = data.datasets[item.datasetIndex].label || "";
-          var yLabel = item.yLabel;
-          var content = "";
-          if (data.datasets.length > 1) {
-            content += label;
-          }
-          content += yLabel;
-          return content;
-        }
-      }
-    }
+
+    // label: {
+    //   display: true,
+    //   position: "bottom",
+    //   labels: {
+    //     fontColor: "#333",
+    //     fontSize: 16,
+    //   },
+    // },
   },
-  data: {
-    labels: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: [
-      {
-        label: "Sales",
-        data: [25, 20, 30, 22, 17, 29],
-        maxBarThickness: 10
-      }
-    ]
-  }
+  data2: (labels, datasets) => {
+    console.log(datasets, labels, "data2");
+    return {
+      labels: labels,
+      datasets: datasets,
+
+      // maxBarThickness: 10,
+      // indexLabel: datasets.data,
+      // indexLabelPlacement: "inside",
+    };
+  },
+  // data: {
+  //   labels: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  //   datasets: [
+  //     {
+  //       label: "Sales",
+  //       data: [25, 20, 30, 22, 17, 29],
+  //       maxBarThickness: 10,
+  //     },
+  //   ],
+  // },
 };
 
 module.exports = {
   chartOptions, // used inside src/views/Index.js
   parseOptions, // used inside src/views/Index.js
   chartExample1, // used inside src/views/Index.js
-  chartExample2 // used inside src/views/Index.js
+  chartExample2, // used inside src/views/Index.js
 };

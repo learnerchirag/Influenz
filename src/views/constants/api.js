@@ -3,5 +3,16 @@ module.exports = {
   baseUrl: "devapi.influenz.club/v1/client/",
   userLogin: "signin",
   userSignup: "signup",
-  forgotPassword: "forgot"
+  forgotPassword: "forgot",
+  transactionList: "transaction/list",
+  profile: "me/",
+  password: "me/password",
+  campaign: "campaign/",
+  campaignList: "campaign/list",
+  campaignTransaction: "campaign/transaction/list",
+  campaignAnalytics: "campaign/analytics",
+  campaignRecharge: "campaign/recharge",
+  campaignRechargeList: "campaign/recharge/list",
+  campaignStatus: "campaign/status",
+  campaignMoveCharge: "campaign/movecharge",
 };
