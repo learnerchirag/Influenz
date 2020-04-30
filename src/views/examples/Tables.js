@@ -41,6 +41,7 @@ import AdminNavbar from "../../components/Navbars/AdminNavbar.js";
 import AdminFooter from "../../components/Footers/AdminFooter.js";
 import cogoToast from "cogo-toast";
 import Popup from "reactjs-popup";
+import ReactPaginate from "react-paginate";
 
 const cookies = new Cookies();
 // const token = cookies.get("Auth-token");
@@ -50,13 +51,15 @@ class Tables extends React.Component {
     tableList: [],
     influencersList: [],
     users: [],
-    search: null,
+    search: "",
     tableListFiltered: [],
     editing: false,
     isLoading: false,
     name: "",
     open: false,
     is_admin: null,
+    pageCount: null,
+    pageSelected: 0,
   };
   componentDidMount = () => {
     this.setState({
@@ -64,15 +67,21 @@ class Tables extends React.Component {
     });
     const token = cookies.get("Auth-token");
     this.handleLoader(true);
-    Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
-      headers: { Authorization: "Bearer " + token },
-    }).then((result) => {
+    Axios.get(
+      `${api.protocol}${api.baseUrl}${api.campaignList}${"?page="}${
+        this.state.pageSelected + 1
+      }${"&limit=10"}`,
+      {
+        headers: { Authorization: "Bearer " + token },
+      }
+    ).then((result) => {
       // myProp(false);
       this.handleLoader(false);
       console.log(result);
       this.setState({
-        tableListFiltered: result.data.payload,
-        tableList: result.data.payload,
+        tableListFiltered: result.data.payload.campaigns,
+        tableList: result.data.payload.campaigns,
+        pageCount: result.data.payload.page_count,
       });
       console.log(this.state.tableList);
       console.log(this.state.tableListFiltered, "before");
@@ -100,6 +109,9 @@ class Tables extends React.Component {
     console.log(user, "this is the user");
   };
   handleSearch = (event) => {
+    event.preventDefault();
+    const token = cookies.get("Auth-token");
+    console.log(event.target.value);
     this.setState(
       {
         search: event.target.value.toLowerCase(),
@@ -108,25 +120,39 @@ class Tables extends React.Component {
       () => {
         console.log(this.state.search);
         let temp = [];
-        for (let i = 0; i < this.state.tableList.length; i++) {
-          if (
-            this.state.tableList[i].company_name
-              .toLowerCase()
-              .includes(this.state.search)
-          ) {
-            console.log(this.state.tableListFiltered, "afterfiltering");
-            temp = [...temp, this.state.tableList[i]];
-            this.setState({
-              tableListFiltered: temp,
-            });
+        Axios.get(
+          `${api.protocol}${api.baseUrl}${api.campaignList}${"?search="}${
+            this.state.search
+          }`,
+          {
+            headers: { Authorization: "Bearer " + token },
           }
-          console.log(
-            this.state.search,
-            this.state.tableList[i].company_name,
-            this.state.tableList[i].company_name.includes(this.state.search),
-            "out ofloop"
-          );
-        }
+        ).then((result) => {
+          console.log(result);
+          this.setState({
+            tableListFiltered: result.data.payload.campaigns,
+            pageCount: result.data.payload.page_count,
+          });
+        });
+        // for (let i = 0; i < this.state.tableList.length; i++) {
+        //   if (
+        //     this.state.tableList[i].name
+        //       .toLowerCase()
+        //       .includes(this.state.search)
+        //   ) {
+        //     console.log(this.state.tableListFiltered, "afterfiltering");
+        //     temp = [...temp, this.state.tableList[i]];
+        //     this.setState({
+        //       tableListFiltered: temp,
+        //     });
+        //   }
+        //   console.log(
+        //     this.state.search,
+        //     this.state.tableList[i].name,
+        //     this.state.tableList[i].name.includes(this.state.search),
+        //     "out ofloop"
+        //   );
+        // }
       }
     );
   };
@@ -232,6 +258,35 @@ class Tables extends React.Component {
     cogoToast.error("You need to Sign in first");
     console.log("function");
   };
+  handlePagination = (event) => {
+    const token = cookies.get("Auth-token");
+    this.setState(
+      {
+        pageSelected: event.selected,
+      },
+      () => {
+        console.log(this.state.pageSelected);
+        Axios.get(
+          `${api.protocol}${api.baseUrl}${api.campaignList}${"?page="}${
+            this.state.pageSelected + 1
+          }${"&limit=10&search="}${this.state.search}`,
+          {
+            headers: { Authorization: "Bearer " + token },
+          }
+        ).then((result) => {
+          // myProp(false);
+          console.log(result);
+          this.setState({
+            tableListFiltered: result.data.payload.campaigns,
+            tableList: result.data.payload.campaigns,
+            pageCount: result.data.payload.page_count,
+          });
+          // this.componentDidMount();
+        });
+      }
+    );
+    console.log(event);
+  };
   getBrandText = (path) => {
     return "My Campaigns";
   };
@@ -291,6 +346,7 @@ class Tables extends React.Component {
                                     placeholder="Search my campaigns"
                                     type="text"
                                     onChange={this.handleSearch}
+                                    // onKeyDown={this.handleSearch}
                                   />
                                 </InputGroup>
                               </FormGroup>
@@ -298,7 +354,7 @@ class Tables extends React.Component {
                           </div>
                           <div className="col-auto text-right">
                             {/* <Link
-                              to={{
+                         s     to={{
                                 state: { editing: this.state.editing },
                               }}
                             > */}
@@ -455,7 +511,7 @@ class Tables extends React.Component {
                                         user.status === "active"
                                           ? "bg-success"
                                           : user.status === "processing"
-                                          ? "bg-info"
+                                          ? "bg-yellow"
                                           : "bg-warning"
                                       }
                                     />
@@ -538,8 +594,29 @@ class Tables extends React.Component {
                         </Card>
                       )}
 
-                      <CardFooter className="py-4">
-                        <nav aria-label="..."></nav>
+                      <CardFooter className="py-4 text-right">
+                        <div className="pagination justify-content-end ">
+                          {" "}
+                          <ReactPaginate
+                            pageCount={this.state.pageCount}
+                            pageRangeDisplayed={2}
+                            marginPagesDisplayed={2}
+                            initialPage={0}
+                            forcePage={this.state.pageSelected}
+                            breakLabel="..."
+                            nextLabel={<i className="fas fa-angle-right" />}
+                            previousLabel={<i className="fas fa-angle-left" />}
+                            onPageChange={this.handlePagination}
+                            containerClassName="pagination justify-content-end "
+                            previousClassName="page-item"
+                            previousLinkClassName="page-link"
+                            nextClassName="page-item"
+                            nextLinkClassName="page-link"
+                            pageClassName="page-item"
+                            pageLinkClassName="page-link"
+                            activeClassName="active"
+                          ></ReactPaginate>
+                        </div>
                       </CardFooter>
                     </Card>
                   </div>

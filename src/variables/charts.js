@@ -178,6 +178,7 @@ function chartOptions() {
         legend: {
           display: false,
           position: "bottom",
+
           labels: {
             usePointStyle: true,
             padding: 16,

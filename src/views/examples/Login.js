@@ -89,6 +89,7 @@ class Login extends React.Component {
 
             cookies.set("Auth-token", result.data.payload.access_token, {
               path: "/",
+              maxAge: "3600",
             });
             cookies.set("User", result.data.payload.name, {
               path: "/",

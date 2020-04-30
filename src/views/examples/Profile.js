@@ -73,6 +73,7 @@ class Profile extends React.Component {
       this.setState({
         uuid: result.data.payload.uuid,
         name: result.data.payload.name,
+        email: result.data.payload.email,
         company_name: result.data.payload.company_name,
         designation: result.data.payload.designation,
         country_code: result.data.payload.country_code,
@@ -90,11 +91,32 @@ class Profile extends React.Component {
   };
   handleProfile = () => {
     const token = cookies.get("Auth-token");
-    Axios.put(`${api.protocol}${api.baseUrl}${api.profile}`, this.state, {
-      headers: { Authorization: "Bearer " + token },
-    }).then((result) => {
-      window.location.reload(true);
-    });
+    var modelOpen = true;
+    modelOpen &&
+      confirmAlert({
+        title: "Cofirm to save changes",
+        message: "Click confirm to save changes to profile",
+        buttons: [
+          {
+            label: "Confirm",
+            onClick: () => {
+              Axios.put(
+                `${api.protocol}${api.baseUrl}${api.profile}`,
+                this.state,
+                {
+                  headers: { Authorization: "Bearer " + token },
+                }
+              ).then((result) => {
+                window.location.reload(true);
+              });
+            },
+          },
+          {
+            label: "Cancel",
+            onClick: () => (modelOpen = false),
+          },
+        ],
+      });
   };
   handlePassword = () => {
     const token = cookies.get("Auth-token");
@@ -192,18 +214,22 @@ class Profile extends React.Component {
                 <Row>
                   <Col className="order-2  mb-xl-0" xl="4">
                     <Card className="card-profile shadow">
-                      <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
-                        <div className="d-flex justify-content-between">
-                          <h2>Change password</h2>
-                          <Button
-                            className="float-right"
-                            color="primary"
-                            onClick={this.handlePassword}
-                            size="sm"
-                          >
-                            Change
-                          </Button>
-                        </div>
+                      <CardHeader className="text-center border-0 ">
+                        <Row>
+                          <Col>
+                            <h2>Change password</h2>
+                          </Col>
+                          <Col>
+                            <Button
+                              // className="float-right"
+                              color="primary"
+                              onClick={this.handlePassword}
+                              size="md"
+                            >
+                              Confirm password
+                            </Button>
+                          </Col>
+                        </Row>
                       </CardHeader>
                       <CardBody className="pt-0 pt-md-4">
                         <Form>
@@ -322,7 +348,7 @@ class Profile extends React.Component {
                       <CardHeader className="bg-white border-0">
                         <Row className="align-items-center">
                           <Col xs="8">
-                            <h2 className="mb-0">My account</h2>
+                            <h2 className="mb-0">My Account</h2>
                           </Col>
                           <Col className="text-right" xs="4">
                             <Button
@@ -331,7 +357,7 @@ class Profile extends React.Component {
                               onClick={this.handleProfile}
                               size="md"
                             >
-                              Save
+                              Save profile
                             </Button>
                           </Col>
                         </Row>
@@ -349,7 +375,7 @@ class Profile extends React.Component {
                                     className="form-control-label"
                                     htmlFor="input-first-name"
                                   >
-                                    First name
+                                    Name
                                   </label>
                                   <Input
                                     className="form-control-alternative"
@@ -366,14 +392,16 @@ class Profile extends React.Component {
                                 <FormGroup>
                                   <label
                                     className="form-control-label"
-                                    htmlFor="input-last-name"
+                                    htmlFor="input-email"
                                   >
-                                    Last name
+                                    Email
                                   </label>
                                   <Input
                                     className="form-control-alternative"
-                                    id="input-last-name"
-                                    placeholder="Last name"
+                                    id="input-email"
+                                    placeholder="Email"
+                                    value={this.state.email}
+                                    readOnly="readonly"
                                     type="text"
                                   />
                                 </FormGroup>

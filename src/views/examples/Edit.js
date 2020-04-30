@@ -121,7 +121,7 @@ class Edit extends React.Component {
     }
     Axios.get(
       `${api.protocol}${api.baseUrl}${api.campaign}${"?uuid="}${
-        this.props.history.location.state.users
+        this.props.match.params.uuid
       }`,
       {
         headers: { Authorization: "Bearer " + token },
@@ -164,7 +164,7 @@ class Edit extends React.Component {
       headers: { Authorization: "Bearer " + token },
     }).then((result) => {
       const options = [];
-      result.data.payload.map((users) => {
+      result.data.payload.campaigns.map((users) => {
         users.uuid !== this.state.uuid &&
           options.push({
             value: users.uuid,
@@ -175,10 +175,10 @@ class Edit extends React.Component {
         options,
       });
     });
-    console.log(this.props.location.state.users, this.props);
+    console.log(this.props.match.params.uuid, this.props);
     Axios.get(
       `${api.protocol}${api.baseUrl}${api.campaignRechargeList}${"?uuid="}${
-        this.props.location.state.users
+        this.props.match.params.uuid
       }`,
       {
         headers: { Authorization: "Bearer " + token },
@@ -355,7 +355,7 @@ class Edit extends React.Component {
     const token = cookies.get("Auth-token");
 
     if (isNull === false) {
-      console.log(this.state, this.props.location.state.users);
+      console.log(this.state, this.props.match.params.uuid);
       var modelOpen = true;
       modelOpen &&
         confirmAlert({

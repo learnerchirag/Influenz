@@ -1,6 +1,6 @@
 import React from "react";
 // node.js library that concatenates classes (strings)
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Redirect } from "react-router-dom";
 
 import classnames from "classnames";
 // javascipt plugin for creating charts
@@ -9,8 +9,11 @@ import Chart from "chart.js";
 import { Line, Bar, Pie } from "react-chartjs-2";
 import Cookies from "universal-cookie";
 import api from "./constants/api";
-import { Spinner } from "reactstrap";
+import { Spinner, FormGroup } from "reactstrap";
 import cogoToast from "cogo-toast";
+import Switch from "@material/react-switch";
+import "@material/react-switch/dist/switch.css";
+// import "@material/react-switch/index.scss";
 
 // reactstrap components
 import {
@@ -18,6 +21,7 @@ import {
   Card,
   CardHeader,
   CardBody,
+  CardTitle,
   DropdownMenu,
   DropdownItem,
   NavItem,
@@ -66,7 +70,20 @@ let chartref3 = null;
 
 class Index extends React.Component {
   state = {
-    current_user: this.props.history.location.state.users,
+    current_user: null,
+    current_uuid: null,
+    whatsapp_share: null,
+    twitter_share: null,
+    facebook_share: null,
+    instagram_share: null,
+    linkedin_share: null,
+    other_share: null,
+    whatsapp_click: null,
+    twitter_click: null,
+    instagram_click: null,
+    facebook_click: null,
+    linkedin_click: null,
+    other_click: null,
     activeNav: 1,
     dates: [],
     cities: [],
@@ -74,14 +91,22 @@ class Index extends React.Component {
     dates_count: [],
     platforms: [],
     platforms_count: [],
+    shareDates: [],
+    share_count: [],
     datasets1_updated: [],
     datasets2_updated: [],
     datasets3_updated: [],
+    datasets4_updated: [],
     transactionList: [],
     isLoading: false,
     editing: false,
     is_admin: null,
+    nonUnique: false,
   };
+  // componentWillMount = async () => {
+  //   const token = cookies.get("Auth-token");
+  //   await
+  // };
 
   componentDidMount = () => {
     if (window.Chart) {
@@ -89,34 +114,54 @@ class Index extends React.Component {
     }
     const token = cookies.get("Auth-token");
     this.setState({
-      is_admin: this.props.location.state.is_admin,
+      is_admin: cookies.get("Is-admin"),
     });
-    // const { myProp } = this.props;
     this.handleLoader(true);
     console.log("mounted");
     console.log(this.props, "props users");
     this.setState({
-      current_user: this.props.history.location.state.users,
+      current_uuid: this.props.match.params.uuid,
+    });
+    Axios.get(
+      `${api.protocol}${api.baseUrl}${api.campaign}${"?uuid="}${
+        this.props.match.params.uuid
+      }`,
+      { headers: { Authorization: "Bearer " + token } }
+    ).then((result) => {
+      this.setState({
+        current_user: result.data.payload,
+      });
     });
     Axios.get(
       `${api.protocol}${api.baseUrl}${api.campaignAnalytics}${"?uuid="}${
-        this.state.current_user.uuid
-      }${"&from_date="}${weekStart}${"&to_date="}${today}`,
+        this.props.match.params.uuid
+      }${"&from_date="}${weekStart}${"&to_date="}${today}${"&is_unique="}${
+        this.state.nonUnique
+      }`,
+      // { is_unique: false },
       { headers: { Authorization: "Bearer " + token } }
     ).then((result) => {
       this.handleLoader(false);
+
       var dates = [];
       var dates_count = [];
+      var shareDates = [];
+      var share_count = [];
       var cities = [];
       var cities_count = [];
       var platforms = [];
       var platforms_count = [];
       var datasets2_updated = [];
       var datasets3_updated = [];
+      var datasets4_updated = [];
       console.log(result, "result");
       result.data.payload.click_data.map((object, index) => {
         dates.push(object.date);
         dates_count.push(object.count);
+      });
+      result.data.payload.share_data.map((object, index) => {
+        shareDates.push(object.date);
+        share_count.push(object.count);
       });
       result.data.payload.city_data.map((object, index) => {
         cities.push(object.city);
@@ -129,6 +174,10 @@ class Index extends React.Component {
       this.state.datasets1_updated[0] = {
         label: "Performance",
         data: dates_count,
+      };
+      datasets4_updated[0] = {
+        label: "Performance",
+        data: share_count,
       };
       datasets2_updated[0] = {
         label: "Performance",
@@ -147,8 +196,23 @@ class Index extends React.Component {
         cities_count: cities_count,
         platforms: platforms,
         platforms_count: platforms_count,
+        shareDates: shareDates,
+        share_count: share_count,
         datasets2_updated: datasets2_updated,
         datasets3_updated: datasets3_updated,
+        datasets4_updated: datasets4_updated,
+        whatsapp_click: result.data.payload.total_data.whatsapp_click,
+        twitter_click: result.data.payload.total_data.twitter_click,
+        facebook_click: result.data.payload.total_data.facebook_click,
+        instagram_click: result.data.payload.total_data.instagram_click,
+        linkedin_click: result.data.payload.total_data.linkedin_click,
+        other_click: result.data.payload.total_data.other_click,
+        whatsapp_share: result.data.payload.total_data.whatsapp_share,
+        twitter_share: result.data.payload.total_data.twitter_share,
+        facebook_share: result.data.payload.total_data.facebook_share,
+        instagram_share: result.data.payload.total_data.instagram_share,
+        linkedin_share: result.data.payload.total_data.linkedin_share,
+        other_share: result.data.payload.total_data.other_share,
       });
 
       console.log(this.state.datasets3_updated);
@@ -161,7 +225,7 @@ class Index extends React.Component {
 
     Axios.get(
       `${api.protocol}${api.baseUrl}${api.campaignRechargeList}${"?uuid="}${
-        this.state.current_user.uuid
+        this.props.match.params.uuid
       }`,
       { headers: { Authorization: "Bearer " + token } }
     ).then((result) => {
@@ -262,21 +326,41 @@ class Index extends React.Component {
     var cities_count = [];
     var platforms = [];
     var platforms_count = [];
+    var shareDates = [];
+    var share_count = [];
+    var datasets4_updated = [];
     var datasets3_updated = [];
     var datasets2_updated = [];
+    const months = [
+      "Jan-",
+      "Feb-",
+      "Mar-",
+      "Apr-",
+      "May-",
+      "Jun-",
+      "Jul-",
+      "Aug-",
+      "Sep-",
+      "Oct-",
+      "Nov-",
+      "Dec-",
+    ];
     // const { myProp } = this.props;
     // this.handleLoader(true);
     index === 3
       ? Axios.get(
           `${api.protocol}${api.baseUrl}${api.campaignAnalytics}${"?uuid="}${
             this.state.current_user.uuid
-          }${"&from_date="}${yearStart}${"&to_date="}${today}`,
+          }${"&from_date="}${yearStart}${"&to_date="}${today}${"&is_unique="}${!this
+            .state.nonUnique}`,
           { headers: { Authorization: "Bearer " + token } }
         ).then((result) => {
           this.handleLoader(false);
           console.log(result, "year");
-          var sorting = [];
-          var final = [];
+          var sortingClicks = [];
+          var finalClicks = [];
+          var sortingShares = [];
+          var finalShares = [];
           result.data.payload.city_data.map((object, index) => {
             cities.push(object.city);
             cities_count.push(object.click_count);
@@ -290,43 +374,54 @@ class Index extends React.Component {
             var a = new Date(object.month);
             var month = a.getMonth();
 
-            const months = [
-              "Jan-",
-              "Feb-",
-              "Mar-",
-              "Apr-",
-              "May-",
-              "Jun-",
-              "Jul-",
-              "Aug-",
-              "Sep-",
-              "Oct-",
-              "Nov-",
-              "Dec-",
-            ];
-            sorting[index] = {
+            sortingClicks[index] = {
+              key: months[month] + a.getFullYear(),
+              value: object.count,
+            };
+          });
+          result.data.payload.share_data.map((object, index) => {
+            var a = new Date(object.month);
+            var month = a.getMonth();
+
+            sortingShares[index] = {
               key: months[month] + a.getFullYear(),
               value: object.count,
             };
           });
 
-          sorting.forEach(function (a) {
+          sortingClicks.forEach(function (a) {
             if (!this[a.key]) {
               this[a.key] = { key: a.key, value: 0 };
-              final.push(this[a.key]);
+              finalClicks.push(this[a.key]);
+            }
+            this[a.key].value += a.value;
+          }, Object.create(null));
+          sortingShares.forEach(function (a) {
+            if (!this[a.key]) {
+              this[a.key] = { key: a.key, value: 0 };
+              finalShares.push(this[a.key]);
             }
             this[a.key].value += a.value;
           }, Object.create(null));
 
-          console.log(final, "final");
-          final.map((object) => {
+          console.log(finalClicks, "final");
+          finalClicks.map((object) => {
             dates.push(object.key);
 
             dates_count.push(object.value);
           });
+          finalShares.map((object) => {
+            shareDates.push(object.key);
+
+            share_count.push(object.value);
+          });
           this.state.datasets1_updated[0] = {
             label: "Performance",
             data: dates_count,
+          };
+          datasets4_updated[0] = {
+            label: "Performance",
+            data: share_count,
           };
           datasets2_updated[0] = {
             label: "Performance",
@@ -348,6 +443,9 @@ class Index extends React.Component {
             cities_count,
             platforms,
             platforms_count,
+            shareDates,
+            share_count,
+            datasets4_updated,
             datasets2_updated,
             datasets3_updated,
           });
@@ -358,12 +456,14 @@ class Index extends React.Component {
                 api.campaignAnalytics
               }${"?uuid="}${
                 this.state.current_user.uuid
-              }${"&from_date="}${monthStart}${"&to_date="}${today}`
+              }${"&from_date="}${monthStart}${"&to_date="}${today}${"&is_unique="}${!this
+                .state.nonUnique}`
             : `${api.protocol}${api.baseUrl}${
                 api.campaignAnalytics
               }${"?uuid="}${
                 this.state.current_user.uuid
-              }${"&from_date="}${weekStart}${"&to_date="}${today}`,
+              }${"&from_date="}${weekStart}${"&to_date="}${today}${"&is_unique="}${!this
+                .state.nonUnique}`,
           { headers: { Authorization: "Bearer " + token } }
         ).then((result) => {
           this.handleLoader(false);
@@ -371,6 +471,10 @@ class Index extends React.Component {
           result.data.payload.click_data.map((object, index) => {
             dates.push(object.date);
             dates_count.push(object.count);
+          });
+          result.data.payload.share_data.map((object, index) => {
+            shareDates.push(object.date);
+            share_count.push(object.count);
           });
           result.data.payload.city_data.map((object, index) => {
             cities.push(object.city);
@@ -384,6 +488,10 @@ class Index extends React.Component {
             label: "Performance",
             data: dates_count,
           };
+          datasets4_updated[0] = {
+            label: "Performance",
+            data: share_count,
+          };
           datasets2_updated[0] = {
             label: "Performance",
             data: cities_count,
@@ -404,6 +512,9 @@ class Index extends React.Component {
             cities_count,
             platforms,
             platforms_count,
+            shareDates,
+            share_count,
+            datasets4_updated,
             datasets2_updated,
             datasets3_updated,
           });
@@ -419,6 +530,16 @@ class Index extends React.Component {
   handleChartData = (labels, datasets) => {
     chartExample1.data1(labels, datasets);
     console.log(labels, datasets, "handlechartdata");
+  };
+  handleUniqueData = (event) => {
+    this.setState(
+      {
+        nonUnique: event.target.checked,
+      },
+      () => {
+        this.handleRequest(this.state.activeNav);
+      }
+    );
   };
   toggleNavs = (e, index) => {
     e.preventDefault();
@@ -449,500 +570,772 @@ class Index extends React.Component {
     var sumDates = this.state.dates_count.reduce(function (a, b) {
       return a + b;
     }, 0);
+    var sumShares = this.state.share_count.reduce(function (a, b) {
+      return a + b;
+    }, 0);
     return (
       <>
-        {!cookies.get("Auth-token") && (
-          <React.Fragment>
-            <Redirect to="/login"></Redirect>
-            {this.handleCookieRedirect()}
-            {/* {cogoToast.error("You need to Signin first")} */}
-          </React.Fragment>
-        )}
-        {cookies.get("Auth-token") && this.state.isLoading ? (
-          <Spinner
-            style={{
-              width: "3rem",
-              height: "3rem",
-              position: "absolute",
-              top: "50%",
-              color: "black",
-              display: "block",
-              right: "50%",
-            }}
-          />
+        {this.state.current_user === null ? (
+          cookies.get("Auth-token") ? (
+            <Spinner
+              style={{
+                width: "3rem",
+                height: "3rem",
+                position: "absolute",
+                top: "50%",
+                color: "black",
+                display: "block",
+                right: "50%",
+              }}
+            />
+          ) : (
+            <React.Fragment>
+              <Redirect to="/login"></Redirect>
+              {this.handleCookieRedirect()}
+              {/* {cogoToast.error("You need to Signin first")} */}
+            </React.Fragment>
+          )
         ) : (
           <React.Fragment>
-            <div className="main-content" ref="mainContent">
-              <AdminNavbar
-                {...this.props}
-                brandText={this.getBrandText(this.props.location.pathname)}
-                title={this.state.current_user.name}
+            {!cookies.get("Auth-token") && (
+              <React.Fragment>
+                <Redirect to="/login"></Redirect>
+                {this.handleCookieRedirect()}
+                {/* {cogoToast.error("You need to Signin first")} */}
+              </React.Fragment>
+            )}
+            {cookies.get("Auth-token") && this.state.isLoading ? (
+              <Spinner
+                style={{
+                  width: "3rem",
+                  height: "3rem",
+                  position: "absolute",
+                  top: "50%",
+                  color: "black",
+                  display: "block",
+                  right: "50%",
+                }}
               />
-              <Header />
-
-              <Container className="mt--7" fluid>
-                {this.state.isLoading === true ? (
-                  <Spinner
-                    style={{
-                      width: "3rem",
-                      height: "3rem",
-                      position: "absolute",
-                      top: "50%",
-                      color: "black",
-                      display: "block",
-                      right: "50%",
-                    }}
+            ) : (
+              <React.Fragment>
+                <div className="main-content" ref="mainContent">
+                  <AdminNavbar
+                    {...this.props}
+                    brandText={this.getBrandText(this.props.location.pathname)}
+                    title={this.state.current_user.name}
                   />
-                ) : (
-                  <React.Fragment>
-                    <Row>
-                      <div className="col">
-                        <Card className="shadow">
-                          <CardHeader className="border-0" float="right">
-                            <Row>
-                              <div className="col">
-                                <h2 className="mb-0">
-                                  {this.state.current_user.name}
-                                </h2>
-                              </div>
-                              <div className="col text-right">
-                                <Button
-                                  color="primary"
-                                  // href="/dashboard"
-                                  onClick={() => this.props.history.goBack()}
-                                  size="md"
-                                >
-                                  My Campaigns
-                                </Button>
-                              </div>
-                            </Row>
-                          </CardHeader>
-                          <Table
-                            className="align-items-center table-flush"
-                            responsive
-                          >
-                            <thead className="thead-light">
-                              <tr>
-                                <th scope="col">My Campaigns</th>
-                                <th scope="col">Total Spending</th>
-                                <th scope="col">Balance left</th>
-                                <th scope="col">Payment per click</th>
-                                <th scope="col">Top Influencers</th>
-                                <th scope="col">Status</th>
-                                <th scope="col" />
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <th scope="row">
-                                  <Media className="align-items-center">
-                                    <a
-                                      className="avatar rounded-circle mr-3"
-                                      href="#pablo"
-                                      onClick={(e) => e.preventDefault()}
+                  <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
+                    <Container fluid>
+                      <div className="header-body">
+                        {/* Card stats */}
+                        <Row>
+                          <Col lg="4" xl="2">
+                            <Card className="card-stats mb-4 mb-xl-0">
+                              <CardBody>
+                                <Row>
+                                  <div className="col">
+                                    <CardTitle
+                                      tag="h5"
+                                      className="text-uppercase text-muted mb-0"
                                     >
-                                      <img
-                                        alt="..."
-                                        src={
-                                          this.state.current_user.company_logo
-                                        }
-                                      />
-                                    </a>
-                                    <Media>
-                                      <span className="mb-0 text-sm">
-                                        {this.state.current_user.name}
-                                      </span>
-                                    </Media>
-                                  </Media>
-                                </th>
-                                <td>
-                                  {"₹ " + this.state.current_user.total_balance}
-                                </td>
-                                <td>
-                                  <div className="d-flex align-items-center">
-                                    <span className="mr-2">
-                                      {"₹ " + this.state.current_user.balance}
+                                      Whatsapp
+                                    </CardTitle>
+                                    <span className="h2 font-weight-bold mb-0">
+                                      {this.state.whatsapp_click}
                                     </span>
-                                    <div>
-                                      <Progress
-                                        max={
-                                          this.state.current_user.total_balance
-                                        }
-                                        value={
-                                          this.state.current_user
-                                            .total_balance -
-                                          this.state.current_user.balance
-                                        }
-                                        barClassName="bg-danger"
-                                      />
+                                  </div>
+                                  <Col className="col-auto">
+                                    <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                      {/* <i className="fas fa-chart-bar" /> */}
+                                      <img
+                                        src={require("assets/img/icons/whatsapp.png.png")}
+                                        // sizes="10px"
+                                      ></img>
                                     </div>
+                                  </Col>
+                                </Row>
+                                <p className="mt-3 mb-0 text-muted text-sm">
+                                  {/* <span className="text-success mr-2">
+                                    <i className="fa fa-arrow-up" /> 3.48%
+                                  </span>{" "} */}
+                                  <span className="text-nowrap">
+                                    {"Total share= " +
+                                      this.state.whatsapp_share}
+                                  </span>
+                                </p>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                          <Col lg="4" xl="2">
+                            <Card className="card-stats mb-4 mb-xl-0">
+                              <CardBody>
+                                <Row>
+                                  <div className="col">
+                                    <CardTitle
+                                      tag="h5"
+                                      className="text-uppercase text-muted mb-0"
+                                    >
+                                      Twitter
+                                    </CardTitle>
+                                    <span className="h2 font-weight-bold mb-0">
+                                      {this.state.twitter_click}
+                                    </span>
                                   </div>
-                                </td>
-
-                                <td>
-                                  {"₹ " +
-                                    this.state.current_user.payment_per_click}
-                                </td>
-                                <td>
-                                  <div className="avatar-group">
-                                    {this.state.current_user.influencers.map(
-                                      (influencer, index) => (
-                                        <React.Fragment>
-                                          <a
-                                            className="avatar avatar-sm"
-                                            href="#pablo"
-                                            id={influencer.first_name}
-                                            onClick={(e) => e.preventDefault()}
-                                          >
-                                            <img
-                                              alt="..."
-                                              className="rounded-circle"
-                                              src={influencer.profile_url}
-                                            />
-                                          </a>
-                                          <UncontrolledTooltip
-                                            delay={0}
-                                            target={influencer.first_name}
-                                          >
-                                            {influencer.first_name}
-                                          </UncontrolledTooltip>
-                                        </React.Fragment>
-                                      )
-                                    )}
+                                  <Col className="col-auto">
+                                    <div className="icon icon-shape  text-white rounded-circle ">
+                                      <img
+                                        src={require("assets/img/icons/twitter.png")}
+                                      ></img>
+                                    </div>
+                                  </Col>
+                                </Row>
+                                <p className="mt-3 mb-0 text-muted text-sm">
+                                  {/* <span className="text-danger mr-2">
+                                    <i className="fas fa-arrow-down" /> 3.48%
+                                  </span>{" "} */}
+                                  <span className="text-nowrap">
+                                    {"Total share= " + this.state.twitter_share}
+                                  </span>
+                                </p>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                          <Col lg="4" xl="2">
+                            <Card className="card-stats mb-4 mb-xl-0">
+                              <CardBody>
+                                <Row>
+                                  <div className="col">
+                                    <CardTitle
+                                      tag="h5"
+                                      className="text-uppercase text-muted mb-0"
+                                    >
+                                      Facebook
+                                    </CardTitle>
+                                    <span className="h2 font-weight-bold mb-0">
+                                      {this.state.facebook_click}
+                                    </span>
                                   </div>
-                                </td>
-
-                                <td>
-                                  <Badge color="" className="badge-dot mr-4">
-                                    <i
-                                      className={
-                                        this.state.current_user.status ===
-                                        "active"
-                                          ? "bg-success"
-                                          : this.state.current_user.status ===
-                                            "processing"
-                                          ? "bg-info"
-                                          : "bg-warning"
+                                  <Col className="col-auto">
+                                    <div className="icon icon-shape text-white rounded-circle ">
+                                      <img
+                                        src={require("assets/img/icons/facebook.png")}
+                                      ></img>
+                                    </div>
+                                  </Col>
+                                </Row>
+                                <p className="mt-3 mb-0 text-muted text-sm">
+                                  {/* <span className="text-warning mr-2">
+                                    <i className="fas fa-arrow-down" /> 1.10%
+                                  </span>{" "} */}
+                                  <span className="text-nowrap">
+                                    {"Total share= " +
+                                      this.state.facebook_share}
+                                  </span>
+                                </p>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                          <Col lg="4" xl="2">
+                            <Card className="card-stats mb-4 mb-xl-0">
+                              <CardBody>
+                                <Row>
+                                  <div className="col">
+                                    <CardTitle
+                                      tag="h5"
+                                      className="text-uppercase text-muted mb-0"
+                                    >
+                                      Instagram
+                                    </CardTitle>
+                                    <span className="h2 font-weight-bold mb-0">
+                                      {this.state.instagram_click}
+                                    </span>
+                                  </div>
+                                  <Col className="col-auto">
+                                    <div className="icon icon-shape text-white rounded-circle ">
+                                      <img
+                                        src={require("assets/img/icons/instagram.png")}
+                                      ></img>
+                                    </div>
+                                  </Col>
+                                </Row>
+                                <p className="mt-3 mb-0 text-muted text-sm">
+                                  {/* <span className="text-success mr-2">
+                                    <i className="fas fa-arrow-up" /> 12%
+                                  </span>{" "} */}
+                                  <span className="text-nowrap">
+                                    {"Total share= " +
+                                      this.state.instagram_share}
+                                  </span>
+                                </p>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                          <Col lg="4" xl="2">
+                            <Card className="card-stats mb-4 mb-xl-0">
+                              <CardBody>
+                                <Row>
+                                  <div className="col">
+                                    <CardTitle
+                                      tag="h5"
+                                      className="text-uppercase text-muted mb-0"
+                                    >
+                                      LinkedIn
+                                    </CardTitle>
+                                    <span className="h2 font-weight-bold mb-0">
+                                      {this.state.linkedin_click}
+                                    </span>
+                                  </div>
+                                  <Col className="col-auto">
+                                    <div className="icon icon-shape text-white rounded-circle ">
+                                      <img
+                                        src={require("assets/img/icons/linkedin.png")}
+                                      ></img>
+                                    </div>
+                                  </Col>
+                                </Row>
+                                <p className="mt-3 mb-0 text-muted text-sm">
+                                  {/* <span className="text-success mr-2">
+                                    <i className="fas fa-arrow-up" /> 12%
+                                  </span>{" "} */}
+                                  <span className="text-nowrap">
+                                    {"Total share= " +
+                                      this.state.linkedin_share}
+                                  </span>
+                                </p>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                          <Col lg="4" xl="2">
+                            <Card className="card-stats mb-4 mb-xl-0">
+                              <CardBody>
+                                <Row>
+                                  <div className="col">
+                                    <CardTitle
+                                      tag="h5"
+                                      className="text-uppercase text-muted mb-0"
+                                    >
+                                      Other
+                                    </CardTitle>
+                                    <span className="h2 font-weight-bold mb-0">
+                                      {this.state.other_click}
+                                    </span>
+                                  </div>
+                                  <Col className="col-auto">
+                                    <div className="icon icon-shape text-white rounded-circle ">
+                                      <img
+                                        src={require("assets/img/icons/others.png")}
+                                      ></img>
+                                    </div>
+                                  </Col>
+                                </Row>
+                                <p className="mt-3 mb-0 text-muted text-sm">
+                                  {/* <span className="text-success mr-2">
+                                    <i className="fas fa-arrow-up" /> 12%
+                                  </span>{" "} */}
+                                  <span className="text-nowrap">
+                                    {"Total share= " + this.state.other_share}
+                                  </span>
+                                </p>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Container>
+                  </div>
+                  <Container className="mt--7" fluid>
+                    {this.state.isLoading === true ? (
+                      <Spinner
+                        style={{
+                          width: "3rem",
+                          height: "3rem",
+                          position: "absolute",
+                          top: "50%",
+                          color: "black",
+                          display: "block",
+                          right: "50%",
+                        }}
+                      />
+                    ) : (
+                      <React.Fragment>
+                        <Row>
+                          <div className="col">
+                            <Card className="shadow">
+                              <CardHeader className="border-0" float="right">
+                                <Row>
+                                  <div className="col">
+                                    <h2 className="mb-0">
+                                      {this.state.current_user.name}
+                                    </h2>
+                                  </div>
+                                  <div className="col text-right">
+                                    <Button
+                                      color="primary"
+                                      // href="/dashboard"
+                                      onClick={() =>
+                                        this.props.history.goBack()
                                       }
-                                    />
-                                    {this.state.current_user.status}
-                                  </Badge>
-                                </td>
+                                      size="md"
+                                    >
+                                      My Campaigns
+                                    </Button>
+                                  </div>
+                                </Row>
+                              </CardHeader>
+                              <Table
+                                className="align-items-center table-flush"
+                                responsive
+                              >
+                                <thead className="thead-light">
+                                  <tr>
+                                    <th scope="col">My Campaigns</th>
+                                    <th scope="col">Total Spending</th>
+                                    <th scope="col">Balance left</th>
+                                    <th scope="col">Payment per click</th>
+                                    <th scope="col">Top Influencers</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" />
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <th scope="row">
+                                      <Media className="align-items-center">
+                                        <a
+                                          className="avatar rounded-circle mr-3"
+                                          href="#pablo"
+                                          onClick={(e) => e.preventDefault()}
+                                        >
+                                          <img
+                                            alt="..."
+                                            src={
+                                              this.state.current_user
+                                                .company_logo
+                                            }
+                                          />
+                                        </a>
+                                        <Media>
+                                          <span className="mb-0 text-sm">
+                                            {this.state.current_user.name}
+                                          </span>
+                                        </Media>
+                                      </Media>
+                                    </th>
+                                    <td>
+                                      {"₹ " +
+                                        this.state.current_user.total_balance}
+                                    </td>
+                                    <td>
+                                      <div className="d-flex align-items-center">
+                                        <span className="mr-2">
+                                          {"₹ " +
+                                            this.state.current_user.balance}
+                                        </span>
+                                        <div>
+                                          <Progress
+                                            max={
+                                              this.state.current_user
+                                                .total_balance
+                                            }
+                                            value={
+                                              this.state.current_user
+                                                .total_balance -
+                                              this.state.current_user.balance
+                                            }
+                                            barClassName="bg-danger"
+                                          />
+                                        </div>
+                                      </div>
+                                    </td>
 
-                                <td className="">
-                                  <UncontrolledDropdown>
-                                    <DropdownToggle
-                                      className="btn-icon-only text-light"
-                                      href="#pablo"
-                                      role="button"
-                                      size="sm"
-                                      color=""
-                                      onClick={(e) => e.preventDefault()}
-                                    >
-                                      <i className="fas fa-ellipsis-v" />
-                                    </DropdownToggle>
-                                    <DropdownMenu
-                                      className="dropdown-menu-arrow"
-                                      right
-                                    >
-                                      {this.state.is_admin &&
-                                        this.state.current_user.status ===
-                                          "processing" && (
+                                    <td>
+                                      {"₹ " +
+                                        this.state.current_user
+                                          .payment_per_click}
+                                    </td>
+                                    <td>
+                                      <div className="avatar-group">
+                                        {this.state.current_user.influencers.map(
+                                          (influencer, index) => (
+                                            <React.Fragment>
+                                              <a
+                                                className="avatar avatar-sm"
+                                                href="#pablo"
+                                                id={influencer.first_name}
+                                                onClick={(e) =>
+                                                  e.preventDefault()
+                                                }
+                                              >
+                                                <img
+                                                  alt="..."
+                                                  className="rounded-circle"
+                                                  src={influencer.profile_url}
+                                                />
+                                              </a>
+                                              <UncontrolledTooltip
+                                                delay={0}
+                                                target={influencer.first_name}
+                                              >
+                                                {influencer.first_name}
+                                              </UncontrolledTooltip>
+                                            </React.Fragment>
+                                          )
+                                        )}
+                                      </div>
+                                    </td>
+
+                                    <td>
+                                      <Badge
+                                        color=""
+                                        className="badge-dot mr-4"
+                                      >
+                                        <i
+                                          className={
+                                            this.state.current_user.status ===
+                                            "active"
+                                              ? "bg-success"
+                                              : this.state.current_user
+                                                  .status === "processing"
+                                              ? "bg-info"
+                                              : "bg-warning"
+                                          }
+                                        />
+                                        {this.state.current_user.status}
+                                      </Badge>
+                                    </td>
+
+                                    <td className="">
+                                      <UncontrolledDropdown>
+                                        <DropdownToggle
+                                          className="btn-icon-only text-light"
+                                          href="#pablo"
+                                          role="button"
+                                          size="sm"
+                                          color=""
+                                          onClick={(e) => e.preventDefault()}
+                                        >
+                                          <i className="fas fa-ellipsis-v" />
+                                        </DropdownToggle>
+                                        <DropdownMenu
+                                          className="dropdown-menu-arrow"
+                                          right
+                                        >
+                                          {this.state.is_admin &&
+                                            this.state.current_user.status ===
+                                              "processing" && (
+                                              <DropdownItem
+                                                onClick={() =>
+                                                  this.handleStatus(
+                                                    this.state.current_user
+                                                      .status,
+                                                    this.state.current_user
+                                                      .uuid,
+                                                    true
+                                                  )
+                                                }
+                                              >
+                                                Activate
+                                              </DropdownItem>
+                                            )}
                                           <DropdownItem
                                             onClick={() =>
                                               this.handleStatus(
                                                 this.state.current_user.status,
-                                                this.state.current_user.uuid,
-                                                true
+                                                this.state.current_user.uuid
                                               )
                                             }
                                           >
-                                            Activate
+                                            {this.state.current_user.status ===
+                                            "active"
+                                              ? "Deactivate"
+                                              : this.state.current_user
+                                                  .status === "inactive"
+                                              ? "Submit for review"
+                                              : "Cancel review"}
                                           </DropdownItem>
-                                        )}
-                                      <DropdownItem
-                                        onClick={() =>
-                                          this.handleStatus(
-                                            this.state.current_user.status,
-                                            this.state.current_user.uuid
-                                          )
-                                        }
-                                      >
-                                        {this.state.current_user.status ===
-                                        "active"
-                                          ? "Deactivate"
-                                          : this.state.current_user.status ===
-                                            "inactive"
-                                          ? "Submit for review"
-                                          : "Cancel review"}
-                                      </DropdownItem>
 
-                                      <DropdownItem onClick={this.handleEdit}>
-                                        Edit Configuration
-                                      </DropdownItem>
-                                    </DropdownMenu>
-                                  </UncontrolledDropdown>
-                                </td>
-                              </tr>
-                            </tbody>
-                          </Table>
-                        </Card>
-                      </div>
-                    </Row>
-                    <Row className="mt-5">
-                      <Col className="mb-5 mb-xl-0" xl="8">
-                        <Card className="bg-gradient-default shadow">
-                          <CardHeader className="bg-transparent">
-                            <Row className="align-items-center">
-                              <div className="col">
-                                <h2 className="text-white mb-0">
-                                  Click History
-                                </h2>
-                                <h6 className="text-white">
-                                  From{" "}
-                                  {this.state.activeNav === 1
-                                    ? weekStart
-                                    : this.state.activeNav === 2
-                                    ? monthStart
-                                    : yearStart}{" "}
-                                  to {today}{" "}
-                                </h6>
-                              </div>
-                              <div className="col">
-                                <Nav className="justify-content-end" pills>
-                                  <NavItem>
-                                    <NavLink
-                                      className={classnames("py-2 px-3", {
-                                        active: this.state.activeNav === 1,
-                                      })}
-                                      data-toggle="tab"
-                                      href="#pablo"
-                                      onClick={(e) => this.toggleNavs(e, 1)}
-                                    >
-                                      <span className="d-none d-md-block">
-                                        Week
-                                      </span>
-                                      <span className="d-md-none">W</span>
-                                    </NavLink>
-                                  </NavItem>
-                                  <NavItem>
-                                    <NavLink
-                                      className={classnames("py-2 px-3", {
-                                        active: this.state.activeNav === 2,
-                                      })}
-                                      href="#pablo"
-                                      onClick={(e) => this.toggleNavs(e, 2)}
-                                    >
-                                      <span className="d-none d-md-block">
-                                        Month
-                                      </span>
-                                      <span className="d-md-none">M</span>
-                                    </NavLink>
-                                  </NavItem>
-                                  <NavItem>
-                                    <NavLink
-                                      className={classnames("py-2 px-3", {
-                                        active: this.state.activeNav === 3,
-                                      })}
-                                      href="#pablo"
-                                      onClick={(e) => this.toggleNavs(e, 3)}
-                                    >
-                                      <span className="d-none d-md-block">
-                                        Year
-                                      </span>
-                                      <span className="d-md-none">Y</span>
-                                    </NavLink>
-                                  </NavItem>
-                                </Nav>
-                              </div>
-                            </Row>
-                          </CardHeader>
-                          <CardBody>
-                            {/* Chart */}
-                            <div className="chart">
-                              {sumDates === 0 ? (
-                                <h4 className="text-white">No Data.</h4>
-                              ) : (
-                                <Bar
-                                  ref={(refrence) => {
-                                    chartref1 = refrence;
-                                  }}
-                                  data={chartExample1.data1(
-                                    this.state.dates,
-                                    this.state.datasets1_updated
-                                  )}
-                                  options={chartExample1.options}
-                                  getDatasetAtEvent={(e) => console.log(e)}
-                                />
-                              )}
-                            </div>
-                          </CardBody>
-                        </Card>
-                      </Col>
-                      <Col
-                        className="mb-5 mb-xl-0"
-                        xl="4"
-                        // style={{ height: "100%" }}
-                      >
-                        <Card className="shadow" style={{ height: "100%" }}>
-                          <CardHeader className="border-0">
-                            <Row className="align-items-center">
-                              <div className="col">
-                                <h3 className="mb-0">Transaction History</h3>
-                              </div>
-                            </Row>
-                          </CardHeader>
-                          <Table
-                            className="align-items-center table-flush"
-                            responsive
-                            // style={{ height: "100%" }}
-                          >
-                            <thead
-                              className="thead-light"
-                              style={{
-                                position: "relative",
-                                overflow: "scroll",
-                              }}
-                            >
-                              <tr>
-                                <th scope="col">Id</th>
-                                <th scope="col">Mode</th>
-                                <th scope="col">Amount</th>
-                                {/* <th scope="col">Bounce rate</th> */}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {this.state.transactionList.map(
-                                (transactions, index) => (
-                                  <tr>
-                                    <th scope="row">
-                                      {transactions.transaction_id}
-                                    </th>
-                                    <td>{transactions.transaction_mode}</td>
-                                    <td>
-                                      {"₹ " + transactions.transaction_value}
+                                          <DropdownItem
+                                            onClick={this.handleEdit}
+                                          >
+                                            Edit Configuration
+                                          </DropdownItem>
+                                        </DropdownMenu>
+                                      </UncontrolledDropdown>
                                     </td>
-                                    {/* <td>
-                  <i className="fas fa-arrow-up text-success mr-3" />{" "}
-                  46,53%
-                </td> */}
                                   </tr>
-                                )
-                              )}
-                            </tbody>
-                          </Table>
-                        </Card>
-                      </Col>
-                    </Row>
-                    <Row className="mt-5">
-                      <Col xl="6">
-                        <Card className="shadow">
-                          <CardHeader className="bg-transparent">
-                            <Row className="align-items-center">
-                              <div className="col">
-                                {/* <h6 className="text-uppercase text-muted ls-1 mb-1">
+                                </tbody>
+                              </Table>
+                            </Card>
+                          </div>
+                        </Row>
+                        <Row className="mt-5">
+                          <Col className="mb-5 mb-xl-0" xl="8">
+                            <Card className="bg-gradient-default shadow">
+                              <CardHeader className="bg-transparent">
+                                <Row className="align-items-center">
+                                  <div className="col">
+                                    <h2 className="text-white mb-0">
+                                      Click History{" "}
+                                      <small>
+                                        {"(total clicks= " + sumDates + ")"}
+                                      </small>
+                                    </h2>
+                                    <h6 className="text-white">
+                                      From{" "}
+                                      {this.state.activeNav === 1
+                                        ? weekStart
+                                        : this.state.activeNav === 2
+                                        ? monthStart
+                                        : yearStart}{" "}
+                                      to {today}{" "}
+                                    </h6>
+                                  </div>
+                                  <div className="col">
+                                    <Nav className="justify-content-end" pills>
+                                      <NavItem>
+                                        <NavLink
+                                          className={classnames("py-2 px-3", {
+                                            active: this.state.activeNav === 1,
+                                          })}
+                                          data-toggle="tab"
+                                          href="#pablo"
+                                          onClick={(e) => this.toggleNavs(e, 1)}
+                                        >
+                                          <span className="d-none d-md-block">
+                                            Week
+                                          </span>
+                                          <span className="d-md-none">W</span>
+                                        </NavLink>
+                                      </NavItem>
+                                      <NavItem>
+                                        <NavLink
+                                          className={classnames("py-2 px-3", {
+                                            active: this.state.activeNav === 2,
+                                          })}
+                                          href="#pablo"
+                                          onClick={(e) => this.toggleNavs(e, 2)}
+                                        >
+                                          <span className="d-none d-md-block">
+                                            Month
+                                          </span>
+                                          <span className="d-md-none">M</span>
+                                        </NavLink>
+                                      </NavItem>
+                                      <NavItem>
+                                        <NavLink
+                                          className={classnames("py-2 px-3", {
+                                            active: this.state.activeNav === 3,
+                                          })}
+                                          href="#pablo"
+                                          onClick={(e) => this.toggleNavs(e, 3)}
+                                        >
+                                          <span className="d-none d-md-block">
+                                            Year
+                                          </span>
+                                          <span className="d-md-none">Y</span>
+                                        </NavLink>
+                                      </NavItem>
+                                    </Nav>
+                                  </div>
+                                </Row>
+                                <Row>
+                                  <Col>
+                                    <Switch
+                                      nativeControlId="my-switch"
+                                      checked={this.state.nonUnique}
+                                      onChange={this.handleUniqueData}
+                                    />
+                                    <label
+                                      htmlFor="my-switch"
+                                      className="pl-1"
+                                      style={{ color: "white" }}
+                                    >
+                                      {"  "}
+                                      Total non-unique clicks
+                                    </label>
+                                  </Col>
+                                </Row>
+                              </CardHeader>
+                              <CardBody className="pt-0">
+                                {/* Chart */}
+                                <div className="chart">
+                                  {sumDates === 0 ? (
+                                    <h4 className="text-white">No Data.</h4>
+                                  ) : (
+                                    <Bar
+                                      ref={(refrence) => {
+                                        chartref1 = refrence;
+                                      }}
+                                      data={chartExample1.data1(
+                                        this.state.dates,
+                                        this.state.datasets1_updated
+                                      )}
+                                      options={chartExample1.options}
+                                      getDatasetAtEvent={(e) => console.log(e)}
+                                    />
+                                  )}
+                                </div>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                          <Col xl="4">
+                            <Card className="shadow">
+                              <CardHeader className="bg-transparent">
+                                <Row className="align-items-center">
+                                  <div className="col">
+                                    {/* <h6 className="text-uppercase text-muted ls-1 mb-1">
                 Performance
               </h6> */}
-                                <h2 className="mb-0">
-                                  City-wise Data{" "}
-                                  <small>
-                                    {"(total clicks= " + sumCity + ")"}
-                                  </small>
-                                </h2>
-                                <h6>
-                                  From{" "}
-                                  {this.state.activeNav === 1
-                                    ? weekStart
-                                    : this.state.activeNav === 2
-                                    ? monthStart
-                                    : yearStart}{" "}
-                                  to {today}
-                                </h6>
-                              </div>
-                            </Row>
-                          </CardHeader>
-                          <CardBody>
-                            {/* Chart */}
-                            <div className="chart">
-                              {sumCity === 0 ? (
-                                <div>
-                                  <h4>No Data.</h4>
-                                </div>
-                              ) : (
-                                <Pie
-                                  // onChange={() => this.handleChart(chartref2)}
-                                  ref={(refrence) => {
-                                    chartref2 = refrence;
-                                  }}
-                                  data={chartExample2.data2(
-                                    this.state.cities,
-                                    this.state.datasets2_updated
+                                    <h2 className="mb-0">
+                                      City-wise Data{" "}
+                                      <small>
+                                        {"(total clicks= " + sumCity + ")"}
+                                      </small>
+                                    </h2>
+                                    <h6>
+                                      From{" "}
+                                      {this.state.activeNav === 1
+                                        ? weekStart
+                                        : this.state.activeNav === 2
+                                        ? monthStart
+                                        : yearStart}{" "}
+                                      to {today}
+                                    </h6>
+                                  </div>
+                                </Row>
+                              </CardHeader>
+                              <CardBody>
+                                {/* Chart */}
+                                <div className="chart">
+                                  {sumCity === 0 ? (
+                                    <div>
+                                      <h4>No Data.</h4>
+                                    </div>
+                                  ) : (
+                                    <Pie
+                                      // onChange={() => this.handleChart(chartref2)}
+                                      ref={(refrence) => {
+                                        chartref2 = refrence;
+                                      }}
+                                      data={chartExample2.data2(
+                                        this.state.cities,
+                                        this.state.datasets2_updated
+                                      )}
+                                      options={chartExample2.options}
+                                    />
                                   )}
-                                  options={chartExample2.options}
-                                />
-                              )}
-                            </div>
-                          </CardBody>
-                        </Card>
-                      </Col>
-                      <Col xl="6">
-                        <Card className="shadow">
-                          <CardHeader className="bg-transparent">
-                            <Row className="align-items-center">
-                              <div className="col">
-                                {/* <h6 className="text-uppercase text-muted ls-1 mb-1">
-                Performance
-              </h6> */}
-                                <h2 className="mb-0">
-                                  Platform-wise Data{" "}
-                                  <small>
-                                    {"(total clicks= " + sumPlatform + ")"}
-                                  </small>
-                                </h2>
-                                <h6>
-                                  From{" "}
-                                  {this.state.activeNav === 1
-                                    ? weekStart
-                                    : this.state.activeNav === 2
-                                    ? monthStart
-                                    : yearStart}{" "}
-                                  to {today}
-                                </h6>
-                              </div>
-                            </Row>
-                          </CardHeader>
-                          <CardBody>
-                            {/* Chart */}
-                            <div className="chart">
-                              {sumPlatform === 0 ? (
-                                <div>
-                                  <h4>No Data.</h4>
                                 </div>
-                              ) : (
-                                <Pie
-                                  ref={(refrence) => {
-                                    chartref3 = refrence;
-                                  }}
-                                  data={chartExample2.data2(
-                                    this.state.platforms,
-                                    this.state.datasets3_updated
+                              </CardBody>
+                            </Card>
+                          </Col>
+                        </Row>
+                        <Row className="mt-5">
+                          <Col className="order-2 mb-5 mb-xl-0" xl="8">
+                            <Card className="bg-gradient-default shadow">
+                              <CardHeader className="bg-transparent">
+                                <Row className="align-items-center">
+                                  <div className="col">
+                                    <h2 className="text-white mb-0">
+                                      Share History{" "}
+                                      <small>
+                                        {"(total shares= " + sumShares + ")"}
+                                      </small>
+                                    </h2>
+                                    <h6 className="text-white">
+                                      From{" "}
+                                      {this.state.activeNav === 1
+                                        ? weekStart
+                                        : this.state.activeNav === 2
+                                        ? monthStart
+                                        : yearStart}{" "}
+                                      to {today}{" "}
+                                    </h6>
+                                  </div>
+                                </Row>
+                              </CardHeader>
+                              <CardBody>
+                                {/* Chart */}
+                                <div className="chart">
+                                  {sumShares === 0 ? (
+                                    <h4 className="text-white">No Data.</h4>
+                                  ) : (
+                                    <Bar
+                                      ref={(refrence) => {
+                                        chartref1 = refrence;
+                                      }}
+                                      data={chartExample1.data1(
+                                        this.state.shareDates,
+                                        this.state.datasets4_updated
+                                      )}
+                                      options={chartExample1.options}
+                                      getDatasetAtEvent={(e) => console.log(e)}
+                                    />
                                   )}
-                                  options={chartExample2.options}
-                                />
-                              )}
-                            </div>
-                          </CardBody>
-                        </Card>
-                      </Col>
-                    </Row>
-                  </React.Fragment>
-                )}
-              </Container>
+                                </div>
+                              </CardBody>
+                            </Card>
+                          </Col>
 
-              <Container fluid>
-                <AdminFooter />
-              </Container>
-            </div>
+                          <Col className="order-1" xl="4">
+                            <Card className="shadow">
+                              <CardHeader className="bg-transparent">
+                                <Row className="align-items-center">
+                                  <div className="col">
+                                    {/* <h6 className="text-uppercase text-muted ls-1 mb-1">
+                Performance
+              </h6> */}
+                                    <h2 className="mb-0">
+                                      Platform-wise Data{" "}
+                                      <small>
+                                        {"(total clicks= " + sumPlatform + ")"}
+                                      </small>
+                                    </h2>
+                                    <h6>
+                                      From{" "}
+                                      {this.state.activeNav === 1
+                                        ? weekStart
+                                        : this.state.activeNav === 2
+                                        ? monthStart
+                                        : yearStart}{" "}
+                                      to {today}
+                                    </h6>
+                                  </div>
+                                </Row>
+                              </CardHeader>
+                              <CardBody>
+                                {/* Chart */}
+                                <div className="chart">
+                                  {sumPlatform === 0 ? (
+                                    <div>
+                                      <h4>No Data.</h4>
+                                    </div>
+                                  ) : (
+                                    <Pie
+                                      ref={(refrence) => {
+                                        chartref3 = refrence;
+                                      }}
+                                      data={chartExample2.data2(
+                                        this.state.platforms,
+                                        this.state.datasets3_updated
+                                      )}
+                                      options={chartExample2.options}
+                                    />
+                                  )}
+                                </div>
+                              </CardBody>
+                            </Card>
+                          </Col>
+                        </Row>
+                      </React.Fragment>
+                    )}
+                  </Container>
+
+                  <Container fluid>
+                    <AdminFooter />
+                  </Container>
+                </div>
+              </React.Fragment>
+            )}
           </React.Fragment>
         )}
       </>

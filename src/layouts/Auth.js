@@ -114,7 +114,7 @@ class Auth extends React.Component {
               <AuthFooter />
             </div>
           ))}
-        {cookies.get("Auth-token") && this.props.history.goForward()}
+        {cookies.get("Auth-token") && <Redirect to="/dashboard"></Redirect>}
       </>
     );
   }
