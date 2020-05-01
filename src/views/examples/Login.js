@@ -268,7 +268,7 @@ class Login extends React.Component {
               </NavLink>
             </Col>
             <Col className="text-right" xs="6">
-              <NavLink className="text-light" to="/register" tag={Link}>
+              <NavLink className="text-light" to="/signup" tag={Link}>
                 <small>Create new account</small>
               </NavLink>
             </Col>

@@ -24,10 +24,10 @@ class Auth extends React.Component {
     document.body.classList.remove("bg-default");
   }
   handleComponent(props) {
-    if (props.location.pathname === "/login") {
+    if (props.location.pathname === "/signin") {
       console.log("i'mm in login");
       return <Login myProp={this.handleLoader} {...props} />;
-    } else if (props.location.pathname === "/register") {
+    } else if (props.location.pathname === "/signup") {
       console.log("i'mm in register");
       return <Register myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/forgot") {
@@ -35,7 +35,7 @@ class Auth extends React.Component {
       return <Forgot myProp={this.handleLoader} {...props} />;
     } else {
       console.log("i'mm in /");
-      return <Redirect from="/" to="/login" />;
+      return <Redirect from="/" to="/signin" />;
     }
   }
 
@@ -104,10 +104,10 @@ class Auth extends React.Component {
               <Container className="mt--9 pb-4">
                 <Row className="justify-content-center">
                   {this.handleComponent(props)}
-                  {/* <Redirect from="/" to="/login" /> */}
+                  {/* <Redirect from="/" to="/signin" /> */}
                   {/* <Switch>
                     {this.getRoutes(routes)}
-                    <Redirect from="*" to="/login" />
+                    <Redirect from="*" to="/signin" />
                   </Switch> */}
                 </Row>
               </Container>

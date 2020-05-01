@@ -34,7 +34,7 @@ const store = createStore(reducer, applyMiddleware(thunk));
 function handleCookiesRedirect() {
   console.log("i am here");
   cogoToast.error("You need to sign in first");
-  return <Redirect to="/login" />;
+  return <Redirect to="/signin" />;
 }
 // export default store;
 
@@ -44,8 +44,8 @@ ReactDOM.render(
       <Switch>
         <AlertProvider template={AlertTemplate} {...options}>
           <Route exact path="/" render={(props) => <Auth {...props} />} />
-          <Route path="/login" render={(props) => <Auth {...props} />} />
-          <Route path="/register" render={(props) => <Auth {...props} />} />
+          <Route path="/signin" render={(props) => <Auth {...props} />} />
+          <Route path="/signup" render={(props) => <Auth {...props} />} />
           <Route path="/forgot" render={(props) => <Auth {...props} />} />
           {/* {cookies.get("Auth-token") ? ( */}
           {/* <React.Fragment> */}

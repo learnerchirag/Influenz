@@ -116,7 +116,7 @@ class Register extends React.Component {
             if (result.status === 200) {
               if (result.data.status === true) {
                 cogoToast.success(result.data.message);
-                this.props.history.push("/login");
+                this.props.history.push("/signin");
               }
               if (result.data.status === false) {
                 cogoToast.error(result.data.message);
@@ -239,7 +239,10 @@ class Register extends React.Component {
                       >
                         <span className="text-muted">
                           I agree with the{" "}
-                          <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                          <a
+                            href="https://influenz.club/privacy"
+                            target="_blank"
+                          >
                             Privacy Policy
                           </a>
                         </span>
@@ -272,7 +275,7 @@ class Register extends React.Component {
           </Card>
           <Row className="mt-3">
             <Col className="text-right" xs="12">
-              <NavLink className="text-light" to="/login" tag={Link}>
+              <NavLink className="text-light" to="/signin" tag={Link}>
                 <small>Sign in</small>
               </NavLink>
             </Col>

@@ -1,4 +1,3 @@
-
 /*eslint-disable*/
 import React from "react";
 
@@ -14,48 +13,29 @@ class Login extends React.Component {
             <Row className="align-items-center justify-content-xl-between">
               <Col xl="6">
                 <div className="copyright text-center text-xl-left text-muted">
-                  © 2020{" "}
-                  <a
-                    className="font-weight-bold ml-1"
-                    href="#Influenz_Campaign"
-                    target="_blank"
-                  >
-                    Influenz Campaign
-                  </a>
+                  © 2020 Influenz | All Right Reserved
                 </div>
               </Col>
+
               <Col xl="6">
                 <Nav className="nav-footer justify-content-center justify-content-xl-end">
                   <NavItem>
                     <NavLink
-                      href="#"
+                      href="https://influenz.club/"
+                      rel="noopener noreferrer"
                       target="_blank"
                     >
-                      Influenz Campaign
+                      Website
                     </NavLink>
                   </NavItem>
+
                   <NavItem>
                     <NavLink
-                      href="#"
+                      href="https://influenz.club/privacy"
+                      rel="noopener noreferrer"
                       target="_blank"
                     >
-                      About Us
-                    </NavLink>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink
-                      href="#"
-                      target="_blank"
-                    >
-                      Blog
-                    </NavLink>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink
-                      href="#"
-                      target="_blank"
-                    >
-                      MIT License
+                      Privacy Policy
                     </NavLink>
                   </NavItem>
                 </Nav>

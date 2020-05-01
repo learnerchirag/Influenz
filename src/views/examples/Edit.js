@@ -493,7 +493,7 @@ class Edit extends React.Component {
     cogoToast.error("You need to Sign in first");
     console.log("function");
 
-    return <Redirect to="/login"></Redirect>;
+    return <Redirect to="/signin"></Redirect>;
   };
   getBrandText = (path) => {
     return "Campaign Name";

@@ -20,21 +20,21 @@ import {
   InputGroup,
   Row,
   Col,
-  NavLink
+  NavLink,
 } from "reactstrap";
 
 class Forgot extends React.Component {
   state = {
     email: "",
-    errors: {}
+    errors: {},
   };
 
-  handleInputChange = event => {
+  handleInputChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
   };
-  handleResetClick = e => {
+  handleResetClick = (e) => {
     this.setState({
-      errors: {}
+      errors: {},
     });
     let errors = {};
     e.preventDefault();
@@ -45,7 +45,7 @@ class Forgot extends React.Component {
       errors["Required"] = "Fill all the fields required";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error("Fill all the fields required");
       console.log(this.state);
@@ -57,7 +57,7 @@ class Forgot extends React.Component {
       errors["Email"] = "Please type a valid email";
       this.setState({
         ...this.state,
-        errors
+        errors,
       });
       cogoToast.error("Please type a valid email");
     } else if (this.state.errors) {
@@ -68,20 +68,20 @@ class Forgot extends React.Component {
         `${api.protocol}${api.baseUrl}${api.forgotPassword}`,
         this.state
       )
-        .then(result => {
+        .then((result) => {
           console.log(result);
           myProp(false);
           if (result.status === 200) {
             if (result.data.status === true) {
               cogoToast.success(result.data.message);
-              this.props.history.push("/login");
+              this.props.history.push("/signin");
             }
             if (result.data.status === false) {
               cogoToast.error(result.data.message);
             }
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.log(error);
           myProp(false);
           if (error.response.status === 400) {
@@ -160,7 +160,7 @@ class Forgot extends React.Component {
           </Card>
           <Row className="mt-3">
             <Col className="text-right" xs="12">
-              <NavLink className="text-light" to="/login" tag={Link}>
+              <NavLink className="text-light" to="/signin" tag={Link}>
                 <small>Sign in</small>
               </NavLink>
             </Col>

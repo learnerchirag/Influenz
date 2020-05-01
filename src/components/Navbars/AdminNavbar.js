@@ -50,7 +50,7 @@ class AdminNavbar extends React.Component {
               cookies.remove("Is-admin", { path: "/" });
               console.log(cookies.get("Auth-token"));
               setTimeout(() => {
-                window.location = "/login";
+                window.location = "/signin";
               }, 1000);
             },
           },
@@ -117,17 +117,13 @@ class AdminNavbar extends React.Component {
                     <span>My Campaigns</span>
                   </DropdownItem>
                   <DropdownItem
-                    to="https://influenz.club/#gettouch"
+                    href="https://influenz.club/#gettouch"
                     target="_blank"
-                    tag={Link}
                   >
                     <i className="ni ni-calendar-grid-58" />
                     <span>Contact us</span>
                   </DropdownItem>
-                  {/* <DropdownItem to="/admin/user-profile" tag={Link}>
-                    <i className="ni ni-support-16" />
-                    <span>Support</span>
-                  </DropdownItem> */}
+
                   <DropdownItem divider />
                   <DropdownItem onClick={(e) => this.handleLogout(e)}>
                     <i className="ni ni-user-run" />

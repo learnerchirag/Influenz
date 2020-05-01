@@ -596,7 +596,7 @@ class Index extends React.Component {
             />
           ) : (
             <React.Fragment>
-              <Redirect to="/login"></Redirect>
+              <Redirect to="/signin"></Redirect>
               {this.handleCookieRedirect()}
               {/* {cogoToast.error("You need to Signin first")} */}
             </React.Fragment>
@@ -605,7 +605,7 @@ class Index extends React.Component {
           <React.Fragment>
             {!cookies.get("Auth-token") && (
               <React.Fragment>
-                <Redirect to="/login"></Redirect>
+                <Redirect to="/signin"></Redirect>
                 {this.handleCookieRedirect()}
                 {/* {cogoToast.error("You need to Signin first")} */}
               </React.Fragment>
@@ -644,7 +644,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Whatsapp
+                                      Whatsapp <br></br>Clicks{" "}
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.whatsapp_click}
@@ -665,8 +665,7 @@ class Index extends React.Component {
                                     <i className="fa fa-arrow-up" /> 3.48%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {"Total share= " +
-                                      this.state.whatsapp_share}
+                                    {this.state.whatsapp_share + " Shares"}
                                   </span>
                                 </p>
                               </CardBody>
@@ -681,7 +680,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Twitter
+                                      Twitter<br></br> Clicks{" "}
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.twitter_click}
@@ -691,6 +690,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape  text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/twitter.png")}
+                                        style={{ height: "60px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -700,7 +700,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-down" /> 3.48%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {"Total share= " + this.state.twitter_share}
+                                    {this.state.twitter_share + " Shares"}
                                   </span>
                                 </p>
                               </CardBody>
@@ -715,7 +715,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Facebook
+                                      Facebook<br></br> Clicks{" "}
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.facebook_click}
@@ -735,8 +735,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-down" /> 1.10%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {"Total share= " +
-                                      this.state.facebook_share}
+                                    {this.state.facebook_share + " Shares"}
                                   </span>
                                 </p>
                               </CardBody>
@@ -751,7 +750,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Instagram
+                                      Instagram<br></br> Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.instagram_click}
@@ -761,6 +760,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/instagram.png")}
+                                        style={{ height: "60px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -770,8 +770,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-up" /> 12%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {"Total share= " +
-                                      this.state.instagram_share}
+                                    {this.state.instagram_share + " Shares"}
                                   </span>
                                 </p>
                               </CardBody>
@@ -786,7 +785,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      LinkedIn
+                                      LinkedIn<br></br> Clicks{" "}
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.linkedin_click}
@@ -796,6 +795,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/linkedin.png")}
+                                        style={{ height: "60px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -805,8 +805,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-up" /> 12%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {"Total share= " +
-                                      this.state.linkedin_share}
+                                    {this.state.linkedin_share + " Shares"}
                                   </span>
                                 </p>
                               </CardBody>
@@ -821,7 +820,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Other
+                                      Other<br></br> Clicks{" "}
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.other_click}
@@ -831,16 +830,14 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/others.png")}
+                                        style={{ height: "60px" }}
                                       ></img>
                                     </div>
                                   </Col>
                                 </Row>
                                 <p className="mt-3 mb-0 text-muted text-sm">
-                                  {/* <span className="text-success mr-2">
-                                    <i className="fas fa-arrow-up" /> 12%
-                                  </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {"Total share= " + this.state.other_share}
+                                    {this.state.other_share + " Shares"}
                                   </span>
                                 </p>
                               </CardBody>

@@ -169,7 +169,7 @@ class Profile extends React.Component {
       <>
         {!cookies.get("Auth-token") && (
           <React.Fragment>
-            <Redirect to="/login"></Redirect>
+            <Redirect to="/signin"></Redirect>
             {this.handleCookieRedirect()}
             {/* {cogoToast.error("You need to Signin first")} */}
           </React.Fragment>
