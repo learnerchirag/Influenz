@@ -42,7 +42,6 @@ import AdminFooter from "../../components/Footers/AdminFooter.js";
 import cogoToast from "cogo-toast";
 import Popup from "reactjs-popup";
 import ReactPaginate from "react-paginate";
-
 const cookies = new Cookies();
 // const token = cookies.get("Auth-token");
 
@@ -156,7 +155,7 @@ class Tables extends React.Component {
       }
     );
   };
-  handleStatus = (status, uuid, activating) => {
+  handleStatus = (status, uuid, index, activating) => {
     const token = cookies.get("Auth-token");
     var modelOpen = true;
     console.log(status, uuid, activating);
@@ -193,8 +192,23 @@ class Tables extends React.Component {
                   headers: { Authorization: "Bearer " + token },
                 }
               ).then((result) => {
-                window.location.reload(true);
-                console.log(result);
+                var tableListFilteredUpdating = this.state.tableListFiltered;
+                tableListFilteredUpdating.splice(index, 1, result.data.payload);
+                this.setState(
+                  {
+                    tableListFiltered: tableListFilteredUpdating,
+                  },
+                  () => {
+                    result.data.status
+                      ? cogoToast.success(result.data.message)
+                      : cogoToast.error(result.data.message);
+                  }
+                );
+                console.log(
+                  tableListFilteredUpdating,
+                  this.state.tableListFiltered
+                );
+                console.log(result.data.payload);
               });
             },
           },
@@ -542,6 +556,7 @@ class Tables extends React.Component {
                                               this.handleStatus(
                                                 user.status,
                                                 user.uuid,
+                                                index,
                                                 true
                                               )
                                             }
@@ -553,7 +568,8 @@ class Tables extends React.Component {
                                         onClick={() =>
                                           this.handleStatus(
                                             user.status,
-                                            user.uuid
+                                            user.uuid,
+                                            index
                                           )
                                         }
                                       >

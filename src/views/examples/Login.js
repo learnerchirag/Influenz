@@ -7,6 +7,8 @@ import Axios from "axios";
 import api from "../constants/api";
 import cogoToast from "cogo-toast";
 import Cookies from "universal-cookie";
+import { ReCaptcha } from "react-recaptcha-google";
+import { loadReCaptcha } from "react-recaptcha-google";
 // reactstrap components
 import {
   Button,
@@ -33,8 +35,28 @@ class Login extends React.Component {
     password: "",
     user: null,
     errors: {},
+    captchaVerified: false,
   };
-
+  componentDidUpdate = () => {
+    loadReCaptcha();
+  };
+  onLoadRecaptcha = () => {
+    if (this.captchaDemo) {
+      this.captchaDemo.reset();
+      // this.captchaDemo.getValue();
+      // this.captchaDemo.getWidgetId();
+      console.log("hello captcha");
+      // this.captchaDemo.execute();
+    }
+  };
+  verifyCallback = (response) => {
+    if (response) {
+      console.log("hello verified");
+      this.setState({
+        captchaVerified: true,
+      });
+    }
+  };
   handleInputChange = (event) => {
     // debugger;
     const target = event.target;
@@ -67,73 +89,76 @@ class Login extends React.Component {
       cogoToast.error(errors.Required);
       // console.log(this.state);
       return;
+    } else if (this.state.captchaVerified) {
+      if (this.state.errors) {
+        event.preventDefault();
+
+        const { myProp } = this.props;
+        const cookies = new Cookies();
+        // console.log(myProp);
+        myProp(true);
+        // 'https://devapi.influenz.club/v1/client/signin '
+        Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
+          .then((result) => {
+            myProp(false);
+
+            console.log(result);
+            console.log("hello");
+            if (result.status === 200) {
+              console.log("chalja bhai");
+              const user = result.data.payload;
+              console.log(user);
+
+              cookies.set("Auth-token", result.data.payload.access_token, {
+                path: "/",
+                maxAge: "3600",
+              });
+              cookies.set("User", result.data.payload.name, {
+                path: "/",
+              });
+              cookies.set("Is-admin", result.data.payload.is_admin, {
+                path: "/",
+              });
+              console.log("running");
+              this.props.history.push({
+                pathname: "/dashboard",
+                state: { is_admin: result.data.payload.is_admin },
+              });
+              console.log(cookies.get("Auth-token"), this.props.history);
+
+              // return <Redirect to="/admin" />;
+            }
+          })
+          .catch((error) => {
+            myProp(false);
+            // this.props.location.handleLoader(false);
+            console.log(error);
+            if (error.message === "Network Error") {
+              cogoToast.error("Network error");
+              return;
+            }
+            if (error.response.status === 401) {
+              cogoToast.error("Email or Password is incorrect.");
+            }
+            if (error.response.status === 400) {
+              cogoToast.error(
+                "Status " + error.response.status + ". Request failed."
+              );
+            }
+            if (error.response.status === 500) {
+              cogoToast.error(
+                "Status " + error.response.status + ". Request failed."
+              );
+            }
+          });
+      }
+      console.log(this.state.errors);
+      console.log(this.state);
+      console.log("This is user", this.state.user);
+      console.log(this.props);
+    } else {
+      cogoToast.error("ReCAPTCHA required");
     }
-    if (this.state.errors) {
-      event.preventDefault();
-
-      const { myProp } = this.props;
-      const cookies = new Cookies();
-      // console.log(myProp);
-      myProp(true);
-      // 'https://devapi.influenz.club/v1/client/signin '
-      Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
-        .then((result) => {
-          myProp(false);
-
-          console.log(result);
-          console.log("hello");
-          if (result.status === 200) {
-            console.log("chalja bhai");
-            const user = result.data.payload;
-            console.log(user);
-
-            cookies.set("Auth-token", result.data.payload.access_token, {
-              path: "/",
-              maxAge: "3600",
-            });
-            cookies.set("User", result.data.payload.name, {
-              path: "/",
-            });
-            cookies.set("Is-admin", result.data.payload.is_admin, {
-              path: "/",
-            });
-            console.log("running");
-            this.props.history.push({
-              pathname: "/dashboard",
-              state: { is_admin: result.data.payload.is_admin },
-            });
-            console.log(cookies.get("Auth-token"), this.props.history);
-
-            // return <Redirect to="/admin" />;
-          }
-        })
-        .catch((error) => {
-          myProp(false);
-          // this.props.location.handleLoader(false);
-          console.log(error);
-          if (error.message === "Network Error") {
-            cogoToast.error("Network error");
-            return;
-          }
-          if (error.response.status === 401) {
-            cogoToast.error("Email or Password is incorrect.");
-          }
-          if (error.response.status === 400) {
-            cogoToast.error(
-              "Status " + error.response.status + ". Request failed."
-            );
-          }
-          if (error.response.status === 500) {
-            cogoToast.error(
-              "Status " + error.response.status + ". Request failed."
-            );
-          }
-        });
-    }
-    console.log(this.state.errors);
-    console.log(this.state);
-    console.log("This is user", this.state.user);
-    console.log(this.props);
   };
   render() {
     // const alert = useAlert();
@@ -197,6 +222,16 @@ class Login extends React.Component {
                     />
                   </InputGroup>
                 </FormGroup>
+                <ReCaptcha
+                  ref={(el) => {
+                    this.captchaDemo = el;
+                  }}
+                  size="normal"
+                  render="explicit"
+                  sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
+                  onloadCallback={this.onLoadRecaptcha}
+                  verifyCallback={this.verifyCallback}
+                />
                 <div className="custom-control custom-control-alternative custom-checkbox">
                   <input
                     className="custom-control-input"

@@ -46,7 +46,8 @@ class AdminNavbar extends React.Component {
               cookies.remove("Auth-token", {
                 path: "/campaign/:uuid/analytics",
               });
-
+              cookies.remove("User", { path: "/" });
+              cookies.remove("Is-admin", { path: "/" });
               console.log(cookies.get("Auth-token"));
               setTimeout(() => {
                 window.location = "/login";

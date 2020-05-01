@@ -84,7 +84,6 @@ class Edit extends React.Component {
 
     selected_image: "",
     progress: 0,
-    upload: false,
     activeTab: "1",
     age_max: null,
     age_min: null,
@@ -160,11 +159,12 @@ class Edit extends React.Component {
       );
       locations = result.data.payload.locations;
     });
-    Axios.get(`${api.protocol}${api.baseUrl}${api.campaignList}`, {
+    Axios.get(`${api.protocol}${api.baseUrl}${api.campaignFullList}`, {
       headers: { Authorization: "Bearer " + token },
     }).then((result) => {
       const options = [];
-      result.data.payload.campaigns.map((users) => {
+      console.log(this.state.uuid);
+      result.data.payload.map((users) => {
         users.uuid !== this.state.uuid &&
           options.push({
             value: users.uuid,
@@ -218,25 +218,7 @@ class Edit extends React.Component {
               await storage
                 .ref(files[0])
                 .put(this.state.selected_image)
-                .then((snap) => {
-                  progress = (snap.bytesTransferred / snap.totalBytes) * 100;
-                  this.setState(
-                    {
-                      progress: progress,
-                    },
-                    () => {
-                      console.log(this.state.progress);
-                      progress === 100
-                        ? this.setState({
-                            upload: true,
-                          })
-                        : this.setState({
-                            upload: false,
-                          });
-                    }
-                  );
-                  // console.log(this.state.progress, "progress");
-                });
+                .then(this.setState({ progress: 1 }));
 
               console.log("posting");
               console.log(this.state.selected_image);
@@ -244,13 +226,16 @@ class Edit extends React.Component {
                 .ref(files[0])
                 .getDownloadURL()
                 .then((url) => {
-                  index === 1
-                    ? this.setState({
-                        company_logo: url,
-                      })
-                    : this.setState({
-                        image_url: url,
+                  this.setState(
+                    {
+                      image_url: url,
+                    },
+                    () => {
+                      this.setState({
+                        progress: 0,
                       });
+                    }
+                  );
                   console.log("downloaded url image_url", url);
                 });
             }
@@ -268,25 +253,11 @@ class Edit extends React.Component {
             await storage
               .ref(files[0])
               .put(this.state.selected_image)
-              .then((snap) => {
-                progress = (snap.bytesTransferred / snap.totalBytes) * 100;
-                this.setState(
-                  {
-                    progress: progress,
-                  },
-                  () => {
-                    console.log(this.state.progress);
-                    progress === 100
-                      ? this.setState({
-                          upload: true,
-                        })
-                      : this.setState({
-                          upload: false,
-                        });
-                  }
-                );
-                // console.log(this.state.progress, "progress");
-              });
+              .then(
+                this.setState({
+                  progress: 2,
+                })
+              );
 
             console.log("posting");
             console.log(this.state.selected_image);
@@ -294,13 +265,17 @@ class Edit extends React.Component {
               .ref(files[0])
               .getDownloadURL()
               .then((url) => {
-                index === 1
-                  ? this.setState({
-                      company_logo: url,
-                    })
-                  : this.setState({
-                      image_url: url,
+                this.setState(
+                  {
+                    company_logo: url,
+                  },
+                  () => {
+                    this.setState({
+                      progress: 0,
                     });
+                  }
+                );
+
                 console.log("downloaded url image_url", url);
               });
           }
@@ -336,15 +311,41 @@ class Edit extends React.Component {
       }
     });
     if (isNull === false) {
-      Axios.put(`${api.protocol}${api.baseUrl}${api.campaign}`, this.state, {
-        headers: { Authorization: "Bearer " + token },
-      }).then((result) => {
-        console.log(result);
-        this.setState({
-          activeTab: "2",
-          tab_preference: true,
+      var modelOpen = true;
+      modelOpen &&
+        confirmAlert({
+          title: "Confirm to update campaign",
+          message: "Click confirm to Update campaign",
+          buttons: [
+            {
+              label: "Confirm",
+              onClick: () => {
+                Axios.put(
+                  `${api.protocol}${api.baseUrl}${api.campaign}`,
+                  this.state,
+                  {
+                    headers: { Authorization: "Bearer " + token },
+                  }
+                ).then((result) => {
+                  console.log(result);
+                  this.setState({
+                    // activeTab: "2",
+                    tab_preference: true,
+                  });
+                  result.data.status
+                    ? cogoToast.success(result.data.message)
+                    : cogoToast.error(result.data.message);
+                });
+              },
+            },
+
+            {
+              label: "Cancel",
+              onClick: () => (modelOpen = false),
+            },
+          ],
         });
-      });
+
       // }
     } else {
       cogoToast.error("All the fields are required");
@@ -378,6 +379,9 @@ class Edit extends React.Component {
                     // uuid: result.data.payload.uuid,
                   });
                   console.log(result);
+                  result.data.status
+                    ? cogoToast.success(result.data.message)
+                    : cogoToast.error(result.data.message);
                 });
               },
             },
@@ -460,7 +464,7 @@ class Edit extends React.Component {
           buttons: [
             {
               label: "Confirm",
-              onClick: () =>
+              onClick: () => {
                 Axios.post(
                   `${api.protocol}${api.baseUrl}${api.campaignMoveCharge}`,
                   {
@@ -470,7 +474,12 @@ class Edit extends React.Component {
                   {
                     headers: { Authorization: "Bearer " + token },
                   }
-                ),
+                ).then((result) => {
+                  result.data.status
+                    ? cogoToast.success(result.data.message)
+                    : cogoToast.error(result.data.message);
+                });
+              },
             },
             {
               label: "Cancel",
@@ -819,6 +828,16 @@ class Edit extends React.Component {
                                               for="image"
                                             >
                                               Upload image
+                                              {this.state.progress === 1 && (
+                                                <Spinner
+                                                  className="ml-2"
+                                                  as="span"
+                                                  animation="grow"
+                                                  size="sm"
+                                                  role="status"
+                                                  aria-hidden="true"
+                                                />
+                                              )}
                                             </label>
                                             <Input
                                               style={{ visibility: "hidden" }}
@@ -843,29 +862,17 @@ class Edit extends React.Component {
                                           lg="5"
                                           className="text-center my-auto"
                                         >
-                                          {this.state.upload === true && (
-                                            <img
-                                              className="img-responsive"
-                                              src={this.state.image_url}
-                                              height="200px"
-                                              style={{
-                                                maxWidth:
-                                                  "-webkit-fill-available",
-                                              }}
-                                            ></img>
-                                          )}
+                                          <img
+                                            className="img-responsive"
+                                            src={this.state.image_url}
+                                            height="200px"
+                                            style={{
+                                              maxWidth:
+                                                "-webkit-fill-available",
+                                            }}
+                                          ></img>
                                         </Col>
                                       </Row>
-                                      {/* <Row>
-                                        <Col className="my-auto">
-                                          <div>
-                                            {/* <h4>Uploading...</h4> */}
-                                      {/* <Progress
-                                              completed={this.state.progress}
-                                            />
-                                          </div>
-                                        </Col>
-                                      </Row> */}
                                     </CardBody>
                                   </Card>
                                 </Col>
@@ -888,6 +895,16 @@ class Edit extends React.Component {
                                               for="image-1"
                                             >
                                               Upload image
+                                              {this.state.progress === 2 && (
+                                                <Spinner
+                                                  className="ml-2"
+                                                  as="span"
+                                                  animation="grow"
+                                                  size="sm"
+                                                  role="status"
+                                                  aria-hidden="true"
+                                                />
+                                              )}
                                             </label>
                                             <Input
                                               style={{ visibility: "hidden" }}
@@ -912,23 +929,12 @@ class Edit extends React.Component {
                                           lg="5"
                                           className="text-center my-auto"
                                         >
-                                          {this.state.upload === true && (
-                                            <img
-                                              className="img-responsive"
-                                              src={this.state.company_logo}
-                                              height="200px"
-                                              width="200px"
-                                            ></img>
-                                          )}
-                                          {this.state.upload === false && (
-                                            <div>
-                                              {/* <h3>Uploading...</h3> */}
-                                              <Progress
-                                                completed={this.state.progress}
-                                              />
-                                            </div>
-                                          )}
-                                          {/* <Progress completed={this.state.progress} /> */}
+                                          <img
+                                            className="img-responsive"
+                                            src={this.state.company_logo}
+                                            height="200px"
+                                            width="200px"
+                                          ></img>
                                         </Col>
                                       </Row>
                                     </CardBody>

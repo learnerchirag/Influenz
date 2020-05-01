@@ -101,7 +101,7 @@ class Index extends React.Component {
     isLoading: false,
     editing: false,
     is_admin: null,
-    nonUnique: false,
+    unique: true,
   };
   // componentWillMount = async () => {
   //   const token = cookies.get("Auth-token");
@@ -136,7 +136,7 @@ class Index extends React.Component {
       `${api.protocol}${api.baseUrl}${api.campaignAnalytics}${"?uuid="}${
         this.props.match.params.uuid
       }${"&from_date="}${weekStart}${"&to_date="}${today}${"&is_unique="}${
-        this.state.nonUnique
+        this.state.unique
       }`,
       // { is_unique: false },
       { headers: { Authorization: "Bearer " + token } }
@@ -290,6 +290,9 @@ class Index extends React.Component {
                 this.setState({
                   current_user: result.data.payload,
                 });
+                result.data.status
+                  ? cogoToast.success(result.data.message)
+                  : cogoToast.error(result.data.message);
                 // window.location.reload(true);
               });
             },
@@ -351,8 +354,9 @@ class Index extends React.Component {
       ? Axios.get(
           `${api.protocol}${api.baseUrl}${api.campaignAnalytics}${"?uuid="}${
             this.state.current_user.uuid
-          }${"&from_date="}${yearStart}${"&to_date="}${today}${"&is_unique="}${!this
-            .state.nonUnique}`,
+          }${"&from_date="}${yearStart}${"&to_date="}${today}${"&is_unique="}${
+            this.state.unique
+          }`,
           { headers: { Authorization: "Bearer " + token } }
         ).then((result) => {
           this.handleLoader(false);
@@ -456,14 +460,16 @@ class Index extends React.Component {
                 api.campaignAnalytics
               }${"?uuid="}${
                 this.state.current_user.uuid
-              }${"&from_date="}${monthStart}${"&to_date="}${today}${"&is_unique="}${!this
-                .state.nonUnique}`
+              }${"&from_date="}${monthStart}${"&to_date="}${today}${"&is_unique="}${
+                this.state.unique
+              }`
             : `${api.protocol}${api.baseUrl}${
                 api.campaignAnalytics
               }${"?uuid="}${
                 this.state.current_user.uuid
-              }${"&from_date="}${weekStart}${"&to_date="}${today}${"&is_unique="}${!this
-                .state.nonUnique}`,
+              }${"&from_date="}${weekStart}${"&to_date="}${today}${"&is_unique="}${
+                this.state.unique
+              }`,
           { headers: { Authorization: "Bearer " + token } }
         ).then((result) => {
           this.handleLoader(false);
@@ -534,7 +540,7 @@ class Index extends React.Component {
   handleUniqueData = (event) => {
     this.setState(
       {
-        nonUnique: event.target.checked,
+        unique: event.target.checked,
       },
       () => {
         this.handleRequest(this.state.activeNav);
@@ -645,11 +651,11 @@ class Index extends React.Component {
                                     </span>
                                   </div>
                                   <Col className="col-auto">
-                                    <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                    <div className="icon icon-shape text-white rounded-circle ">
                                       {/* <i className="fas fa-chart-bar" /> */}
                                       <img
                                         src={require("assets/img/icons/whatsapp.png.png")}
-                                        // sizes="10px"
+                                        style={{ height: "60px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -719,6 +725,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/facebook.png")}
+                                        style={{ height: "60px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -1142,16 +1149,16 @@ class Index extends React.Component {
                                   <Col>
                                     <Switch
                                       nativeControlId="my-switch"
-                                      checked={this.state.nonUnique}
+                                      checked={this.state.unique}
                                       onChange={this.handleUniqueData}
                                     />
                                     <label
                                       htmlFor="my-switch"
-                                      className="pl-1"
+                                      className="pl-2"
                                       style={{ color: "white" }}
                                     >
                                       {"  "}
-                                      Total non-unique clicks
+                                      Unique users
                                     </label>
                                   </Col>
                                 </Row>
@@ -1230,7 +1237,7 @@ class Index extends React.Component {
                           </Col>
                         </Row>
                         <Row className="mt-5">
-                          <Col className="order-2 mb-5 mb-xl-0" xl="8">
+                          <Col className="order-1 mb-5 mb-xl-0" xl="8">
                             <Card className="bg-gradient-default shadow">
                               <CardHeader className="bg-transparent">
                                 <Row className="align-items-center">
@@ -1276,7 +1283,7 @@ class Index extends React.Component {
                             </Card>
                           </Col>
 
-                          <Col className="order-1" xl="4">
+                          <Col className="order-2" xl="4">
                             <Card className="shadow">
                               <CardHeader className="bg-transparent">
                                 <Row className="align-items-center">

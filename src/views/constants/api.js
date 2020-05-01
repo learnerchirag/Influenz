@@ -9,6 +9,7 @@ module.exports = {
   password: "me/password",
   campaign: "campaign/",
   campaignList: "campaign/list",
+  campaignFullList: "campaign/list/all",
   campaignTransaction: "campaign/transaction/list",
   campaignAnalytics: "campaign/analytics",
   campaignRecharge: "campaign/recharge",
