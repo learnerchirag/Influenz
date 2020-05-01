@@ -636,8 +636,8 @@ class Index extends React.Component {
                         {/* Card stats */}
                         <Row>
                           <Col lg="4" xl="2">
-                            <Card className="card-stats mb-4 mb-xl-0">
-                              <CardBody>
+                            <Card className="card-stats mb-4 mb-xl-0 border-0">
+                              <CardBody style={{ width: "110%" }}>
                                 <Row>
                                   <div className="col">
                                     <CardTitle
@@ -673,7 +673,7 @@ class Index extends React.Component {
                           </Col>
                           <Col lg="4" xl="2">
                             <Card className="card-stats mb-4 mb-xl-0">
-                              <CardBody>
+                              <CardBody style={{ width: "110%" }}>
                                 <Row>
                                   <div className="col">
                                     <CardTitle
@@ -708,7 +708,7 @@ class Index extends React.Component {
                           </Col>
                           <Col lg="4" xl="2">
                             <Card className="card-stats mb-4 mb-xl-0">
-                              <CardBody>
+                              <CardBody style={{ width: "110%" }}>
                                 <Row>
                                   <div className="col">
                                     <CardTitle
@@ -743,7 +743,7 @@ class Index extends React.Component {
                           </Col>
                           <Col lg="4" xl="2">
                             <Card className="card-stats mb-4 mb-xl-0">
-                              <CardBody>
+                              <CardBody style={{ width: "110%" }}>
                                 <Row>
                                   <div className="col">
                                     <CardTitle
@@ -778,7 +778,7 @@ class Index extends React.Component {
                           </Col>
                           <Col lg="4" xl="2">
                             <Card className="card-stats mb-4 mb-xl-0">
-                              <CardBody>
+                              <CardBody style={{ width: "110%" }}>
                                 <Row>
                                   <div className="col">
                                     <CardTitle
@@ -813,7 +813,7 @@ class Index extends React.Component {
                           </Col>
                           <Col lg="4" xl="2">
                             <Card className="card-stats mb-4 mb-xl-0">
-                              <CardBody>
+                              <CardBody style={{ width: "110%" }}>
                                 <Row>
                                   <div className="col">
                                     <CardTitle

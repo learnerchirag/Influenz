@@ -173,7 +173,7 @@ class Login extends React.Component {
                     <Col lg="9" md="6">
                       <h1 className="#5e72e4">Welcome!</h1>
                       <p className="text-lead #8898aa">
-                        Influenz Campaign Management
+                        Influenz Marketing Platform
                       </p>
                     </Col>
                   </Row>
