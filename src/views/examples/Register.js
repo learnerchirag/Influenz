@@ -48,7 +48,7 @@ class Register extends React.Component {
   };
   verifyCallback = (response) => {
     if (response) {
-      console.log("hello verified");
+      console.log("hello verified", response);
       this.setState({
         captchaVerified: true,
       });
@@ -249,7 +249,7 @@ class Register extends React.Component {
                     this.captchaDemo = el;
                   }}
                   size="normal"
-                  render="onload"
+                  render="explicit"
                   sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
                   onloadCallback={this.onLoadRecaptcha}
                   verifyCallback={this.verifyCallback}
