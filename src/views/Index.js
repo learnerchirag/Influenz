@@ -655,7 +655,7 @@ class Index extends React.Component {
                                       {/* <i className="fas fa-chart-bar" /> */}
                                       <img
                                         src={require("assets/img/icons/whatsapp.png.png")}
-                                        style={{ height: "60px" }}
+                                        style={{ width: "40px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -690,7 +690,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape  text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/twitter.png")}
-                                        style={{ height: "60px" }}
+                                        style={{ width: "40px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -725,7 +725,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/facebook.png")}
-                                        style={{ height: "60px" }}
+                                        style={{ width: "40px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -760,7 +760,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/instagram.png")}
-                                        style={{ height: "60px" }}
+                                        style={{ width: "40px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -795,7 +795,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/linkedin.png")}
-                                        style={{ height: "60px" }}
+                                        style={{ width: "40px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -830,7 +830,7 @@ class Index extends React.Component {
                                     <div className="icon icon-shape text-white rounded-circle ">
                                       <img
                                         src={require("assets/img/icons/others.png")}
-                                        style={{ height: "60px" }}
+                                        style={{ width: "40px" }}
                                       ></img>
                                     </div>
                                   </Col>
@@ -1191,7 +1191,7 @@ class Index extends React.Component {
                 Performance
               </h6> */}
                                     <h2 className="mb-0">
-                                      City-wise Data{" "}
+                                      City-wise Clicks{" "}
                                       <small>
                                         {"(total clicks= " + sumCity + ")"}
                                       </small>
@@ -1289,7 +1289,7 @@ class Index extends React.Component {
                 Performance
               </h6> */}
                                     <h2 className="mb-0">
-                                      Platform-wise Data{" "}
+                                      Platform-wise Clicks{" "}
                                       <small>
                                         {"(total clicks= " + sumPlatform + ")"}
                                       </small>
