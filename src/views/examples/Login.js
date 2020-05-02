@@ -37,7 +37,7 @@ class Login extends React.Component {
     errors: {},
     captchaVerified: false,
   };
-  componentDidUpdate = () => {
+  componentDidMount = () => {
     loadReCaptcha();
   };
   onLoadRecaptcha = () => {
@@ -227,7 +227,7 @@ class Login extends React.Component {
                     this.captchaDemo = el;
                   }}
                   size="normal"
-                  render="explicit"
+                  render="onload"
                   sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
                   onloadCallback={this.onLoadRecaptcha}
                   verifyCallback={this.verifyCallback}
