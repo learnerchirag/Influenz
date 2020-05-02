@@ -114,7 +114,7 @@ class Tables extends React.Component {
     this.setState(
       {
         search: event.target.value.toLowerCase(),
-        tableListFiltered: [],
+        //tableListFiltered: [],
       },
       () => {
         console.log(this.state.search);
