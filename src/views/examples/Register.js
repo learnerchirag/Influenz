@@ -36,12 +36,6 @@ class Register extends React.Component {
   };
   componentDidMount = () => {
     loadReCaptcha();
-    // if (this.captchaDemo) {
-    //   console.log("started, just a second...");
-    //   console.log(this.captchaDemo);
-    //   this.captchaDemo.reset();
-    //   // this.captchaDemo.execute();
-    // }
   };
   onLoadRecaptcha = () => {
     if (this.captchaDemo) {
@@ -54,7 +48,7 @@ class Register extends React.Component {
   };
   verifyCallback = (response) => {
     if (response) {
-      console.log("hello verified");
+      console.log("hello verified", response);
       this.setState({
         captchaVerified: true,
       });

@@ -37,7 +37,7 @@ class Login extends React.Component {
     errors: {},
     captchaVerified: false,
   };
-  componentDidUpdate = () => {
+  componentDidMount = () => {
     loadReCaptcha();
   };
   onLoadRecaptcha = () => {
@@ -51,7 +51,7 @@ class Login extends React.Component {
   };
   verifyCallback = (response) => {
     if (response) {
-      console.log("hello verified");
+      console.log("hello verified", response);
       this.setState({
         captchaVerified: true,
       });
