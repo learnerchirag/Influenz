@@ -644,7 +644,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Whatsapp <br></br>Clicks{" "}
+                                      Whatsapp <br/>Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.whatsapp_click}
@@ -665,7 +665,7 @@ class Index extends React.Component {
                                     <i className="fa fa-arrow-up" /> 3.48%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {this.state.whatsapp_share + " Shares"}
+                                    <h5>Total Shares: {this.state.whatsapp_share}</h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -680,7 +680,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Twitter<br></br> Clicks{" "}
+                                      Twitter<br/>Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.twitter_click}
@@ -700,7 +700,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-down" /> 3.48%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {this.state.twitter_share + " Shares"}
+                                    <h5>Total Shares: {this.state.twitter_share}</h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -715,7 +715,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Facebook<br></br> Clicks{" "}
+                                      Facebook<br/>Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.facebook_click}
@@ -735,7 +735,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-down" /> 1.10%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {this.state.facebook_share + " Shares"}
+                                    <h5>Total Shares: {this.state.facebook_share}</h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -750,7 +750,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Instagram<br></br> Clicks
+                                      Instagram<br/>Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.instagram_click}
@@ -770,7 +770,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-up" /> 12%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {this.state.instagram_share + " Shares"}
+                                    <h5>Total Shares: {this.state.instagram_share}</h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -785,7 +785,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      LinkedIn<br></br> Clicks{" "}
+                                      LinkedIn<br/>Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.linkedin_click}
@@ -805,7 +805,7 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-up" /> 12%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    {this.state.linkedin_share + " Shares"}
+                                    <h5>Total Shares: {this.state.linkedin_share}</h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -820,7 +820,7 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Other<br></br> Clicks{" "}
+                                      Other<br/>Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.other_click}
@@ -837,7 +837,7 @@ class Index extends React.Component {
                                 </Row>
                                 <p className="mt-3 mb-0 text-muted text-sm">
                                   <span className="text-nowrap">
-                                    {this.state.other_share + " Shares"}
+                                    <h5>Total Shares: {this.state.other_share}</h5>
                                   </span>
                                 </p>
                               </CardBody>
