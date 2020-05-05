@@ -1,8 +1,6 @@
 import React from "react";
-import { Link, Redirect } from "react-router-dom";
-import { userActions } from "../../_actions/user.actions";
+import { Link } from "react-router-dom";
 // import PropTypes from 'prop-types';
-import { connect } from "react-redux";
 import Axios from "axios";
 import api from "../constants/api";
 import cogoToast from "cogo-toast";
@@ -43,15 +41,10 @@ class Login extends React.Component {
   onLoadRecaptcha = () => {
     if (this.captchaDemo) {
       this.captchaDemo.reset();
-      // this.captchaDemo.getValue();
-      // this.captchaDemo.getWidgetId();
-      console.log("hello captcha");
-      // this.captchaDemo.execute();
     }
   };
   verifyCallback = (response) => {
     if (response) {
-      console.log("hello verified", response);
       this.setState({
         captchaVerified: true,
       });
@@ -75,11 +68,7 @@ class Login extends React.Component {
     let errors = {};
 
     event.preventDefault();
-    const { history } = this.props;
-    const serverport = {
-      email: this.state.email,
-      password: this.state.password,
-    };
+
     if (this.state.email === "" || this.state.password === "") {
       errors["Required"] = "Fill all the fields required";
       this.setState({
@@ -87,7 +76,7 @@ class Login extends React.Component {
         errors,
       });
       cogoToast.error(errors.Required);
-      // console.log(this.state);
+      // (this.state);
       return;
     } else if (this.state.captchaVerified) {
       if (this.state.errors) {
@@ -95,23 +84,19 @@ class Login extends React.Component {
 
         const { myProp } = this.props;
         const cookies = new Cookies();
-        // console.log(myProp);
+        // (myProp);
         myProp(true);
         // 'https://devapi.influenz.club/v1/client/signin '
         Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
           .then((result) => {
             myProp(false);
 
-            console.log(result);
-            console.log("hello");
             if (result.status === 200) {
-              console.log("chalja bhai");
               const user = result.data.payload;
-              console.log(user);
 
               cookies.set("Auth-token", result.data.payload.access_token, {
                 path: "/",
-                maxAge: "3600",
+                maxAge: "43200",
               });
               cookies.set("User", result.data.payload.name, {
                 path: "/",
@@ -119,43 +104,31 @@ class Login extends React.Component {
               cookies.set("Is-admin", result.data.payload.is_admin, {
                 path: "/",
               });
-              console.log("running");
               this.props.history.push({
                 pathname: "/dashboard",
                 state: { is_admin: result.data.payload.is_admin },
               });
-              console.log(cookies.get("Auth-token"), this.props.history);
-
-              // return <Redirect to="/admin" />;
             }
           })
           .catch((error) => {
             myProp(false);
-            // this.props.location.handleLoader(false);
-            console.log(error);
+
             if (error.message === "Network Error") {
               cogoToast.error("Network error");
               return;
-            }
-            if (error.response.status === 401) {
+            } else if (error.response.status === 401) {
               cogoToast.error("Email or Password is incorrect.");
-            }
-            if (error.response.status === 400) {
+            } else if (error.response.status === 400) {
               cogoToast.error(
                 "Status " + error.response.status + ". Request failed."
               );
-            }
-            if (error.response.status === 500) {
+            } else {
               cogoToast.error(
                 "Status " + error.response.status + ". Request failed."
               );
             }
           });
       }
-      console.log(this.state.errors);
-      console.log(this.state);
-      console.log("This is user", this.state.user);
-      console.log(this.props);
     } else {
       cogoToast.error("ReCAPTCHA required");
     }
@@ -222,16 +195,18 @@ class Login extends React.Component {
                     />
                   </InputGroup>
                 </FormGroup>
-                <ReCaptcha
-                  ref={(el) => {
-                    this.captchaDemo = el;
-                  }}
-                  size="normal"
-                  render="explicit"
-                  sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
-                  onloadCallback={this.onLoadRecaptcha}
-                  verifyCallback={this.verifyCallback}
-                />
+                <div style={{ minHeight: "78px" }}>
+                  <ReCaptcha
+                    ref={(el) => {
+                      this.captchaDemo = el;
+                    }}
+                    size="normal"
+                    render="explicit"
+                    sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
+                    onloadCallback={this.onLoadRecaptcha}
+                    verifyCallback={this.verifyCallback}
+                  />
+                </div>
                 <div className="custom-control custom-control-alternative custom-checkbox">
                   <input
                     className="custom-control-input"
@@ -279,19 +254,4 @@ class Login extends React.Component {
   }
 }
 
-//export default Login;
-const mapStateToProps = (state) => {
-  return {
-    isLoginPending: state.isLoginPending,
-    isLoginSuccess: state.isLoginSuccess,
-    loginError: state.loginError,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    login: (email, password) => dispatch(userActions.login(email, password)),
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Login;

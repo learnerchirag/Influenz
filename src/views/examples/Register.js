@@ -40,15 +40,10 @@ class Register extends React.Component {
   onLoadRecaptcha = () => {
     if (this.captchaDemo) {
       this.captchaDemo.reset();
-      // this.captchaDemo.getValue();
-      // this.captchaDemo.getWidgetId();
-      console.log("hello captcha");
-      // this.captchaDemo.execute();
     }
   };
   verifyCallback = (response) => {
     if (response) {
-      console.log("hello verified", response);
       this.setState({
         captchaVerified: true,
       });
@@ -72,7 +67,6 @@ class Register extends React.Component {
         errors,
       });
       cogoToast.error("Fill all the fields required");
-      console.log(this.state);
       return;
     }
     if (this.state.name.length > 50) {
@@ -91,7 +85,6 @@ class Register extends React.Component {
       });
       cogoToast.error("Enter a valid phone number");
     } else if (!validator.isEmail(this.state.email)) {
-      console.log("in email");
       errors["Email"] = "Please type a valid email";
       this.setState({
         ...this.state,
@@ -106,7 +99,6 @@ class Register extends React.Component {
         Axios.post(`${api.protocol}${api.baseUrl}${api.userSignup}`, this.state)
           .then((result) => {
             myProp(false);
-            console.log(result);
             if (result.status === 200) {
               if (result.data.status === true) {
                 cogoToast.success(result.data.message);
@@ -119,7 +111,6 @@ class Register extends React.Component {
           })
           .catch((error) => {
             myProp(false);
-            console.log(error);
             if (error.response.status === 400) {
               cogoToast.error(
                 "Status " + error.response.status + ". Request failed."
@@ -135,9 +126,6 @@ class Register extends React.Component {
     } else {
       cogoToast.error("ReCAPTCHA required");
     }
-
-    console.log(this.state.errors);
-    console.log(this.state);
   };
 
   render() {
@@ -236,6 +224,7 @@ class Register extends React.Component {
                           <a
                             href="https://influenz.club/privacy"
                             target="_blank"
+                            rel="noopener noreferrer"
                           >
                             Privacy Policy
                           </a>
@@ -244,16 +233,18 @@ class Register extends React.Component {
                     </div>
                   </Col>
                 </Row>
-                <ReCaptcha
-                  ref={(el) => {
-                    this.captchaDemo = el;
-                  }}
-                  size="normal"
-                  render="explicit"
-                  sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
-                  onloadCallback={this.onLoadRecaptcha}
-                  verifyCallback={this.verifyCallback}
-                />
+                <div style={{ minHeight: "78px" }}>
+                  <ReCaptcha
+                    ref={(el) => {
+                      this.captchaDemo = el;
+                    }}
+                    size="normal"
+                    render="explicit"
+                    sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
+                    onloadCallback={this.onLoadRecaptcha}
+                    verifyCallback={this.verifyCallback}
+                  />
+                </div>
                 <div className="text-center">
                   <Button
                     className="mt-4"

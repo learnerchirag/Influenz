@@ -48,12 +48,10 @@ class Forgot extends React.Component {
         errors,
       });
       cogoToast.error("Fill all the fields required");
-      console.log(this.state);
       return;
     }
 
     if (!validator.isEmail(this.state.email)) {
-      console.log("in email");
       errors["Email"] = "Please type a valid email";
       this.setState({
         ...this.state,
@@ -69,7 +67,6 @@ class Forgot extends React.Component {
         this.state
       )
         .then((result) => {
-          console.log(result);
           myProp(false);
           if (result.status === 200) {
             if (result.data.status === true) {
@@ -82,7 +79,6 @@ class Forgot extends React.Component {
           }
         })
         .catch((error) => {
-          console.log(error);
           myProp(false);
           if (error.response.status === 400) {
             cogoToast.error(
@@ -96,9 +92,6 @@ class Forgot extends React.Component {
           }
         });
     }
-
-    console.log(this.state.errors);
-    console.log(this.state);
   };
 
   render() {

@@ -52,7 +52,6 @@ class Profile extends React.Component {
     Axios.get(`${api.protocol}${api.baseUrl}${api.profile}`, {
       headers: { Authorization: "Bearer " + token },
     }).then((result) => {
-      console.log(result);
       this.setState({
         uuid: result.data.payload.uuid,
         name: result.data.payload.name,
@@ -154,7 +153,6 @@ class Profile extends React.Component {
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
-    console.log("function");
   };
   getBrandText = (path) => {
     return "My Campaigns";

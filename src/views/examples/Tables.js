@@ -1,7 +1,6 @@
 import React from "react";
 import api from "../constants/api";
 import Cookies from "universal-cookie";
-import { Link } from "react-router-dom";
 
 // reactstrap components
 import {
@@ -21,9 +20,6 @@ import {
   UncontrolledDropdown,
   DropdownToggle,
   Media,
-  Pagination,
-  PaginationItem,
-  PaginationLink,
   Progress,
   Table,
   Container,
@@ -74,16 +70,12 @@ class Tables extends React.Component {
         headers: { Authorization: "Bearer " + token },
       }
     ).then((result) => {
-      // myProp(false);
       this.handleLoader(false);
-      console.log(result);
       this.setState({
         tableListFiltered: result.data.payload.campaigns,
         tableList: result.data.payload.campaigns,
         pageCount: result.data.payload.page_count,
       });
-      console.log(this.state.tableList);
-      console.log(this.state.tableListFiltered, "before");
     });
   };
   handleAnalytics = (user) => {
@@ -103,22 +95,15 @@ class Tables extends React.Component {
         });
       }
     );
-
-    console.log("handling analytics");
-    console.log(user, "this is the user");
   };
   handleSearch = (event) => {
     event.preventDefault();
     const token = cookies.get("Auth-token");
-    console.log(event.target.value);
     this.setState(
       {
         search: event.target.value.toLowerCase(),
-        //tableListFiltered: [],
       },
       () => {
-        console.log(this.state.search);
-        let temp = [];
         Axios.get(
           `${api.protocol}${api.baseUrl}${api.campaignList}${"?search="}${
             this.state.search
@@ -127,38 +112,17 @@ class Tables extends React.Component {
             headers: { Authorization: "Bearer " + token },
           }
         ).then((result) => {
-          console.log(result);
           this.setState({
             tableListFiltered: result.data.payload.campaigns,
             pageCount: result.data.payload.page_count,
           });
         });
-        // for (let i = 0; i < this.state.tableList.length; i++) {
-        //   if (
-        //     this.state.tableList[i].name
-        //       .toLowerCase()
-        //       .includes(this.state.search)
-        //   ) {
-        //     console.log(this.state.tableListFiltered, "afterfiltering");
-        //     temp = [...temp, this.state.tableList[i]];
-        //     this.setState({
-        //       tableListFiltered: temp,
-        //     });
-        //   }
-        //   console.log(
-        //     this.state.search,
-        //     this.state.tableList[i].name,
-        //     this.state.tableList[i].name.includes(this.state.search),
-        //     "out ofloop"
-        //   );
-        // }
       }
     );
   };
   handleStatus = (status, uuid, index, activating) => {
     const token = cookies.get("Auth-token");
     var modelOpen = true;
-    console.log(status, uuid, activating);
     modelOpen &&
       confirmAlert({
         title:
@@ -170,7 +134,6 @@ class Tables extends React.Component {
             : status === "inactive"
             ? "submit for review"
             : "decativate"),
-        // message: "Click recharge to Confirm campaign and recharge",
         buttons: [
           {
             label: "Confirm",
@@ -204,11 +167,6 @@ class Tables extends React.Component {
                       : cogoToast.error(result.data.message);
                   }
                 );
-                console.log(
-                  tableListFilteredUpdating,
-                  this.state.tableListFiltered
-                );
-                console.log(result.data.payload);
               });
             },
           },
@@ -240,7 +198,6 @@ class Tables extends React.Component {
   handleCreate = (e) => {
     e.preventDefault();
     const token = cookies.get("Auth-token");
-    console.log("creating");
     if (this.state.name.length > 4) {
       Axios.post(
         `${api.protocol}${api.baseUrl}${api.campaign}`,
@@ -270,7 +227,6 @@ class Tables extends React.Component {
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
-    console.log("function");
   };
   handlePagination = (event) => {
     const token = cookies.get("Auth-token");
@@ -279,7 +235,6 @@ class Tables extends React.Component {
         pageSelected: event.selected,
       },
       () => {
-        console.log(this.state.pageSelected);
         Axios.get(
           `${api.protocol}${api.baseUrl}${api.campaignList}${"?page="}${
             this.state.pageSelected + 1
@@ -288,24 +243,19 @@ class Tables extends React.Component {
             headers: { Authorization: "Bearer " + token },
           }
         ).then((result) => {
-          // myProp(false);
-          console.log(result);
           this.setState({
             tableListFiltered: result.data.payload.campaigns,
             tableList: result.data.payload.campaigns,
             pageCount: result.data.payload.page_count,
           });
-          // this.componentDidMount();
         });
       }
     );
-    console.log(event);
   };
   getBrandText = (path) => {
     return "My Campaigns";
   };
   render() {
-    console.log(this.props.history.location);
     return (
       <>
         {!cookies.get("Auth-token") && (

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, Router, BrowserRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Cookies from "universal-cookie";
 // reactstrap components
 import {
@@ -7,12 +7,6 @@ import {
   DropdownItem,
   UncontrolledDropdown,
   DropdownToggle,
-  Form,
-  FormGroup,
-  InputGroupAddon,
-  InputGroupText,
-  Input,
-  InputGroup,
   Navbar,
   Nav,
   Container,
@@ -34,12 +28,10 @@ class AdminNavbar extends React.Component {
     modelOpen &&
       confirmAlert({
         title: "Are you sure to logout",
-        // message: "Click confirm to Move balance",
         buttons: [
           {
             label: "Confirm",
             onClick: () => {
-              console.log("logout", this.props);
               cookies.remove("Auth-token", { path: "/" });
               cookies.remove("Auth-token", { path: "/dashboard" });
               cookies.remove("Auth-token", { path: "/campaign/:uuid/edit" });
@@ -48,7 +40,7 @@ class AdminNavbar extends React.Component {
               });
               cookies.remove("User", { path: "/" });
               cookies.remove("Is-admin", { path: "/" });
-              console.log(cookies.get("Auth-token"));
+              cookies.get("Auth-token");
               setTimeout(() => {
                 window.location = "/signin";
               }, 1000);

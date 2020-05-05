@@ -1,12 +1,10 @@
 import React from "react";
-import { Route, Switch, Redirect, Router } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 // reactstrap components
-import { Container, Row, Col } from "reactstrap";
-import { UncontrolledAlert } from "reactstrap";
+import { Container, Row } from "reactstrap";
 // core components
 import AuthNavbar from "components/Navbars/AuthNavbar.js";
 import AuthFooter from "components/Footers/AuthFooter.js";
-import routes from "routes.js";
 import { Spinner } from "reactstrap";
 import Login from "../views/examples/Login.js";
 import Register from "views/examples/Register.js";
@@ -25,16 +23,12 @@ class Auth extends React.Component {
   }
   handleComponent(props) {
     if (props.location.pathname === "/signin") {
-      console.log("i'mm in login");
       return <Login myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/signup") {
-      console.log("i'mm in register");
       return <Register myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/forgot") {
-      console.log("i'mm in forgot");
       return <Forgot myProp={this.handleLoader} {...props} />;
     } else {
-      console.log("i'mm in /");
       return <Redirect from="/" to="/signin" />;
     }
   }
@@ -46,15 +40,8 @@ class Auth extends React.Component {
   };
   render() {
     const props = this.props;
-    console.log(cookies.get("Auth-token") === null);
-    console.log(
-      cookies.get("Auth-token") === undefined,
-      typeof cookies.get("Auth-token")
-    );
     return (
       <>
-        {/* {cookies.get("Auth-token") === "null" ||
-        cookies.get("Auth-token") === undefined  */}
         {!cookies.get("Auth-token") &&
           (this.state.isLoading ? (
             <Spinner
@@ -72,18 +59,6 @@ class Auth extends React.Component {
             <div className="main-content">
               <AuthNavbar />
               <div className="header bg-gradient-info py-7 py-lg-8">
-                {/* <Container>
-                <div className="header-body text-center mb-7">
-                  <Row className="justify-content-center">
-                    <Col lg="5" md="8">
-                      <h1 className="text-white">Influenz Campaign Dashboard</h1>
-                      <p className="text-lead text-light">
-                      Let Influencers Spread The World.
-                      </p>
-                    </Col>
-                  </Row>
-                </div>
-              </Container> */}
                 <div className="separator separator-bottom separator-skew zindex-100">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -104,11 +79,6 @@ class Auth extends React.Component {
               <Container className="mt--9 pb-4">
                 <Row className="justify-content-center">
                   {this.handleComponent(props)}
-                  {/* <Redirect from="/" to="/signin" /> */}
-                  {/* <Switch>
-                    {this.getRoutes(routes)}
-                    <Redirect from="*" to="/signin" />
-                  </Switch> */}
                 </Row>
               </Container>
               <AuthFooter />

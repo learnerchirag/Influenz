@@ -319,22 +319,8 @@ let chartExample1 = {
         },
       },
     },
-    // animation: {
-    //   onComplete: function () {
-    //     var chartInstance = this.Chart;
-    //     var ctx = chartInstance.ctx;
-    //     ctx.up;
-    //     // Chart.helpers.each(this.data.datasets.forEach(function (dataset, i) {
-    //     //     var meta = chartInstance.controller.getDatasetMeta(i);
-    //     //     Chart.helpers.each(meta.data.forEach(function (bar, index) {
-    //     //         ctx.fillText(dataset.data[index], bar._model.x - 5, bar._model.y + 3);
-    //     //     }),this)
-    //     // }),this);
-    //   },50px
-    // },
   },
   data1: (labels, datasets) => {
-    console.log(datasets, labels, "data1");
     return {
       labels: labels,
       datasets: datasets,
@@ -355,37 +341,13 @@ let chartExample2 = {
         fontSize: 16,
       },
     },
-
-    // label: {
-    //   display: true,
-    //   position: "bottom",
-    //   labels: {
-    //     fontColor: "#333",
-    //     fontSize: 16,
-    //   },
-    // },
   },
   data2: (labels, datasets) => {
-    console.log(datasets, labels, "data2");
     return {
       labels: labels,
       datasets: datasets,
-
-      // maxBarThickness: 10,
-      // indexLabel: datasets.data,
-      // indexLabelPlacement: "inside",
     };
   },
-  // data: {
-  //   labels: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  //   datasets: [
-  //     {
-  //       label: "Sales",
-  //       data: [25, 20, 30, 22, 17, 29],
-  //       maxBarThickness: 10,
-  //     },
-  //   ],
-  // },
 };
 
 module.exports = {

@@ -1,15 +1,15 @@
 import React from "react";
 // node.js library that concatenates classes (strings)
-import { Route, Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 import classnames from "classnames";
 // javascipt plugin for creating charts
 import Chart from "chart.js";
 // react plugin used to create charts
-import { Line, Bar, Pie } from "react-chartjs-2";
+import { Bar, Pie } from "react-chartjs-2";
 import Cookies from "universal-cookie";
 import api from "./constants/api";
-import { Spinner, FormGroup } from "reactstrap";
+import { Spinner } from "reactstrap";
 import cogoToast from "cogo-toast";
 import Switch from "@material/react-switch";
 import "@material/react-switch/dist/switch.css";
@@ -47,10 +47,8 @@ import {
   chartExample2,
 } from "variables/charts.js";
 
-import Header from "components/Headers/Header.js";
 import Axios from "axios";
-import moment, { weekdays, weekdaysMin, weekdaysShort } from "moment";
-import { thatReturnsThis } from "react-recaptcha-google";
+import moment from "moment";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import AdminFooter from "components/Footers/AdminFooter.js";
 import { confirmAlert } from "react-confirm-alert";
@@ -60,7 +58,6 @@ var today = moment(new Date()).format("YYYY-MM-DD");
 const weekStart = moment(today).subtract(6, "days").format("YYYY-MM-DD");
 const monthStart = moment(today).subtract(1, "month").format("YYYY-MM-DD");
 const yearStart = moment(today).subtract(1, "year").format("YYYY-MM-DD");
-const token = cookies.get("Auth-token");
 
 const pie_chart2 = [];
 const pie_chart3 = [];
@@ -103,10 +100,6 @@ class Index extends React.Component {
     is_admin: null,
     unique: true,
   };
-  // componentWillMount = async () => {
-  //   const token = cookies.get("Auth-token");
-  //   await
-  // };
 
   componentDidMount = () => {
     if (window.Chart) {
@@ -117,8 +110,6 @@ class Index extends React.Component {
       is_admin: cookies.get("Is-admin"),
     });
     this.handleLoader(true);
-    console.log("mounted");
-    console.log(this.props, "props users");
     this.setState({
       current_uuid: this.props.match.params.uuid,
     });
@@ -154,7 +145,6 @@ class Index extends React.Component {
       var datasets2_updated = [];
       var datasets3_updated = [];
       var datasets4_updated = [];
-      console.log(result, "result");
       result.data.payload.click_data.map((object, index) => {
         dates.push(object.date);
         dates_count.push(object.count);
@@ -214,13 +204,6 @@ class Index extends React.Component {
         linkedin_share: result.data.payload.total_data.linkedin_share,
         other_share: result.data.payload.total_data.other_share,
       });
-
-      console.log(this.state.datasets3_updated);
-      console.log(this.state.dates, "array of dates");
-      console.log(
-        chartExample1.data1(this.state.dates, this.state.datasets1_updated),
-        "data"
-      );
     });
 
     Axios.get(
@@ -253,7 +236,6 @@ class Index extends React.Component {
   handleStatus = (status, uuid, activating) => {
     const token = cookies.get("Auth-token");
     var modelOpen = true;
-    console.log(status, uuid);
     modelOpen &&
       confirmAlert({
         title:
@@ -312,7 +294,6 @@ class Index extends React.Component {
       var b = Math.floor(Math.random() * 255);
       chart[i] = "rgb(" + r + "," + g + "," + b + ")";
     }
-    console.log(chart, "color array");
     return chart;
   };
   handleRequest = (index) => {
@@ -348,8 +329,7 @@ class Index extends React.Component {
       "Nov-",
       "Dec-",
     ];
-    // const { myProp } = this.props;
-    // this.handleLoader(true);
+
     index === 3
       ? Axios.get(
           `${api.protocol}${api.baseUrl}${api.campaignAnalytics}${"?uuid="}${
@@ -360,7 +340,6 @@ class Index extends React.Component {
           { headers: { Authorization: "Bearer " + token } }
         ).then((result) => {
           this.handleLoader(false);
-          console.log(result, "year");
           var sortingClicks = [];
           var finalClicks = [];
           var sortingShares = [];
@@ -408,7 +387,6 @@ class Index extends React.Component {
             this[a.key].value += a.value;
           }, Object.create(null));
 
-          console.log(finalClicks, "final");
           finalClicks.map((object) => {
             dates.push(object.key);
 
@@ -473,7 +451,6 @@ class Index extends React.Component {
           { headers: { Authorization: "Bearer " + token } }
         ).then((result) => {
           this.handleLoader(false);
-          console.log(result, "month result");
           result.data.payload.click_data.map((object, index) => {
             dates.push(object.date);
             dates_count.push(object.count);
@@ -524,18 +501,11 @@ class Index extends React.Component {
             datasets2_updated,
             datasets3_updated,
           });
-          console.log(this.state.dates, "array of dates");
-          console.log(result);
-          console.log(
-            chartExample1.data1(this.state.dates, this.state.datasets1_updated),
-            "data"
-          );
         });
     // myProp(false);
   };
   handleChartData = (labels, datasets) => {
     chartExample1.data1(labels, datasets);
-    console.log(labels, datasets, "handlechartdata");
   };
   handleUniqueData = (event) => {
     this.setState(
@@ -561,7 +531,6 @@ class Index extends React.Component {
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
-    console.log("function");
   };
   getBrandText = (path) => {
     return "Campaign performance";
@@ -644,7 +613,8 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Whatsapp <br/>Total Clicks
+                                      Whatsapp <br />
+                                      Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.whatsapp_click}
@@ -665,7 +635,9 @@ class Index extends React.Component {
                                     <i className="fa fa-arrow-up" /> 3.48%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    <h5>Total Shares: {this.state.whatsapp_share}</h5>
+                                    <h5>
+                                      Total Shares: {this.state.whatsapp_share}
+                                    </h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -680,7 +652,9 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Twitter<br/>Total Clicks
+                                      Twitter
+                                      <br />
+                                      Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.twitter_click}
@@ -700,7 +674,9 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-down" /> 3.48%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    <h5>Total Shares: {this.state.twitter_share}</h5>
+                                    <h5>
+                                      Total Shares: {this.state.twitter_share}
+                                    </h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -715,7 +691,9 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Facebook<br/>Total Clicks
+                                      Facebook
+                                      <br />
+                                      Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.facebook_click}
@@ -735,7 +713,9 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-down" /> 1.10%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    <h5>Total Shares: {this.state.facebook_share}</h5>
+                                    <h5>
+                                      Total Shares: {this.state.facebook_share}
+                                    </h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -750,7 +730,9 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Instagram<br/>Total Clicks
+                                      Instagram
+                                      <br />
+                                      Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.instagram_click}
@@ -770,7 +752,9 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-up" /> 12%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    <h5>Total Shares: {this.state.instagram_share}</h5>
+                                    <h5>
+                                      Total Shares: {this.state.instagram_share}
+                                    </h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -785,7 +769,9 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      LinkedIn<br/>Total Clicks
+                                      LinkedIn
+                                      <br />
+                                      Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.linkedin_click}
@@ -805,7 +791,9 @@ class Index extends React.Component {
                                     <i className="fas fa-arrow-up" /> 12%
                                   </span>{" "} */}
                                   <span className="text-nowrap">
-                                    <h5>Total Shares: {this.state.linkedin_share}</h5>
+                                    <h5>
+                                      Total Shares: {this.state.linkedin_share}
+                                    </h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -820,7 +808,9 @@ class Index extends React.Component {
                                       tag="h5"
                                       className="text-uppercase text-muted mb-0"
                                     >
-                                      Other<br/>Total Clicks
+                                      Other
+                                      <br />
+                                      Total Clicks
                                     </CardTitle>
                                     <span className="h2 font-weight-bold mb-0">
                                       {this.state.other_click}
@@ -837,7 +827,9 @@ class Index extends React.Component {
                                 </Row>
                                 <p className="mt-3 mb-0 text-muted text-sm">
                                   <span className="text-nowrap">
-                                    <h5>Total Shares: {this.state.other_share}</h5>
+                                    <h5>
+                                      Total Shares: {this.state.other_share}
+                                    </h5>
                                   </span>
                                 </p>
                               </CardBody>
@@ -1000,7 +992,7 @@ class Index extends React.Component {
                                               ? "bg-success"
                                               : this.state.current_user
                                                   .status === "processing"
-                                              ? "bg-info"
+                                              ? "bg-yellow"
                                               : "bg-warning"
                                           }
                                         />
@@ -1175,7 +1167,7 @@ class Index extends React.Component {
                                         this.state.datasets1_updated
                                       )}
                                       options={chartExample1.options}
-                                      getDatasetAtEvent={(e) => console.log(e)}
+                                      getDatasetAtEvent={(e) => e}
                                     />
                                   )}
                                 </div>
@@ -1272,7 +1264,7 @@ class Index extends React.Component {
                                         this.state.datasets4_updated
                                       )}
                                       options={chartExample1.options}
-                                      getDatasetAtEvent={(e) => console.log(e)}
+                                      getDatasetAtEvent={(e) => e}
                                     />
                                   )}
                                 </div>

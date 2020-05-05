@@ -1,14 +1,10 @@
 import React from "react";
 // react plugin used to create google maps
-import {
-  withScriptjs,
-  withGoogleMap,
-  GoogleMap,
-  Marker,
-} from "react-google-maps";
+
 import classnames from "classnames";
 // reactstrap components
 import {
+  Badge,
   Card,
   Container,
   Row,
@@ -16,11 +12,15 @@ import {
   CardHeader,
   CardBody,
   FormGroup,
+  DropdownMenu,
+  DropdownToggle,
+  DropdownItem,
   Form,
   Input,
   InputGroupAddon,
   InputGroup,
   Col,
+  Media,
   Nav,
   NavItem,
   NavLink,
@@ -28,12 +28,11 @@ import {
   TabContent,
   Table,
   TabPane,
+  UncontrolledDropdown,
+  UncontrolledTooltip,
 } from "reactstrap";
-// import { Select } from "antd";
-// import { Dropdown } from "semantic-ui-react";
-// import FileUploadProgress from "react-fileupload-progress";
+
 import Progress from "react-progressbar";
-import validator from "validator";
 
 // core components
 import Header from "components/Headers/Header.js";
@@ -50,24 +49,19 @@ import "react-confirm-alert/src/react-confirm-alert.css";
 import { Redirect } from "react-router-dom";
 import cogoToast from "cogo-toast";
 import Select from "react-select";
-import { Multiselect } from "multiselect-react-dropdown";
 
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import AdminFooter from "components/Footers/AdminFooter.js";
 // import Razorpay from "razorpay";
 import GooglePlacesAutocomplete, {
-  geocodeByAddress,
   geocodeByPlaceId,
   getLatLng,
 } from "react-google-places-autocomplete";
 import "react-google-places-autocomplete/dist/index.min.css";
 
 const cookies = new Cookies();
-const token = cookies.get("Auth-token");
-// mapTypeId={google.maps.MapTypeId.ROADMAP}
 var locations = [];
 
-var progress = 0;
 class Edit extends React.Component {
   state = {
     name: "",
@@ -81,7 +75,6 @@ class Edit extends React.Component {
     instagram_url: "",
     twitter_url: "",
     linkedin_url: "",
-
     selected_image: "",
     progress: 0,
     activeTab: "1",
@@ -92,6 +85,7 @@ class Edit extends React.Component {
     current_balance: 0,
     total_balance: 0,
     uuid: null,
+    influencers: [],
     transaction_value: 0,
     transaction_id: null,
     transaction_mode: "upi",
@@ -103,6 +97,7 @@ class Edit extends React.Component {
     selectedOption: null,
     transaction_list: [],
     cityTable: "",
+    is_admin: null,
   };
   componentDidMount = () => {
     var config = {
@@ -126,44 +121,40 @@ class Edit extends React.Component {
         headers: { Authorization: "Bearer " + token },
       }
     ).then((result) => {
-      this.setState(
-        {
-          name: result.data.payload.name,
-          company_name: result.data.payload.company_name,
-          company_logo: result.data.payload.company_logo,
-          content: result.data.payload.content,
-          cta_url: result.data.payload.cta_url,
-          facebook_url: result.data.payload.facebook_url,
-          instagram_url: result.data.payload.instagram_url,
-          twitter_url: result.data.payload.twitter_url,
-          linkedin_url: result.data.payload.linkedin_url,
-          payment_per_click: result.data.payload.payment_per_click,
-          image_url: result.data.payload.image_url,
-          upload: true,
-          activeTab: "1",
-          age_max: result.data.payload.age_max,
-          age_min: result.data.payload.age_min,
-          gender: result.data.payload.gender,
-          locations: result.data.payload.locations,
-          current_balance: result.data.payload.balance,
-          total_balance: result.data.payload.total_balance,
-          uuid: result.data.payload.uuid,
-
-          tab_preference: true,
-          tab_recharge: true,
-          tab_transaction: true,
-        },
-        () => {
-          console.log(this.state, "debugging state");
-        }
-      );
+      this.setState({
+        name: result.data.payload.name,
+        company_name: result.data.payload.company_name,
+        company_logo: result.data.payload.company_logo,
+        content: result.data.payload.content,
+        cta_url: result.data.payload.cta_url,
+        facebook_url: result.data.payload.facebook_url,
+        instagram_url: result.data.payload.instagram_url,
+        twitter_url: result.data.payload.twitter_url,
+        linkedin_url: result.data.payload.linkedin_url,
+        payment_per_click: result.data.payload.payment_per_click,
+        image_url: result.data.payload.image_url,
+        upload: true,
+        activeTab: "1",
+        age_max: result.data.payload.age_max,
+        age_min: result.data.payload.age_min,
+        gender: result.data.payload.gender,
+        locations: result.data.payload.locations,
+        current_balance: result.data.payload.balance,
+        total_balance: result.data.payload.total_balance,
+        uuid: result.data.payload.uuid,
+        influencers: result.data.payload.influencers,
+        status: result.data.payload.status,
+        tab_preference: true,
+        tab_recharge: true,
+        tab_transaction: true,
+        is_admin: cookies.get("Auth-token"),
+      });
       locations = result.data.payload.locations;
     });
     Axios.get(`${api.protocol}${api.baseUrl}${api.campaignFullList}`, {
       headers: { Authorization: "Bearer " + token },
     }).then((result) => {
       const options = [];
-      console.log(this.state.uuid);
       result.data.payload.map((users) => {
         users.uuid !== this.state.uuid &&
           options.push({
@@ -175,7 +166,6 @@ class Edit extends React.Component {
         options,
       });
     });
-    console.log(this.props.match.params.uuid, this.props);
     Axios.get(
       `${api.protocol}${api.baseUrl}${api.campaignRechargeList}${"?uuid="}${
         this.props.match.params.uuid
@@ -188,6 +178,65 @@ class Edit extends React.Component {
         transaction_list: result.data.payload,
       });
     });
+  };
+  handleAnalytics = () => {
+    this.props.history.push({
+      pathname: "/campaign/" + this.state.uuid + "/analytics",
+    });
+  };
+  handleStatus = (status, uuid, activating) => {
+    const token = cookies.get("Auth-token");
+    var modelOpen = true;
+    modelOpen &&
+      confirmAlert({
+        title:
+          "Click confirm to " +
+          (activating
+            ? "activate"
+            : status === "active"
+            ? "deacivate"
+            : status === "inactive"
+            ? "submit for review"
+            : "decativate"),
+        // message: "Click recharge to Confirm campaign and recharge",
+        buttons: [
+          {
+            label: "Confirm",
+            onClick: () => {
+              Axios.put(
+                `${api.protocol}${api.baseUrl}${api.campaignStatus}`,
+
+                {
+                  uuid: uuid,
+                  status: activating
+                    ? "active"
+                    : status === "active"
+                    ? "inactive"
+                    : status === "inactive"
+                    ? "processing"
+                    : "inactive",
+                },
+                {
+                  headers: { Authorization: "Bearer " + token },
+                }
+              ).then((result) => {
+                this.setState({
+                  status: result.data.payload.status,
+                });
+                result.data.status
+                  ? cogoToast.success(result.data.message)
+                  : cogoToast.error(result.data.message);
+                // window.location.reload(true);
+              });
+            },
+          },
+
+          {
+            label: "Cancel",
+            onClick: () => (modelOpen = false),
+          },
+        ],
+      });
   };
   handleInputChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
@@ -203,7 +252,6 @@ class Edit extends React.Component {
     });
   };
   handleUpload = async (event, index) => {
-    console.log(event.target.files[0].size);
     // firebase.app()
     index === 2
       ? event.target.files[0].size <= 250000
@@ -220,8 +268,6 @@ class Edit extends React.Component {
                 .put(this.state.selected_image)
                 .then(this.setState({ progress: 1 }));
 
-              console.log("posting");
-              console.log(this.state.selected_image);
               storage
                 .ref(files[0])
                 .getDownloadURL()
@@ -236,7 +282,6 @@ class Edit extends React.Component {
                       });
                     }
                   );
-                  console.log("downloaded url image_url", url);
                 });
             }
           )
@@ -259,8 +304,6 @@ class Edit extends React.Component {
                 })
               );
 
-            console.log("posting");
-            console.log(this.state.selected_image);
             storage
               .ref(files[0])
               .getDownloadURL()
@@ -275,8 +318,6 @@ class Edit extends React.Component {
                     });
                   }
                 );
-
-                console.log("downloaded url image_url", url);
               });
           }
         )
@@ -290,7 +331,6 @@ class Edit extends React.Component {
   handleSave = () => {
     const token = cookies.get("Auth-token");
 
-    console.log(this.state);
     var isNull = false;
     Object.values(this.state).map((item, index) => {
       if (
@@ -302,11 +342,8 @@ class Edit extends React.Component {
         index === 5 ||
         index === 6
       ) {
-        console.log(index);
-        console.log(item);
         if (item === "" || item === null) {
           isNull = true;
-          console.log(index);
         }
       }
     });
@@ -327,9 +364,7 @@ class Edit extends React.Component {
                     headers: { Authorization: "Bearer " + token },
                   }
                 ).then((result) => {
-                  console.log(result);
                   this.setState({
-                    // activeTab: "2",
                     tab_preference: true,
                   });
                   result.data.status
@@ -356,7 +391,6 @@ class Edit extends React.Component {
     const token = cookies.get("Auth-token");
 
     if (isNull === false) {
-      console.log(this.state, this.props.match.params.uuid);
       var modelOpen = true;
       modelOpen &&
         confirmAlert({
@@ -374,11 +408,8 @@ class Edit extends React.Component {
                   }
                 ).then((result) => {
                   this.setState({
-                    // activeTab: "3",
                     current_balance: result.data.payload.balance,
-                    // uuid: result.data.payload.uuid,
                   });
-                  console.log(result);
                   result.data.status
                     ? cogoToast.success(result.data.message)
                     : cogoToast.error(result.data.message);
@@ -407,7 +438,6 @@ class Edit extends React.Component {
       description: "Adding credit",
       image: "",
       handler: (response) => {
-        console.log(response);
         this.setState(
           {
             transaction_id: response.razorpay_payment_id,
@@ -429,14 +459,12 @@ class Edit extends React.Component {
                 current_balance: this.state.transaction_value,
               });
               cogoToast.success("recharge done");
-              console.log(result);
             });
           }
         );
       },
       prefill: {
         name: this.state.name,
-        // email: "harshil@razorpay.com",
       },
       notes: {
         address: "Hello World",
@@ -446,11 +474,7 @@ class Edit extends React.Component {
       },
     });
 
-    // let rzp = new window.Razorpay(options);
-    // let instance = new Razorpay(options);
     instance.open();
-
-    // instance.open();
   };
   handleMoveCharge = () => {
     var modelOpen = true;
@@ -491,7 +515,6 @@ class Edit extends React.Component {
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
-    console.log("function");
 
     return <Redirect to="/signin"></Redirect>;
   };
@@ -538,13 +561,194 @@ class Edit extends React.Component {
 
               <Container className="mt--7" fluid>
                 <Row>
+                  <div className="col">
+                    <Card className="shadow">
+                      <CardHeader className="border-0" float="right">
+                        <Row>
+                          <div className="col">
+                            <h2 className="mb-0">{this.state.name}</h2>
+                          </div>
+                          <div className="col text-right">
+                            <Button
+                              color="primary"
+                              // href="/dashboard"
+                              onClick={() => this.props.history.goBack()}
+                              size="md"
+                            >
+                              My Campaigns
+                            </Button>
+                          </div>
+                        </Row>
+                      </CardHeader>
+                      <Table
+                        className="align-items-center table-flush"
+                        responsive
+                      >
+                        <thead className="thead-light">
+                          <tr>
+                            <th scope="col">My Campaigns</th>
+                            <th scope="col">Total Spending</th>
+                            <th scope="col">Balance left</th>
+                            <th scope="col">Payment per click</th>
+                            <th scope="col">Top Influencers</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <th scope="row">
+                              <Media className="align-items-center">
+                                <a
+                                  className="avatar rounded-circle mr-3"
+                                  href="#pablo"
+                                  onClick={(e) => e.preventDefault()}
+                                >
+                                  <img
+                                    alt="..."
+                                    src={this.state.company_logo}
+                                  />
+                                </a>
+                                <Media>
+                                  <span className="mb-0 text-sm">
+                                    {this.state.name}
+                                  </span>
+                                </Media>
+                              </Media>
+                            </th>
+                            <td>{"₹ " + this.state.total_balance}</td>
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <span className="mr-2">
+                                  {"₹ " + this.state.current_balance}
+                                </span>
+                                <div>
+                                  <Progress
+                                    max={this.state.total_balance}
+                                    value={
+                                      this.state.total_balance -
+                                      this.state.current_balance
+                                    }
+                                    barClassName="bg-danger"
+                                  />
+                                </div>
+                              </div>
+                            </td>
+
+                            <td>{"₹ " + this.state.payment_per_click}</td>
+                            <td>
+                              <div className="avatar-group">
+                                {this.state.influencers.map(
+                                  (influencer, index) => (
+                                    <React.Fragment>
+                                      <a
+                                        className="avatar avatar-sm"
+                                        href="#pablo"
+                                        id={influencer.first_name}
+                                        onClick={(e) => e.preventDefault()}
+                                      >
+                                        <img
+                                          alt="..."
+                                          className="rounded-circle"
+                                          src={influencer.profile_url}
+                                        />
+                                      </a>
+                                      <UncontrolledTooltip
+                                        delay={0}
+                                        target={influencer.first_name}
+                                      >
+                                        {influencer.first_name}
+                                      </UncontrolledTooltip>
+                                    </React.Fragment>
+                                  )
+                                )}
+                              </div>
+                            </td>
+
+                            <td>
+                              <Badge color="" className="badge-dot mr-4">
+                                <i
+                                  className={
+                                    this.state.status === "active"
+                                      ? "bg-success"
+                                      : this.state.status === "processing"
+                                      ? "bg-yellow"
+                                      : "bg-warning"
+                                  }
+                                />
+                                {this.state.status}
+                              </Badge>
+                            </td>
+
+                            <td className="">
+                              <UncontrolledDropdown>
+                                <DropdownToggle
+                                  className="btn-icon-only text-light"
+                                  href="#pablo"
+                                  role="button"
+                                  size="sm"
+                                  color=""
+                                  onClick={(e) => e.preventDefault()}
+                                >
+                                  <i className="fas fa-ellipsis-v" />
+                                </DropdownToggle>
+                                <DropdownMenu
+                                  className="dropdown-menu-arrow"
+                                  right
+                                >
+                                  {this.state.is_admin &&
+                                    this.state.status === "processing" && (
+                                      <DropdownItem
+                                        onClick={() =>
+                                          this.handleStatus(
+                                            this.state.status,
+                                            this.state.uuid,
+                                            true
+                                          )
+                                        }
+                                      >
+                                        Activate
+                                      </DropdownItem>
+                                    )}
+                                  <DropdownItem
+                                    onClick={() =>
+                                      this.handleStatus(
+                                        this.state.status,
+                                        this.state.uuid
+                                      )
+                                    }
+                                  >
+                                    {this.state.status === "active"
+                                      ? "Deactivate"
+                                      : this.state.status === "inactive"
+                                      ? "Submit for review"
+                                      : "Cancel review"}
+                                  </DropdownItem>
+
+                                  <DropdownItem onClick={this.handleAnalytics}>
+                                    View performance
+                                  </DropdownItem>
+                                </DropdownMenu>
+                              </UncontrolledDropdown>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    </Card>
+                  </div>
+                </Row>
+
+                <Row className="mt-5">
                   <Col className="order-xl-1">
                     <Card className="bg-secondary shadow border-0">
                       <CardHeader className="bg-white border-0 p-0">
                         <Row className="align-items-center">
                           <Col>
-                            <Nav tabs className="active">
-                              <NavItem className="w-25 text-center">
+                            <Nav tabs responsive className="triangle active">
+                              <NavItem
+                                className=" text-center"
+                                style={{ width: "33%" }}
+                              >
                                 <NavLink
                                   className={classnames("py-3 px-3 border-0", {
                                     active: this.state.activeTab === "1",
@@ -555,11 +759,13 @@ class Edit extends React.Component {
                                   Campaign Details
                                 </NavLink>
                               </NavItem>
-                              <NavItem className="w-25 text-center">
+                              <NavItem
+                                className="text-center"
+                                style={{ width: "33%" }}
+                              >
                                 <NavLink
                                   className={classnames("py-3 px-3 border-0", {
                                     active: this.state.activeTab === "2",
-                                    // disable: this.state.activeTab != "2",
                                   })}
                                   style={
                                     this.state.tab_preference
@@ -571,22 +777,11 @@ class Edit extends React.Component {
                                   Campaign Preferences
                                 </NavLink>
                               </NavItem>
-                              <NavItem className="w-25 text-center">
-                                <NavLink
-                                  className={classnames("py-3 px-3 border-0", {
-                                    active: this.state.activeTab === "3",
-                                  })}
-                                  style={
-                                    this.state.tab_recharge
-                                      ? undefined
-                                      : { pointerEvents: "none" }
-                                  }
-                                  onClick={() => this.handleToggle("3")}
-                                >
-                                  Recharge
-                                </NavLink>
-                              </NavItem>
-                              <NavItem className="w-25 text-center">
+
+                              <NavItem
+                                className=" text-center"
+                                style={{ width: "33%" }}
+                              >
                                 <NavLink
                                   className={classnames("py-3 px-3 border-0", {
                                     active: this.state.activeTab === "4",
@@ -598,7 +793,7 @@ class Edit extends React.Component {
                                   }
                                   onClick={() => this.handleToggle("4")}
                                 >
-                                  Transactions
+                                  Campaign Balance
                                 </NavLink>
                               </NavItem>
                             </Nav>
@@ -785,7 +980,7 @@ class Edit extends React.Component {
                                                       this.handleInputChange
                                                     }
                                                     // id="input-city"
-                                                    // placeholder="link"
+                                                    placeholder="Minimum ₹3"
                                                     name="payment_per_click"
                                                     type="number"
                                                   />
@@ -1087,33 +1282,6 @@ class Edit extends React.Component {
                                                 className="form-control-label"
                                                 htmlFor="input-age"
                                               >
-                                                Maximum age
-                                              </label>
-                                              <Input
-                                                className="form-control-alternative"
-                                                value={
-                                                  this.state.age_max
-                                                    ? this.state.age_max
-                                                    : 35
-                                                }
-                                                name="age_max"
-                                                onChange={
-                                                  this.handleInputChange
-                                                }
-                                                type="select"
-                                              >
-                                                {ageCount.map((age) => (
-                                                  <option>{age}</option>
-                                                ))}
-                                              </Input>
-                                            </FormGroup>
-                                          </Col>
-                                          <Col>
-                                            <FormGroup>
-                                              <label
-                                                className="form-control-label"
-                                                htmlFor="input-age"
-                                              >
                                                 Minimum age
                                               </label>
                                               <Input
@@ -1129,9 +1297,47 @@ class Edit extends React.Component {
                                                 }
                                                 type="select"
                                               >
-                                                {ageCount.map((age) => (
-                                                  <option>{age}</option>
-                                                ))}
+                                                {ageCount.map(
+                                                  (age, index) =>
+                                                    index <=
+                                                      this.state.age_max -
+                                                        13 && (
+                                                      <option>{age}</option>
+                                                    )
+                                                )}
+                                              </Input>
+                                            </FormGroup>
+                                          </Col>
+
+                                          <Col>
+                                            <FormGroup>
+                                              <label
+                                                className="form-control-label"
+                                                htmlFor="input-age"
+                                              >
+                                                Maximum age
+                                              </label>
+                                              <Input
+                                                className="form-control-alternative"
+                                                value={
+                                                  this.state.age_max
+                                                    ? this.state.age_max
+                                                    : 35
+                                                }
+                                                name="age_max"
+                                                onChange={
+                                                  this.handleInputChange
+                                                }
+                                                type="select"
+                                              >
+                                                {ageCount.map(
+                                                  (age, index) =>
+                                                    index >=
+                                                      this.state.age_min -
+                                                        13 && (
+                                                      <option>{age}</option>
+                                                    )
+                                                )}
                                               </Input>
                                             </FormGroup>
                                           </Col>
@@ -1214,20 +1420,17 @@ class Edit extends React.Component {
                                                 }}
                                                 onSelect={(event) => {
                                                   var city = "";
-                                                  console.log(event);
                                                   city = event.description;
                                                   geocodeByPlaceId(
                                                     event.place_id
                                                   ).then((result) => {
                                                     getLatLng(result[0]).then(
                                                       (result) => {
-                                                        console.log(result);
                                                         locations.push({
                                                           city: city,
                                                           latitude: result.lat,
                                                           longitude: result.lng,
                                                         });
-                                                        console.log(locations);
                                                         this.setState(
                                                           {
                                                             locations,
@@ -1330,7 +1533,7 @@ class Edit extends React.Component {
                                       </Button>
                                       <div className="mr-2">
                                         <small>
-                                          * save and proceed to recharge
+                                          * save and proceed to campaign balance
                                         </small>
                                       </div>
                                     </Col>
@@ -1339,267 +1542,179 @@ class Edit extends React.Component {
                               </Form>
                             </CardBody>
                           </TabPane>
-                          <TabPane tabId="3">
-                            <CardBody>
-                              <Form>
-                                {/* <CardHeader>
-                                  <h3 className="heading-small text-muted mb-4">
-                                    Current Credits
-                                  </h3>
-                                </CardHeader> */}
-                                <div className="pl-lg-4">
-                                  <Row>
-                                    <Col lg="8">
-                                      <FormGroup>
-                                        <label
-                                          className="form-control-label"
-                                          htmlFor="input-age"
-                                        >
-                                          <h3> Current Credit</h3>
-                                        </label>
-                                        <InputGroup>
-                                          <InputGroupAddon addonType="prepend">
-                                            ₹
-                                          </InputGroupAddon>
-                                          <Input
-                                            className="form-control-alternative"
-                                            value={this.state.current_balance}
-                                            name="cuurent_balance"
-                                            readOnly="readonly"
-                                            type="number"
-                                          />
-                                        </InputGroup>
-                                      </FormGroup>
-                                    </Col>
-                                  </Row>
-                                </div>
-                                <hr className="my-4" />
-                                {/* Address */}
-                                <Card>
-                                  <CardHeader>
-                                    <h3>Add Credit</h3>
-                                  </CardHeader>
-                                  <CardBody>
-                                    <div className="pl-lg-4">
-                                      <Row>
-                                        <Col lg="8">
-                                          <FormGroup>
-                                            <label
-                                              className="form-control-label"
-                                              htmlFor="input-gender"
-                                            >
-                                              Amount
-                                            </label>
-                                            <InputGroup>
-                                              <InputGroupAddon addonType="prepend">
-                                                ₹
-                                              </InputGroupAddon>
-                                              <Input
-                                                className="form-control-alternative"
-                                                value={
-                                                  this.state.transaction_value
-                                                }
-                                                name="transaction_value"
-                                                onChange={
-                                                  this.handleInputChange
-                                                }
-                                                type="number"
-                                              />
-                                            </InputGroup>
-                                          </FormGroup>
-                                        </Col>
-                                      </Row>
-                                    </div>
-                                  </CardBody>
-                                </Card>
-                                <hr className="my-4" />
-                                <div className="text-right">
+                          <TabPane tabId="4">
+                            <Form>
+                              <Row>
+                                <Col>
                                   <Row>
                                     <Col>
-                                      <Button
-                                        className="my-4"
-                                        color="primary"
-                                        type="button"
-                                        onClick={this.handleTransaction}
-                                      >
-                                        Add credit
-                                      </Button>
+                                      <Card className="shadow">
+                                        <CardHeader>
+                                          <h3>Recharge campaign</h3>
+                                        </CardHeader>
+                                        <CardBody>
+                                          <Row>
+                                            <Col>
+                                              <FormGroup>
+                                                <label
+                                                  className="form-control-label"
+                                                  htmlFor="input-gender"
+                                                >
+                                                  Amount
+                                                </label>
+                                                <Row>
+                                                  <Col>
+                                                    <InputGroup>
+                                                      <InputGroupAddon addonType="prepend">
+                                                        ₹
+                                                      </InputGroupAddon>
+                                                      <Input
+                                                        className="form-control-alternative"
+                                                        value={
+                                                          this.state
+                                                            .transaction_value
+                                                        }
+                                                        name="transaction_value"
+                                                        onChange={
+                                                          this.handleInputChange
+                                                        }
+                                                        type="number"
+                                                      />
+                                                    </InputGroup>
+                                                  </Col>
+                                                  <Col lg="auto">
+                                                    <Button
+                                                      className=""
+                                                      color="primary"
+                                                      type="button"
+                                                      onClick={
+                                                        this.handleTransaction
+                                                      }
+                                                    >
+                                                      Recharge
+                                                    </Button>
+                                                  </Col>
+                                                </Row>
+                                              </FormGroup>
+                                            </Col>
+                                          </Row>
+                                        </CardBody>
+                                      </Card>
                                     </Col>
                                   </Row>
-                                </div>
-                              </Form>
-                            </CardBody>
-                          </TabPane>
-                          <TabPane tabId="4">
-                            <CardBody>
-                              <Form>
-                                <Row>
-                                  <Col>
-                                    <Card className="shadow">
-                                      <Row>
-                                        <Col>
-                                          <Card className="shadow">
-                                            <CardHeader>
-                                              <h3>Current balance</h3>
-                                            </CardHeader>
-                                            <CardBody className="shadow m-4">
-                                              <Row>
-                                                <Col>
-                                                  <h5 class="text-uppercase text-muted mb-0 card-title">
-                                                    Balance
-                                                  </h5>
-                                                  <span class="h2 font-weight-bold mb-0">
-                                                    {"₹ " +
-                                                      this.state
-                                                        .current_balance}
-                                                  </span>
-                                                </Col>
-                                                <Col
-                                                  className="text-right"
-                                                  xs="auto"
+                                  <Row className="mt-4">
+                                    <Col>
+                                      <Card className="shadow">
+                                        <CardHeader>
+                                          <h3>Move Balance</h3>
+                                        </CardHeader>
+                                        <CardBody>
+                                          <Row>
+                                            <Col>
+                                              <FormGroup>
+                                                <label
+                                                  className="form-control-label"
+                                                  htmlFor="input-gender"
                                                 >
-                                                  <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
-                                                    <i class="fas fa-chart-bar"></i>
-                                                  </div>
-                                                </Col>
-                                              </Row>
-                                              <Row>
-                                                <small className="mt-3 col-auto">
-                                                  Total Budget={" "}
-                                                  {this.state.total_balance}{" "}
-                                                </small>
-                                              </Row>
-                                            </CardBody>
-                                          </Card>
-                                        </Col>
-                                      </Row>
-                                      <Row>
-                                        <Col>
-                                          <Card>
-                                            <CardHeader>
-                                              <h3>Move Balance</h3>
-                                            </CardHeader>
-                                            <CardBody>
-                                              <Row>
-                                                <Col>
-                                                  <FormGroup>
-                                                    <label
-                                                      className="form-control-label"
-                                                      htmlFor="input-gender"
-                                                    >
-                                                      Select campaign to credit
-                                                      balance
-                                                    </label>
-                                                    <Select
-                                                      value={
-                                                        this.state
-                                                          .selectedOption
-                                                      }
-                                                      onChange={
-                                                        this.handleSelect
-                                                      }
-                                                      options={
-                                                        this.state.options
-                                                      }
-                                                      name="selectedOption"
-                                                    />
-                                                  </FormGroup>
-                                                </Col>
-                                                <Col
-                                                  className="text-right"
-                                                  xs="auto"
-                                                >
-                                                  <Button
-                                                    className="my-4"
-                                                    color="primary"
-                                                    type="button"
-                                                    onClick={
-                                                      this.handleMoveCharge
-                                                    }
-                                                  >
-                                                    Confirm
-                                                  </Button>
-                                                </Col>
-                                              </Row>
-                                            </CardBody>
-                                          </Card>
-                                        </Col>
-                                      </Row>
-                                    </Card>
-                                  </Col>
-                                  <Col>
-                                    <Card>
-                                      <Row>
-                                        <Col
-                                          className="mb-5 mb-xl-0"
-                                          // style={{ height: "100%" }}
-                                        >
-                                          <Card
-                                            className="shadow "
-                                            style={{ height: "600px" }}
-                                          >
-                                            <CardHeader className="border-0">
-                                              <Row className="align-items-center">
-                                                <div className="col">
-                                                  <h3 className="">
-                                                    Transaction History
-                                                  </h3>
-                                                </div>
-                                              </Row>
-                                            </CardHeader>
-                                            <Table
-                                              className="align-items-center table-flush"
-                                              responsive
-                                              // style={{ height: "100%" }}
+                                                  Select campaign to credit
+                                                  balance
+                                                </label>
+                                                <Select
+                                                  value={
+                                                    this.state.selectedOption
+                                                  }
+                                                  onChange={this.handleSelect}
+                                                  options={this.state.options}
+                                                  name="selectedOption"
+                                                />
+                                              </FormGroup>
+                                            </Col>
+                                            <Col
+                                              className="text-right"
+                                              xs="auto"
                                             >
-                                              <thead
-                                                className="thead-light"
-                                                style={{
-                                                  position: "relative",
-                                                  overflow: "scroll",
-                                                }}
+                                              <Button
+                                                className="my-4"
+                                                color="primary"
+                                                type="button"
+                                                onClick={this.handleMoveCharge}
                                               >
-                                                <tr>
-                                                  <th scope="col">Campaign</th>
+                                                Confirm
+                                              </Button>
+                                            </Col>
+                                          </Row>
+                                        </CardBody>
+                                      </Card>
+                                    </Col>
+                                  </Row>
+                                </Col>
+                                <Col>
+                                  <Card>
+                                    <Row>
+                                      <Col className="mb-5 mb-xl-0">
+                                        <Card
+                                          className="shadow "
+                                          style={{ height: "576px" }}
+                                        >
+                                          <CardHeader className="border-0">
+                                            <Row className="align-items-center">
+                                              <div className="col">
+                                                <h3 className="">
+                                                  Transaction History
+                                                </h3>
+                                              </div>
+                                            </Row>
+                                          </CardHeader>
+                                          <Table
+                                            className="align-items-center table-flush"
+                                            responsive
+                                          >
+                                            <thead
+                                              className="thead-light"
+                                              style={{
+                                                position: "relative",
+                                                overflow: "scroll",
+                                              }}
+                                            >
+                                              <tr>
+                                                <th scope="col">Campaign</th>
 
-                                                  <th scope="col">Id</th>
-                                                  <th scope="col">Amount</th>
-                                                  {/* <th scope="col">Bounce rate</th> */}
-                                                </tr>
-                                              </thead>
-                                              <tbody>
-                                                {this.state.transaction_list.map(
-                                                  (transactions) => (
-                                                    <tr>
-                                                      <th>
-                                                        {
-                                                          transactions.campaign
-                                                            .name
-                                                        }
-                                                      </th>
+                                                <th scope="col">Id</th>
+                                                <th scope="col">Amount</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {this.state.transaction_list.map(
+                                                (transactions) => (
+                                                  <tr>
+                                                    <th>
+                                                      {
+                                                        transactions.campaign
+                                                          .name
+                                                      }
+                                                    </th>
 
-                                                      <td scope="row">
-                                                        {
-                                                          transactions.transaction_id
-                                                        }
-                                                      </td>
-                                                      <td>
-                                                        {"₹ " +
-                                                          transactions.transaction_value}
-                                                      </td>
-                                                    </tr>
-                                                  )
-                                                )}
-                                              </tbody>
-                                            </Table>
-                                          </Card>
-                                        </Col>
-                                      </Row>
-                                    </Card>
-                                  </Col>
-                                </Row>
-                              </Form>
-                            </CardBody>
+                                                    <td scope="row">
+                                                      {
+                                                        transactions.transaction_id
+                                                      }
+                                                    </td>
+                                                    <td>
+                                                      {"₹ " +
+                                                        transactions.transaction_value}
+                                                    </td>
+                                                  </tr>
+                                                )
+                                              )}
+                                            </tbody>
+                                          </Table>
+                                        </Card>
+                                      </Col>
+                                    </Row>
+                                  </Card>
+                                </Col>
+                              </Row>
+                            </Form>
                           </TabPane>
                         </TabContent>
                       </CardBody>
