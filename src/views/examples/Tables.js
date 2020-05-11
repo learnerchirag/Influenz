@@ -71,6 +71,7 @@ class Tables extends React.Component {
       }
     ).then((result) => {
       this.handleLoader(false);
+      console.log(result);
       this.setState({
         tableListFiltered: result.data.payload.campaigns,
         tableList: result.data.payload.campaigns,
@@ -448,7 +449,9 @@ class Tables extends React.Component {
                                           <a
                                             className="avatar avatar-sm"
                                             href="#pablo"
-                                            id={influencer.first_name}
+                                            id={influencer.first_name
+                                              .split(" ")
+                                              .join("")}
                                             onClick={(e) => e.preventDefault()}
                                           >
                                             <img
@@ -459,7 +462,9 @@ class Tables extends React.Component {
                                           </a>
                                           <UncontrolledTooltip
                                             delay={0}
-                                            target={influencer.first_name}
+                                            target={influencer.first_name
+                                              .split(" ")
+                                              .join("")}
                                           >
                                             {influencer.first_name}
                                           </UncontrolledTooltip>
