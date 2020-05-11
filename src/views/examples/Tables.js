@@ -442,14 +442,16 @@ class Tables extends React.Component {
                                 <td>{"₹ " + user.payment_per_click}</td>
 
                                 <td>
-                                  {/* <div className="avatar-group">
+                                  <div className="avatar-group">
                                     {user.influencers.map(
                                       (influencer, index) => (
                                         <React.Fragment>
                                           <a
                                             className="avatar avatar-sm"
                                             href="#pablo"
-                                            id={index}
+                                            id={influencer.first_name
+                                              .split(" ")
+                                              .join("")}
                                             onClick={(e) => e.preventDefault()}
                                           >
                                             <img
@@ -460,14 +462,16 @@ class Tables extends React.Component {
                                           </a>
                                           <UncontrolledTooltip
                                             delay={0}
-                                            target={index}
+                                            target={influencer.first_name
+                                              .split(" ")
+                                              .join("")}
                                           >
                                             {influencer.first_name}
                                           </UncontrolledTooltip>
                                         </React.Fragment>
                                       )
                                     )}
-                                  </div> */}
+                                  </div>
                                 </td>
                                 <td>
                                   <Badge color="" className="badge-dot mr-4">

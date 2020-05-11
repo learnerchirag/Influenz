@@ -296,7 +296,7 @@ class Edit extends React.Component {
             const files = [this.state.selected_image.name];
 
             await storage
-              .ref(files[0])
+              .ref(`${"/"}${this.state.uuid}${"/"}${files[0]}`)
               .put(this.state.selected_image)
               .then(
                 this.setState({
@@ -305,7 +305,7 @@ class Edit extends React.Component {
               );
 
             storage
-              .ref(files[0])
+              .ref(`${"/"}${this.state.uuid}${"/"}${files[0]}`)
               .getDownloadURL()
               .then((url) => {
                 this.setState(
@@ -532,7 +532,10 @@ class Edit extends React.Component {
     return (
       <>
         {!cookies.get("Auth-token") && (
-          <React.Fragment>{this.handleCookieRedirect()}</React.Fragment>
+          <React.Fragment>
+            {this.handleCookieRedirect()}
+            {/* {cogoToast.error("You need to Signin first")} */}
+          </React.Fragment>
         )}
         {cookies.get("Auth-token") && this.state.isLoading ? (
           <Spinner
@@ -643,7 +646,9 @@ class Edit extends React.Component {
                                       <a
                                         className="avatar avatar-sm"
                                         href="#pablo"
-                                        id={influencer.first_name}
+                                        id={influencer.first_name
+                                          .split(" ")
+                                          .join("")}
                                         onClick={(e) => e.preventDefault()}
                                       >
                                         <img
@@ -654,7 +659,9 @@ class Edit extends React.Component {
                                       </a>
                                       <UncontrolledTooltip
                                         delay={0}
-                                        target={influencer.first_name}
+                                        target={influencer.first_name
+                                          .split(" ")
+                                          .join("")}
                                       >
                                         {influencer.first_name}
                                       </UncontrolledTooltip>

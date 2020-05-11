@@ -957,7 +957,9 @@ class Index extends React.Component {
                                               <a
                                                 className="avatar avatar-sm"
                                                 href="#pablo"
-                                                id={influencer.first_name}
+                                                id={influencer.first_name
+                                                  .split(" ")
+                                                  .join("")}
                                                 onClick={(e) =>
                                                   e.preventDefault()
                                                 }
@@ -970,7 +972,9 @@ class Index extends React.Component {
                                               </a>
                                               <UncontrolledTooltip
                                                 delay={0}
-                                                target={influencer.first_name}
+                                                target={influencer.first_name
+                                                  .split(" ")
+                                                  .join("")}
                                               >
                                                 {influencer.first_name}
                                               </UncontrolledTooltip>
