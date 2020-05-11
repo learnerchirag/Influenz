@@ -869,7 +869,7 @@ class Index extends React.Component {
                                       color="primary"
                                       // href="/dashboard"
                                       onClick={() =>
-                                        this.props.history.push("/dashboard")
+                                        this.props.history.goBack()
                                       }
                                       size="md"
                                     >

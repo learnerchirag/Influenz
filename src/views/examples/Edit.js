@@ -532,7 +532,10 @@ class Edit extends React.Component {
     return (
       <>
         {!cookies.get("Auth-token") && (
-          <React.Fragment>{this.handleCookieRedirect()}</React.Fragment>
+          <React.Fragment>
+            {this.handleCookieRedirect()}
+            {/* {cogoToast.error("You need to Signin first")} */}
+          </React.Fragment>
         )}
         {cookies.get("Auth-token") && this.state.isLoading ? (
           <Spinner
@@ -569,9 +572,7 @@ class Edit extends React.Component {
                             <Button
                               color="primary"
                               // href="/dashboard"
-                              onClick={() =>
-                                this.props.history.push("/dashboard")
-                              }
+                              onClick={() => this.props.history.goBack()}
                               size="md"
                             >
                               My Campaigns
