@@ -264,12 +264,12 @@ class Edit extends React.Component {
               const files = [this.state.selected_image.name];
 
               await storage
-                .ref(files[0])
+                .ref(`${"/"}${this.state.uuid}${"/"}${files[0]}`)
                 .put(this.state.selected_image)
                 .then(this.setState({ progress: 1 }));
 
               storage
-                .ref(files[0])
+                .ref(`${"/"}${this.state.uuid}${"/"}${files[0]}`)
                 .getDownloadURL()
                 .then((url) => {
                   this.setState(

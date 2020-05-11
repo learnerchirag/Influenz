@@ -71,6 +71,7 @@ class Tables extends React.Component {
       }
     ).then((result) => {
       this.handleLoader(false);
+      console.log(result);
       this.setState({
         tableListFiltered: result.data.payload.campaigns,
         tableList: result.data.payload.campaigns,
@@ -244,7 +245,7 @@ class Tables extends React.Component {
           }
         ).then((result) => {
           this.setState({
-            tableListFiltered: result.data.payload.campaigns,
+            // tableListFiltered: result.data.payload.campaigns,
             tableList: result.data.payload.campaigns,
             pageCount: result.data.payload.page_count,
           });
@@ -441,14 +442,14 @@ class Tables extends React.Component {
                                 <td>{"₹ " + user.payment_per_click}</td>
 
                                 <td>
-                                  <div className="avatar-group">
+                                  {/* <div className="avatar-group">
                                     {user.influencers.map(
                                       (influencer, index) => (
                                         <React.Fragment>
                                           <a
                                             className="avatar avatar-sm"
                                             href="#pablo"
-                                            id={influencer.first_name}
+                                            id={index}
                                             onClick={(e) => e.preventDefault()}
                                           >
                                             <img
@@ -459,14 +460,14 @@ class Tables extends React.Component {
                                           </a>
                                           <UncontrolledTooltip
                                             delay={0}
-                                            target={influencer.first_name}
+                                            target={index}
                                           >
                                             {influencer.first_name}
                                           </UncontrolledTooltip>
                                         </React.Fragment>
                                       )
                                     )}
-                                  </div>
+                                  </div> */}
                                 </td>
                                 <td>
                                   <Badge color="" className="badge-dot mr-4">
