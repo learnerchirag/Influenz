@@ -71,7 +71,6 @@ class Tables extends React.Component {
       }
     ).then((result) => {
       this.handleLoader(false);
-      console.log(result);
       this.setState({
         tableListFiltered: result.data.payload.campaigns,
         tableList: result.data.payload.campaigns,
