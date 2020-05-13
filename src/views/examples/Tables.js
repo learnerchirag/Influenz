@@ -245,7 +245,7 @@ class Tables extends React.Component {
           }
         ).then((result) => {
           this.setState({
-            // tableListFiltered: result.data.payload.campaigns,
+            tableListFiltered: result.data.payload.campaigns,
             tableList: result.data.payload.campaigns,
             pageCount: result.data.payload.page_count,
           });
