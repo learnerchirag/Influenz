@@ -30,6 +30,7 @@ import {
   TabPane,
   UncontrolledDropdown,
   UncontrolledTooltip,
+  FormFeedback,
 } from "reactstrap";
 
 import Progress from "react-progressbar";
@@ -58,6 +59,7 @@ import GooglePlacesAutocomplete, {
   getLatLng,
 } from "react-google-places-autocomplete";
 import "react-google-places-autocomplete/dist/index.min.css";
+import { number } from "prop-types";
 
 const cookies = new Cookies();
 var locations = [];
@@ -347,7 +349,12 @@ class Edit extends React.Component {
         }
       }
     });
-    if (isNull === false) {
+    if (
+      Number.isInteger(Number(this.state.payment_per_click)) === false ||
+      this.state.payment_per_click < 3
+    ) {
+      cogoToast.error("Payment per click is not valid");
+    } else if (isNull === false) {
       var modelOpen = true;
       modelOpen &&
         confirmAlert({
@@ -429,52 +436,148 @@ class Edit extends React.Component {
   };
   handleTransaction = () => {
     const token = cookies.get("Auth-token");
-
-    let instance = new window.Razorpay({
-      key: "rzp_test_Rwji71ovjqAObr",
-      key_secret: "jxKNEN2gyH2uxbZqLjt4tYeN",
-      amount: this.state.transaction_value,
-      name: "Influenz",
-      description: "Adding credit",
-      image: "",
-      handler: (response) => {
-        this.setState(
+    var modelOpen = true;
+    modelOpen &&
+      confirmAlert({
+        title: "Confirm to recharge campaign",
+        message: "Click confirm to recharge campaign",
+        buttons: [
           {
-            transaction_id: response.razorpay_payment_id,
+            label: "Confirm",
+            onClick: () => {
+              Axios.post(
+                `${api.protocol}${api.baseUrl}${api.campaignRechargeCreate}`,
+                {
+                  uuid: this.state.uuid,
+                  transaction_value: this.state.transaction_value,
+                },
+                {
+                  headers: { Authorization: "Bearer " + token },
+                }
+              )
+                .then((result) => {
+                  !result.data.status && cogoToast.error(result.data.message);
+                  if (result.data.status) {
+                    let instance = new window.Razorpay({
+                      key: result.data.payload.razorpay_key_id,
+                      amount: result.data.payload.transaction.transaction_value,
+                      name: "Influenz",
+                      description: "Adding credit",
+                      order_id:
+                        result.data.payload.transaction.razorpay_order_id,
+                      image: "",
+                      handler: (response) => {
+                        Axios.post(
+                          `${api.protocol}${api.baseUrl}${api.campaignRechargeConfirm}`,
+                          {
+                            transaction_uuid:
+                              result.data.payload.transaction.uuid,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                          },
+                          {
+                            headers: { Authorization: "Bearer " + token },
+                          }
+                        ).then((result) => {
+                          Axios.get(
+                            `${api.protocol}${api.baseUrl}${
+                              api.campaignRechargeList
+                            }${"?uuid="}${this.props.match.params.uuid}`,
+                            {
+                              headers: { Authorization: "Bearer " + token },
+                            }
+                          ).then((result) => {
+                            this.setState({
+                              transaction_list: result.data.payload,
+                            });
+                          });
+                          this.setState({
+                            current_balance:
+                              result.data.payload.campaign.balance,
+                            total_balance:
+                              result.data.payload.campaign.total_balance,
+                          });
+                          result.data.payload.is_verify
+                            ? cogoToast.success("recharge successful")
+                            : cogoToast.error(result.data.message);
+                        });
+                        Axios.get(
+                          `${api.protocol}${api.baseUrl}${
+                            api.campaignRechargeList
+                          }${"?uuid="}${this.props.match.params.uuid}`,
+                          {
+                            headers: { Authorization: "Bearer " + token },
+                          }
+                        ).then((result) => {
+                          this.setState({
+                            transaction_list: result.data.payload,
+                          });
+                        });
+                      },
+                      modal: {
+                        ondismiss: () => {
+                          Axios.post(
+                            `${api.protocol}${api.baseUrl}${api.campaignRechargeCancel}`,
+                            {
+                              transaction_uuid:
+                                result.data.payload.transaction.uuid,
+                            },
+                            {
+                              headers: { Authorization: "Bearer " + token },
+                            }
+                          ).then((response) => {
+                            response.data.status
+                              ? cogoToast.error("Recharge cancelled")
+                              : cogoToast.error(response.data.message);
+                          });
+                          Axios.get(
+                            `${api.protocol}${api.baseUrl}${
+                              api.campaignRechargeList
+                            }${"?uuid="}${this.props.match.params.uuid}`,
+                            {
+                              headers: { Authorization: "Bearer " + token },
+                            }
+                          ).then((result) => {
+                            this.setState({
+                              transaction_list: result.data.payload,
+                            });
+                          });
+                        },
+                      },
+                      prefill: {
+                        name: this.state.name,
+                        email: this.state.email,
+                      },
+                      notes: {
+                        address: "Hello World",
+                      },
+                      theme: {
+                        color: "#5e72e4",
+                      },
+                    });
+                    instance.open();
+                  }
+                })
+                .catch((error) => {
+                  if (error.message === "Network Error") {
+                    cogoToast.error(
+                      "Check your Internet connection and try again"
+                    );
+                  } else {
+                    cogoToast.error(error.message);
+                  }
+                });
+            },
           },
-          () => {
-            Axios.post(
-              `${api.protocol}${api.baseUrl}${api.campaignRecharge}`,
-              {
-                uuid: this.state.uuid,
-                transaction_id: this.state.transaction_id,
-                transaction_mode: this.state.transaction_mode,
-                transaction_value: this.state.transaction_value * 100,
-              },
-              {
-                headers: { Authorization: "Bearer " + token },
-              }
-            ).then((result) => {
-              this.setState({
-                current_balance: this.state.transaction_value,
-              });
-              cogoToast.success("recharge done");
-            });
-          }
-        );
-      },
-      prefill: {
-        name: this.state.name,
-      },
-      notes: {
-        address: "Hello World",
-      },
-      theme: {
-        color: "#5e72e4",
-      },
-    });
-
-    instance.open();
+          {
+            label: "Cancel",
+            onClick: () => {
+              modelOpen = false;
+            },
+          },
+        ],
+      });
   };
   handleMoveCharge = () => {
     var modelOpen = true;
@@ -786,7 +889,7 @@ class Edit extends React.Component {
 
                               <NavItem
                                 className=" text-center"
-                                style={{ width: "33%" }}
+                                style={{ width: "34%" }}
                               >
                                 <NavLink
                                   className={classnames("py-3 px-3 border-0", {
@@ -966,7 +1069,8 @@ class Edit extends React.Component {
                                                       for every click.<br></br>{" "}
                                                       * 1 INR will be deducted
                                                       by Influenz for every
-                                                      click.
+                                                      click.<br></br> * Should
+                                                      be an integer
                                                     </small>
                                                   </div>
                                                 </label>
@@ -985,10 +1089,23 @@ class Edit extends React.Component {
                                                     onChange={
                                                       this.handleInputChange
                                                     }
-                                                    // id="input-city"
+                                                    id="payment-per-click"
                                                     placeholder="Minimum ₹3"
                                                     name="payment_per_click"
                                                     type="number"
+                                                    step="1"
+                                                    min="3"
+                                                    pattern="\d+"
+                                                    invalid={
+                                                      Number.isInteger(
+                                                        Number(
+                                                          this.state
+                                                            .payment_per_click
+                                                        )
+                                                      )
+                                                        ? false
+                                                        : true
+                                                    }
                                                   />
                                                 </InputGroup>
                                               </FormGroup>
@@ -1687,6 +1804,7 @@ class Edit extends React.Component {
 
                                                 <th scope="col">Id</th>
                                                 <th scope="col">Amount</th>
+                                                <th scope="col">Status</th>
                                               </tr>
                                             </thead>
                                             <tbody>
@@ -1708,6 +1826,29 @@ class Edit extends React.Component {
                                                     <td>
                                                       {"₹ " +
                                                         transactions.transaction_value}
+                                                    </td>
+                                                    <td>
+                                                      <td>
+                                                        <Badge
+                                                          color=""
+                                                          className="badge-dot mr-4"
+                                                        >
+                                                          <i
+                                                            className={
+                                                              transactions.transaction_status ===
+                                                              "successful"
+                                                                ? "bg-success"
+                                                                : transactions.transaction_status ===
+                                                                  "initiated"
+                                                                ? "bg-yellow"
+                                                                : "bg-warning"
+                                                            }
+                                                          />
+                                                          {
+                                                            transactions.transaction_status
+                                                          }
+                                                        </Badge>
+                                                      </td>
                                                     </td>
                                                   </tr>
                                                 )
