@@ -6,7 +6,7 @@ import api from "../constants/api";
 import cogoToast from "cogo-toast";
 import { ReCaptcha } from "react-recaptcha-google";
 import { loadReCaptcha } from "react-recaptcha-google";
-
+import classnames from "classnames";
 // reactstrap components
 import {
   Button,
@@ -33,6 +33,7 @@ class Register extends React.Component {
     phone_number: "",
     errors: {},
     captchaVerified: false,
+    isLoaded: false,
   };
   componentDidMount = () => {
     loadReCaptcha();
@@ -46,6 +47,7 @@ class Register extends React.Component {
     if (response) {
       this.setState({
         captchaVerified: true,
+        isLoaded: true,
       });
     }
   };
@@ -247,7 +249,9 @@ class Register extends React.Component {
                 </div>
                 <div className="text-center">
                   <Button
-                    className="mt-4"
+                    className={classnames("my-4", {
+                      disabled: this.state.isLoaded === false,
+                    })}
                     color="primary"
                     onClick={this.handleSignupClick}
                     type="submit"

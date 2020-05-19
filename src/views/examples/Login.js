@@ -7,6 +7,8 @@ import cogoToast from "cogo-toast";
 import Cookies from "universal-cookie";
 import { ReCaptcha } from "react-recaptcha-google";
 import { loadReCaptcha } from "react-recaptcha-google";
+import classnames from "classnames";
+
 // reactstrap components
 import {
   Button,
@@ -34,6 +36,7 @@ class Login extends React.Component {
     user: null,
     errors: {},
     captchaVerified: false,
+    isLoaded: false,
   };
   componentDidMount = () => {
     loadReCaptcha();
@@ -47,6 +50,7 @@ class Login extends React.Component {
     if (response) {
       this.setState({
         captchaVerified: true,
+        isLoaded: true,
       });
     }
   };
@@ -84,7 +88,6 @@ class Login extends React.Component {
 
         const { myProp } = this.props;
         const cookies = new Cookies();
-        // (myProp);
         myProp(true);
         // 'https://devapi.influenz.club/v1/client/signin '
         Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
@@ -225,7 +228,9 @@ class Login extends React.Component {
                 </div>
                 <div className="text-center">
                   <Button
-                    className="my-4"
+                    className={classnames("my-4", {
+                      disabled: this.state.isLoaded === false,
+                    })}
                     color="primary"
                     type="submit"
                     onSubmit={this.handleSubmit}

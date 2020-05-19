@@ -60,6 +60,7 @@ import GooglePlacesAutocomplete, {
 } from "react-google-places-autocomplete";
 import "react-google-places-autocomplete/dist/index.min.css";
 import { number } from "prop-types";
+import { Stepper, Step, StepButton } from "@material-ui/core/";
 
 const cookies = new Cookies();
 var locations = [];
@@ -100,7 +101,11 @@ class Edit extends React.Component {
     transaction_list: [],
     cityTable: "",
     is_admin: null,
+    completed1: false,
+    completed2: false,
+    completed3: false,
   };
+
   componentDidMount = () => {
     var config = {
       apiKey: "AIzaSyDaH6y6-TmOgugETzqMuKgoj3HxTkDmGV0",
@@ -242,6 +247,9 @@ class Edit extends React.Component {
   };
   handleInputChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
+    this.state.activeTab === "1" && this.setState({ completed1: false });
+    this.state.activeTab === "2" && this.setState({ completed2: false });
+    this.state.activeTab === "3" && this.setState({ completed3: false });
   };
   handleSelect = (selectedOption) => {
     this.setState({
@@ -373,7 +381,10 @@ class Edit extends React.Component {
                 ).then((result) => {
                   this.setState({
                     tab_preference: true,
+                    activeTab: "2",
+                    completed1: true,
                   });
+                  window.scrollTo(0, 0);
                   result.data.status
                     ? cogoToast.success(result.data.message)
                     : cogoToast.error(result.data.message);
@@ -416,7 +427,11 @@ class Edit extends React.Component {
                 ).then((result) => {
                   this.setState({
                     current_balance: result.data.payload.balance,
+                    activeTab: "3",
+                    completed2: true,
                   });
+                  window.scrollTo(0, 0);
+
                   result.data.status
                     ? cogoToast.success(result.data.message)
                     : cogoToast.error(result.data.message);
@@ -630,7 +645,7 @@ class Edit extends React.Component {
     for (let index = 13; index < 61; index++) {
       ageCount.push(index);
     }
-
+    console.log(this.state.activeTab);
     // const { selectedOption } = this.state;
     return (
       <>
@@ -757,7 +772,11 @@ class Edit extends React.Component {
                                         <img
                                           alt="..."
                                           className="rounded-circle"
-                                          src={influencer.profile_url}
+                                          src={
+                                            influencer.profile_url === null
+                                              ? require("../../assets/img/icons/WhatsApp Image 2020-04-25 at 6.49.24 PM.jpeg")
+                                              : influencer.profile_url
+                                          }
                                         />
                                       </a>
                                       <UncontrolledTooltip
@@ -853,10 +872,53 @@ class Edit extends React.Component {
                       <CardHeader className="bg-white border-0 p-0">
                         <Row className="align-items-center">
                           <Col>
-                            <Nav tabs responsive className="triangle active">
-                              <NavItem
+                            <Stepper
+                              nonLinear
+                              activeStep={this.state.activeTab - 1}
+                            >
+                              <Step>
+                                <StepButton
+                                  onClick={() => this.handleToggle("1")}
+                                  completed={this.state.completed1}
+                                >
+                                  <h2
+                                    className="my-auto"
+                                    style={{ fontWeight: "normal" }}
+                                  >
+                                    Campaign Details
+                                  </h2>
+                                </StepButton>
+                              </Step>
+                              <Step>
+                                <StepButton
+                                  onClick={() => this.handleToggle("2")}
+                                  completed={this.state.completed2}
+                                >
+                                  <h2
+                                    className="my-auto"
+                                    style={{ fontWeight: "normal" }}
+                                  >
+                                    Campaign Preferences
+                                  </h2>
+                                </StepButton>
+                              </Step>
+                              <Step>
+                                <StepButton
+                                  onClick={() => this.handleToggle("3")}
+                                  completed={this.state.completed3}
+                                >
+                                  <h2
+                                    className="my-auto"
+                                    style={{ fontWeight: "normal" }}
+                                  >
+                                    Campaign Balance
+                                  </h2>
+                                </StepButton>
+                              </Step>
+                            </Stepper>
+                            {/* <NavItem
                                 className=" text-center"
-                                style={{ width: "33%" }}
+                                // style={{ width: "33%" }}
                               >
                                 <NavLink
                                   className={classnames("py-3 px-3 border-0", {
@@ -870,7 +932,7 @@ class Edit extends React.Component {
                               </NavItem>
                               <NavItem
                                 className="text-center"
-                                style={{ width: "33%" }}
+                                // style={{ width: "33%" }}
                               >
                                 <NavLink
                                   className={classnames("py-3 px-3 border-0", {
@@ -886,10 +948,9 @@ class Edit extends React.Component {
                                   Campaign Preferences
                                 </NavLink>
                               </NavItem>
-
                               <NavItem
                                 className=" text-center"
-                                style={{ width: "34%" }}
+                                // style={{ width: "34%" }}
                               >
                                 <NavLink
                                   className={classnames("py-3 px-3 border-0", {
@@ -905,7 +966,7 @@ class Edit extends React.Component {
                                   Campaign Balance
                                 </NavLink>
                               </NavItem>
-                            </Nav>
+                            */}
                           </Col>
                         </Row>
                       </CardHeader>
@@ -1665,7 +1726,7 @@ class Edit extends React.Component {
                               </Form>
                             </CardBody>
                           </TabPane>
-                          <TabPane tabId="4">
+                          <TabPane tabId="3">
                             <Form>
                               <Row>
                                 <Col>

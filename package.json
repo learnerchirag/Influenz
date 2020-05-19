@@ -2,7 +2,14 @@
   "name": "argon-dashboard-react",
   "description": "DOWNLOAD our app to share sponsored posts. EARN money for every click on your post. WITHDRAW money using UPI",
   "keywords": [
-    "influencer", "earn", "share", "sponsor", "marketing", "post", "social", "media"
+    "influencer",
+    "earn",
+    "share",
+    "sponsor",
+    "marketing",
+    "post",
+    "social",
+    "media"
   ],
   "version": "1.1.0",
   "main": "index.js",
@@ -38,6 +45,7 @@
     "@firebase/functions": "^0.4.40",
     "@firebase/storage": "^0.3.31",
     "@fortawesome/fontawesome-free": "5.12.1",
+    "@material-ui/core": "^4.9.14",
     "@material/react-switch": "^0.15.0",
     "antd": "^4.1.5",
     "axios": "^0.19.2",
@@ -62,6 +70,7 @@
     "react-fileupload-progress": "^0.5.0",
     "react-google-maps": "9.4.5",
     "react-google-places-autocomplete": "^2.0.5",
+    "react-mui-stepper": "^0.1.7",
     "react-paginate": "^6.3.2",
     "react-progressbar": "^15.4.1",
     "react-recaptcha-google": "^1.1.1",

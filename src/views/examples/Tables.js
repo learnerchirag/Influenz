@@ -71,6 +71,7 @@ class Tables extends React.Component {
       }
     ).then((result) => {
       this.handleLoader(false);
+      console.log(result);
       this.setState({
         tableListFiltered: result.data.payload.campaigns,
         tableList: result.data.payload.campaigns,
@@ -456,7 +457,11 @@ class Tables extends React.Component {
                                             <img
                                               alt="..."
                                               className="rounded-circle"
-                                              src={influencer.profile_url}
+                                              src={
+                                                influencer.profile_url === null
+                                                  ? require("../../assets/img/icons/WhatsApp Image 2020-04-25 at 6.49.24 PM.jpeg")
+                                                  : influencer.profile_url
+                                              }
                                             />
                                           </a>
                                           <UncontrolledTooltip

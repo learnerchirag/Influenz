@@ -36,6 +36,7 @@
   &.disabled,
   &:disabled {
     opacity: $btn-disabled-opacity;
+    pointer-events: none;
     @include box-shadow(none);
   }
 
