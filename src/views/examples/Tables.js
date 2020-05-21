@@ -228,6 +228,7 @@ class Tables extends React.Component {
   };
   handleCookieRedirect = () => {
     cogoToast.error("You need to Sign in first");
+    return <Redirect to="/signin"></Redirect>;
   };
   handlePagination = (event) => {
     const token = cookies.get("Auth-token");
@@ -257,16 +258,19 @@ class Tables extends React.Component {
     return "My Campaigns";
   };
   render() {
+    // if (!cookies.get("Auth-token")) {
+    //   return (
+    //     <>
+    //       <React.Fragment>
+    //         {this.handleCookieRedirect()}
+    //         {/* {cogoToast.error("You need to Signin first")} */}
+    //       </React.Fragment>
+    //     </>
+    //   );
+    // } else {
     return (
       <>
-        {!cookies.get("Auth-token") && (
-          <React.Fragment>
-            <Redirect to="/signin"></Redirect>
-            {this.handleCookieRedirect()}
-            {/* {cogoToast.error("You need to Signin first")} */}
-          </React.Fragment>
-        )}
-        {cookies.get("Auth-token") && this.state.isLoading ? (
+        {this.state.isLoading ? (
           <Spinner
             style={{
               width: "3rem",
@@ -408,11 +412,18 @@ class Tables extends React.Component {
                                 <th scope="row">
                                   <Media className="align-items-center">
                                     <a
-                                      className="avatar rounded-circle mr-3"
+                                      className="avatar rounded-circle mr-3 bg-dark"
                                       href="#pablo"
                                       onClick={(e) => e.preventDefault()}
                                     >
-                                      <img alt="..." src={user.company_logo} />
+                                      <img
+                                        alt="..."
+                                        src={
+                                          user.company_logo === null
+                                            ? "https://influenz.club/img/logo.png"
+                                            : user.company_logo
+                                        }
+                                      />
                                     </a>
                                     <Media>
                                       <span className="mb-0 text-sm">

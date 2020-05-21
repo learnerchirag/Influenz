@@ -19,16 +19,21 @@ class Auth extends React.Component {
     document.body.classList.add("bg-default");
   }
   componentWillUnmount() {
-    document.body.classList.remove("bg-default");
+    // document.body.classList.remove("bg-default");
+    return <Redirect from="/" to="/signin" />;
   }
   handleComponent(props) {
     if (props.location.pathname === "/signin") {
+      console.log("i'm in sigin");
       return <Login myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/signup") {
+      console.log("i'm in sigup");
       return <Register myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/forgot") {
+      console.log("i'm in forgot");
       return <Forgot myProp={this.handleLoader} {...props} />;
     } else {
+      console.log("i'm in /");
       return <Redirect from="/" to="/signin" />;
     }
   }
@@ -40,51 +45,54 @@ class Auth extends React.Component {
   };
   render() {
     const props = this.props;
+    console.log(this.props);
     return (
       <>
-        {!cookies.get("Auth-token") &&
-          (this.state.isLoading ? (
-            <Spinner
-              style={{
-                width: "3rem",
-                height: "3rem",
-                position: "absolute",
-                top: "50%",
-                color: "black",
-                display: "block",
-                right: "50%",
-              }}
-            />
-          ) : (
-            <div className="main-content">
-              <AuthNavbar />
-              <div className="header bg-gradient-info py-7 py-lg-8">
-                <div className="separator separator-bottom separator-skew zindex-100">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    preserveAspectRatio="none"
-                    version="1.1"
-                    viewBox="0 0 2560 100"
-                    x="0"
-                    y="0"
-                  >
-                    <polygon
-                      className="fill-default"
-                      points="2560 0 2560 100 0 100"
-                    />
-                  </svg>
-                </div>
+        {this.state.isLoading ? (
+          <Spinner
+            style={{
+              width: "3rem",
+              height: "3rem",
+              position: "absolute",
+              top: "50%",
+              color: "black",
+              display: "block",
+              right: "50%",
+            }}
+          />
+        ) : (
+          <div className="main-content">
+            <AuthNavbar />
+            <div className="header bg-gradient-info py-7 py-lg-8">
+              <div className="separator separator-bottom separator-skew zindex-100">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="none"
+                  version="1.1"
+                  viewBox="0 0 2560 100"
+                  x="0"
+                  y="0"
+                >
+                  <polygon
+                    className="fill-default"
+                    points="2560 0 2560 100 0 100"
+                  />
+                </svg>
               </div>
-              {/* Page content */}
-              <Container className="mt--9 pb-4">
-                <Row className="justify-content-center">
-                  {this.handleComponent(props)}
-                </Row>
-              </Container>
-              <AuthFooter />
             </div>
-          ))}
-        {cookies.get("Auth-token") && <Redirect to="/dashboard"></Redirect>}
+            {/* Page content */}
+            <Container className="mt--9 pb-4">
+              <Row className="justify-content-center">
+                {this.handleComponent(props)}
+                {/* {props.location.pathname === "/signin" && (
+                  <Login myProp={this.handleLoader} {...props} />
+                )} */}
+                {console.log("rendering component")}
+              </Row>
+            </Container>
+            <AuthFooter />
+          </div>
+        )}
       </>
     );
   }

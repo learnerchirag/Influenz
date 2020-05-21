@@ -906,7 +906,10 @@ class Index extends React.Component {
                                             alt="..."
                                             src={
                                               this.state.current_user
-                                                .company_logo
+                                                .company_logo === null
+                                                ? "https://influenz.club/img/logo.png"
+                                                : this.state.current_user
+                                                    .company_logo
                                             }
                                           />
                                         </a>

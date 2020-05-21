@@ -181,6 +181,7 @@ class Edit extends React.Component {
         headers: { Authorization: "Bearer " + token },
       }
     ).then((result) => {
+      console.log(result);
       this.setState({
         transaction_list: result.data.payload,
       });
@@ -564,9 +565,7 @@ class Edit extends React.Component {
                         name: this.state.name,
                         email: this.state.email,
                       },
-                      notes: {
-                        address: "Hello World",
-                      },
+
                       theme: {
                         color: "#5e72e4",
                       },
@@ -726,7 +725,11 @@ class Edit extends React.Component {
                                 >
                                   <img
                                     alt="..."
-                                    src={this.state.company_logo}
+                                    src={
+                                      this.state.company_logo === null
+                                        ? "https://influenz.club/img/logo.png"
+                                        : this.state.company_logo
+                                    }
                                   />
                                 </a>
                                 <Media>

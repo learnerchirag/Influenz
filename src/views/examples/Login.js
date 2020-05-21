@@ -38,9 +38,7 @@ class Login extends React.Component {
     captchaVerified: false,
     isLoaded: false,
   };
-  componentDidMount = () => {
-    loadReCaptcha();
-  };
+  componentDidMount = () => {};
   onLoadRecaptcha = () => {
     if (this.captchaDemo) {
       this.captchaDemo.reset();
@@ -157,7 +155,7 @@ class Login extends React.Component {
               </Container>
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
-              <div class="text-center py-lg-3">
+              <div className="text-center py-lg-3">
                 <small style={{ color: "#8898aa" }}>
                   Sign in with your credentials
                 </small>
@@ -204,7 +202,7 @@ class Login extends React.Component {
                       this.captchaDemo = el;
                     }}
                     size="normal"
-                    render="explicit"
+                    render="normal"
                     sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
                     onloadCallback={this.onLoadRecaptcha}
                     verifyCallback={this.verifyCallback}

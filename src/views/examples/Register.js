@@ -36,7 +36,7 @@ class Register extends React.Component {
     isLoaded: false,
   };
   componentDidMount = () => {
-    loadReCaptcha();
+    // loadReCaptcha();
   };
   onLoadRecaptcha = () => {
     if (this.captchaDemo) {
@@ -155,9 +155,6 @@ class Register extends React.Component {
                   Fill your details to register
                 </small>
               </div>
-              {/* <div className="text-center text-muted mb-4">
-                <small>Or sign up with credentials</small>
-              </div> */}
               <Form role="form" onSubmit={this.handleSignupClick}>
                 <FormGroup>
                   <InputGroup className="input-group-alternative mb-3">
