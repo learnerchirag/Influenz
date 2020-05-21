@@ -23,9 +23,22 @@ const options = {
 };
 const cookies = new Cookies();
 export default class App extends Component {
-  componentDidMount() {
-    loadReCaptcha();
+  state = {
+    error: false,
+    cookie: cookies.get("Auth-token"),
+  };
+  componentWillMount() {
+    window.location.pathname === "/dashboard"
+      ? this.setState({
+          error: true,
+        })
+      : this.setState({
+          error: false,
+        });
   }
+  handleCookieState = (cookie) => {
+    this.setState({ cookie: cookie });
+  };
   cookieRedirectDashboard = () => {
     cogoToast.error("You need to Sign in first");
   };
@@ -34,25 +47,27 @@ export default class App extends Component {
       <BrowserRouter>
         <Switch>
           <AlertProvider template={AlertTemplate} {...options}>
-            {cookies.get("Auth-token") ? (
+            {this.state.cookie ? (
               <React.Fragment>
-                <Route
-                  path="/dashboard"
-                  render={(props) => <Tables {...props} />}
-                />
-                <Route
-                  path="/campaign/:uuid/edit"
-                  render={(props) => <Edit {...props} />}
-                />
-                <Route
-                  path="/campaign/:uuid/analytics"
-                  render={(props) => <Index {...props} />}
-                />
-                <Route
-                  path="/profile"
-                  render={(props) => <Profile {...props} />}
-                />
-                <Redirect to="/dashboard"></Redirect>
+                <Switch>
+                  <Route
+                    path="/dashboard"
+                    render={(props) => <Tables {...props} />}
+                  />
+                  <Route
+                    path="/campaign/:uuid/edit"
+                    render={(props) => <Edit {...props} />}
+                  />
+                  <Route
+                    path="/campaign/:uuid/analytics"
+                    render={(props) => <Index {...props} />}
+                  />
+                  <Route
+                    path="/profile"
+                    render={(props) => <Profile {...props} />}
+                  />
+                  <Redirect to="/dashboard"></Redirect>
+                </Switch>
               </React.Fragment>
             ) : (
               <React.Fragment>
@@ -64,7 +79,12 @@ export default class App extends Component {
                   />
                   <Route
                     path="/signin"
-                    render={(props) => <Auth {...props} />}
+                    render={(props) => (
+                      <Auth
+                        handleCookieState={this.handleCookieState}
+                        {...props}
+                      />
+                    )}
                   />
                   <Route
                     path="/signup"
@@ -74,9 +94,10 @@ export default class App extends Component {
                     path="/forgot"
                     render={(props) => <Auth {...props} />}
                   />
-                  <Redirect to="/signin">
-                    {this.cookieRedirectDashboard}
-                  </Redirect>
+                  {this.state.error && this.cookieRedirectDashboard()}
+
+                  <Redirect to="/signin"></Redirect>
+                  {this.state.error && this.cookieRedirectDashboard}
                 </Switch>
                 {/* {this.cookieRedirectDashboard()} */}
               </React.Fragment>

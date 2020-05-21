@@ -181,7 +181,6 @@ class Edit extends React.Component {
         headers: { Authorization: "Bearer " + token },
       }
     ).then((result) => {
-      console.log(result);
       this.setState({
         transaction_list: result.data.payload,
       });
@@ -644,7 +643,6 @@ class Edit extends React.Component {
     for (let index = 13; index < 61; index++) {
       ageCount.push(index);
     }
-    console.log(this.state.activeTab);
     // const { selectedOption } = this.state;
     return (
       <>
@@ -701,6 +699,7 @@ class Edit extends React.Component {
                       </CardHeader>
                       <Table
                         className="align-items-center table-flush"
+                        style={{ minHeight: "200px" }}
                         responsive
                       >
                         <thead className="thead-light">
@@ -719,7 +718,7 @@ class Edit extends React.Component {
                             <th scope="row">
                               <Media className="align-items-center">
                                 <a
-                                  className="avatar rounded-circle mr-3"
+                                  className="avatar rounded-circle mr-3 bg-dark"
                                   href="#pablo"
                                   onClick={(e) => e.preventDefault()}
                                 >
@@ -827,7 +826,7 @@ class Edit extends React.Component {
                                   className="dropdown-menu-arrow"
                                   right
                                 >
-                                  {this.state.is_admin &&
+                                  {this.state.is_admin === "true" &&
                                     this.state.status === "processing" && (
                                       <DropdownItem
                                         onClick={() =>
@@ -919,57 +918,6 @@ class Edit extends React.Component {
                                 </StepButton>
                               </Step>
                             </Stepper>
-                            {/* <NavItem
-                                className=" text-center"
-                                // style={{ width: "33%" }}
-                              >
-                                <NavLink
-                                  className={classnames("py-3 px-3 border-0", {
-                                    active: this.state.activeTab === "1",
-                                    // disable: this.state.activeTab != "1",
-                                  })}
-                                  onClick={() => this.handleToggle("1")}
-                                >
-                                  Campaign Details
-                                </NavLink>
-                              </NavItem>
-                              <NavItem
-                                className="text-center"
-                                // style={{ width: "33%" }}
-                              >
-                                <NavLink
-                                  className={classnames("py-3 px-3 border-0", {
-                                    active: this.state.activeTab === "2",
-                                  })}
-                                  style={
-                                    this.state.tab_preference
-                                      ? undefined
-                                      : { pointerEvents: "none" }
-                                  }
-                                  onClick={() => this.handleToggle("2")}
-                                >
-                                  Campaign Preferences
-                                </NavLink>
-                              </NavItem>
-                              <NavItem
-                                className=" text-center"
-                                // style={{ width: "34%" }}
-                              >
-                                <NavLink
-                                  className={classnames("py-3 px-3 border-0", {
-                                    active: this.state.activeTab === "4",
-                                  })}
-                                  style={
-                                    this.state.tab_transaction
-                                      ? undefined
-                                      : { pointerEvents: "none" }
-                                  }
-                                  onClick={() => this.handleToggle("4")}
-                                >
-                                  Campaign Balance
-                                </NavLink>
-                              </NavItem>
-                            */}
                           </Col>
                         </Row>
                       </CardHeader>
@@ -1864,7 +1812,7 @@ class Edit extends React.Component {
                                               }}
                                             >
                                               <tr>
-                                                <th scope="col">Campaign</th>
+                                                {/* <th scope="col">Campaign</th> */}
 
                                                 <th scope="col">Id</th>
                                                 <th scope="col">Amount</th>
@@ -1875,17 +1823,17 @@ class Edit extends React.Component {
                                               {this.state.transaction_list.map(
                                                 (transactions) => (
                                                   <tr>
-                                                    <th>
+                                                    {/* <th>
                                                       {
                                                         transactions.campaign
                                                           .name
                                                       }
-                                                    </th>
+                                                    </th> */}
 
                                                     <td scope="row">
-                                                      {
-                                                        transactions.transaction_id
-                                                      }
+                                                      {transactions.razorpay_payment_id
+                                                        ? transactions.razorpay_payment_id
+                                                        : "Null"}
                                                     </td>
                                                     <td>
                                                       {"₹ " +

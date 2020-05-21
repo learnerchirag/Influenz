@@ -71,7 +71,6 @@ class Tables extends React.Component {
       }
     ).then((result) => {
       this.handleLoader(false);
-      console.log(result);
       this.setState({
         tableListFiltered: result.data.payload.campaigns,
         tableList: result.data.payload.campaigns,
@@ -258,16 +257,6 @@ class Tables extends React.Component {
     return "My Campaigns";
   };
   render() {
-    // if (!cookies.get("Auth-token")) {
-    //   return (
-    //     <>
-    //       <React.Fragment>
-    //         {this.handleCookieRedirect()}
-    //         {/* {cogoToast.error("You need to Signin first")} */}
-    //       </React.Fragment>
-    //     </>
-    //   );
-    // } else {
     return (
       <>
         {this.state.isLoading ? (
@@ -357,6 +346,12 @@ class Tables extends React.Component {
                                         <FormGroup className="text-left">
                                           <label className="form-control-label">
                                             New Campaign Name
+                                            <div>
+                                              <small>
+                                                * to be displayed as share title
+                                                in every post
+                                              </small>
+                                            </div>
                                           </label>
                                           <Input
                                             className="form-control-alternative"
@@ -393,6 +388,7 @@ class Tables extends React.Component {
                       {this.state.tableListFiltered.length !== 0 ? (
                         <Table
                           className="align-items-center table-flush"
+                          style={{ minHeight: "200px" }}
                           responsive
                         >
                           <thead className="thead-light">
@@ -519,21 +515,21 @@ class Tables extends React.Component {
                                       className="dropdown-menu-arrow"
                                       right
                                     >
-                                      {this.state.is_admin &&
-                                        user.status === "processing" && (
-                                          <DropdownItem
-                                            onClick={() =>
-                                              this.handleStatus(
-                                                user.status,
-                                                user.uuid,
-                                                index,
-                                                true
-                                              )
-                                            }
-                                          >
-                                            Activate
-                                          </DropdownItem>
-                                        )}
+                                      {this.state.is_admin === "true" &&
+                                      user.status === "processing" ? (
+                                        <DropdownItem
+                                          onClick={() =>
+                                            this.handleStatus(
+                                              user.status,
+                                              user.uuid,
+                                              index,
+                                              true
+                                            )
+                                          }
+                                        >
+                                          Activate
+                                        </DropdownItem>
+                                      ) : null}
                                       <DropdownItem
                                         onClick={() =>
                                           this.handleStatus(

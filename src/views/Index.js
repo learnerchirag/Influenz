@@ -880,6 +880,7 @@ class Index extends React.Component {
                               </CardHeader>
                               <Table
                                 className="align-items-center table-flush"
+                                style={{ minHeight: "200px" }}
                                 responsive
                               >
                                 <thead className="thead-light">
@@ -898,7 +899,7 @@ class Index extends React.Component {
                                     <th scope="row">
                                       <Media className="align-items-center">
                                         <a
-                                          className="avatar rounded-circle mr-3"
+                                          className="avatar rounded-circle mr-3 bg-dark"
                                           href="#pablo"
                                           onClick={(e) => e.preventDefault()}
                                         >
@@ -1028,7 +1029,7 @@ class Index extends React.Component {
                                           className="dropdown-menu-arrow"
                                           right
                                         >
-                                          {this.state.is_admin &&
+                                          {this.state.is_admin === "true" &&
                                             this.state.current_user.status ===
                                               "processing" && (
                                               <DropdownItem

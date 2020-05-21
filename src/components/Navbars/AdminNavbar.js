@@ -64,19 +64,27 @@ class AdminNavbar extends React.Component {
         >
           <Container fluid>
             <div className="h3 mb-0 text-white text-center text-uppercase d-none d-lg-inline-block">
-              {this.props.title !== "My Campaigns" && (
+              {this.props.title !== "My Campaigns" ? (
+                <React.Fragment>
+                  <img
+                    src={require("../../assets/img/icons/left.png")}
+                    height="28px"
+                    textColor="white"
+                    style={{ fontWeight: "bold" }}
+                    onClick={() => this.props.history.goBack()}
+                    style={{ cursor: "pointer" }}
+                  ></img>
+                  <h3 className="ml-2 text-white text-center text-uppercase d-none d-lg-inline-block my-auto">
+                    {this.props.title}
+                  </h3>
+                </React.Fragment>
+              ) : (
                 <img
-                  src={require("../../assets/img/icons/left.png")}
-                  height="28px"
-                  textColor="white"
-                  style={{ fontWeight: "bold" }}
-                  onClick={() => this.props.history.goBack()}
-                  style={{ cursor: "pointer" }}
-                ></img>
+                  alt="..."
+                  src={require("assets/img/brand/argon-react-white.png")}
+                  style={{ height: "80px" }}
+                />
               )}
-              <h3 className="ml-2 text-white text-center text-uppercase d-none d-lg-inline-block my-auto">
-                {this.props.title}
-              </h3>
             </div>
 
             <Nav className="align-items-center d-none d-md-flex" navbar>

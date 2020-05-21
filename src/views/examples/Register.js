@@ -7,6 +7,8 @@ import cogoToast from "cogo-toast";
 import { ReCaptcha } from "react-recaptcha-google";
 import { loadReCaptcha } from "react-recaptcha-google";
 import classnames from "classnames";
+import ReCAPTCHA from "react-google-recaptcha";
+
 // reactstrap components
 import {
   Button,
@@ -35,32 +37,33 @@ class Register extends React.Component {
     captchaVerified: false,
     isLoaded: false,
   };
-  componentDidMount = () => {
-    // loadReCaptcha();
-    if (this.captchaDemo) {
-      console.log("started, just a second...");
-      this.captchaDemo.reset();
-      this.captchaDemo.execute();
-    }
-  };
-  onLoadRecaptcha = () => {
-    console.log("loaded");
-    if (this.captchaDemo) {
-      this.captchaDemo.reset();
-      this.captchaDemo.execute();
-    }
-  };
-  verifyCallback = (response) => {
-    console.log("verified", response);
 
-    if (response) {
+  // onLoadRecaptcha = () => {
+  //   if (this.captchaDemo) {
+  //     this.captchaDemo.reset();
+  //   }
+  // };
+  // verifyCallback = (response) => {
+
+  //   if (response) {
+  //     this.setState({
+  //       captchaVerified: true,
+  //       isLoaded: true,
+  //     });
+  //   }
+  // };
+  onChange = (value) => {
+    if (value) {
       this.setState({
-        captchaVerified: true,
         isLoaded: true,
+        captchaVerified: true,
+      });
+    } else {
+      this.setState({
+        isLoaded: false,
       });
     }
   };
-
   handleInputChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
   };
@@ -242,15 +245,10 @@ class Register extends React.Component {
                   </Col>
                 </Row>
                 <div style={{ minHeight: "78px" }}>
-                  <ReCaptcha
-                    ref={(el) => {
-                      this.captchaDemo = el;
-                    }}
-                    size="invisible"
-                    render="explicit"
+                  <ReCAPTCHA
+                    // ref={recaptchaRef}
                     sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
-                    onloadCallback={this.onLoadRecaptcha}
-                    verifyCallback={this.verifyCallback}
+                    onChange={this.onChange}
                   />
                 </div>
                 <div className="text-center">

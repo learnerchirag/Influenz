@@ -8,7 +8,7 @@ import Cookies from "universal-cookie";
 import { ReCaptcha } from "react-recaptcha-google";
 import { loadReCaptcha } from "react-recaptcha-google";
 import classnames from "classnames";
-
+import ReCAPTCHA from "react-google-recaptcha";
 // reactstrap components
 import {
   Button,
@@ -38,17 +38,29 @@ class Login extends React.Component {
     captchaVerified: false,
     isLoaded: false,
   };
-  componentDidMount = () => {};
-  onLoadRecaptcha = () => {
-    if (this.captchaDemo) {
-      this.captchaDemo.reset();
-    }
-  };
-  verifyCallback = (response) => {
-    if (response) {
+
+  // onLoadRecaptcha = () => {
+  //   if (this.captchaDemo) {
+  //     this.captchaDemo.reset();
+  //   }
+  // };
+  // verifyCallback = (response) => {
+  //   if (response) {
+  //     this.setState({
+  //       captchaVerified: true,
+  //       isLoaded: true,
+  //     });
+  //   }
+  // };
+  onChange = (value) => {
+    if (value) {
       this.setState({
-        captchaVerified: true,
         isLoaded: true,
+        captchaVerified: true,
+      });
+    } else {
+      this.setState({
+        isLoaded: false,
       });
     }
   };
@@ -83,7 +95,7 @@ class Login extends React.Component {
     } else if (this.state.captchaVerified) {
       if (this.state.errors) {
         event.preventDefault();
-
+        const { handleCookieState } = this.props;
         const { myProp } = this.props;
         const cookies = new Cookies();
         myProp(true);
@@ -91,10 +103,8 @@ class Login extends React.Component {
         Axios.post(`${api.protocol}${api.baseUrl}${api.userLogin}`, this.state)
           .then((result) => {
             myProp(false);
-
             if (result.status === 200) {
               const user = result.data.payload;
-
               cookies.set("Auth-token", result.data.payload.access_token, {
                 path: "/",
                 maxAge: "43200",
@@ -105,10 +115,7 @@ class Login extends React.Component {
               cookies.set("Is-admin", result.data.payload.is_admin, {
                 path: "/",
               });
-              this.props.history.push({
-                pathname: "/dashboard",
-                state: { is_admin: result.data.payload.is_admin },
-              });
+              handleCookieState(cookies.get("Auth-token"));
             }
           })
           .catch((error) => {
@@ -197,16 +204,11 @@ class Login extends React.Component {
                   </InputGroup>
                 </FormGroup>
                 <div style={{ minHeight: "78px" }}>
-                  {/* <ReCaptcha
-                    ref={(el) => {
-                      this.captchaDemo = el;
-                    }}
-                    size="normal"
-                    render="normal"
+                  <ReCAPTCHA
+                    // ref={recaptchaRef}
                     sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
-                    onloadCallback={this.onLoadRecaptcha}
-                    verifyCallback={this.verifyCallback}
-                  /> */}
+                    onChange={this.onChange}
+                  />
                 </div>
                 <div className="custom-control custom-control-alternative custom-checkbox">
                   <input

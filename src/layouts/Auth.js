@@ -19,7 +19,7 @@ class Auth extends React.Component {
     document.body.classList.add("bg-default");
   }
   componentWillUnmount() {
-    // document.body.classList.remove("bg-default");
+    document.body.classList.remove("bg-default");
     return <Redirect from="/" to="/signin" />;
   }
   handleComponent(props) {
