@@ -95,6 +95,7 @@
     "gh-pages": "^2.2.0",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
-    "typescript": "3.7.5"
+    "typescript": "3.7.5",
+    "webpack": "^4.41.5"
   }
 }
