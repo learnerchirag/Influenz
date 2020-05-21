@@ -197,7 +197,7 @@ class Login extends React.Component {
                   </InputGroup>
                 </FormGroup>
                 <div style={{ minHeight: "78px" }}>
-                  <ReCaptcha
+                  {/* <ReCaptcha
                     ref={(el) => {
                       this.captchaDemo = el;
                     }}
@@ -206,7 +206,7 @@ class Login extends React.Component {
                     sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
                     onloadCallback={this.onLoadRecaptcha}
                     verifyCallback={this.verifyCallback}
-                  />
+                  /> */}
                 </div>
                 <div className="custom-control custom-control-alternative custom-checkbox">
                   <input

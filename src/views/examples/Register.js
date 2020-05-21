@@ -37,13 +37,22 @@ class Register extends React.Component {
   };
   componentDidMount = () => {
     // loadReCaptcha();
+    if (this.captchaDemo) {
+      console.log("started, just a second...");
+      this.captchaDemo.reset();
+      this.captchaDemo.execute();
+    }
   };
   onLoadRecaptcha = () => {
+    console.log("loaded");
     if (this.captchaDemo) {
       this.captchaDemo.reset();
+      this.captchaDemo.execute();
     }
   };
   verifyCallback = (response) => {
+    console.log("verified", response);
+
     if (response) {
       this.setState({
         captchaVerified: true,
@@ -237,7 +246,7 @@ class Register extends React.Component {
                     ref={(el) => {
                       this.captchaDemo = el;
                     }}
-                    size="normal"
+                    size="invisible"
                     render="explicit"
                     sitekey="6LfD4uQUAAAAAJ2RHILlTL46VaPVaAsriI-IgefG"
                     onloadCallback={this.onLoadRecaptcha}

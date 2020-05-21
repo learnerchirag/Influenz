@@ -24,16 +24,12 @@ class Auth extends React.Component {
   }
   handleComponent(props) {
     if (props.location.pathname === "/signin") {
-      console.log("i'm in sigin");
       return <Login myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/signup") {
-      console.log("i'm in sigup");
       return <Register myProp={this.handleLoader} {...props} />;
     } else if (props.location.pathname === "/forgot") {
-      console.log("i'm in forgot");
       return <Forgot myProp={this.handleLoader} {...props} />;
     } else {
-      console.log("i'm in /");
       return <Redirect from="/" to="/signin" />;
     }
   }
@@ -45,7 +41,6 @@ class Auth extends React.Component {
   };
   render() {
     const props = this.props;
-    console.log(this.props);
     return (
       <>
         {this.state.isLoading ? (
@@ -87,7 +82,6 @@ class Auth extends React.Component {
                 {/* {props.location.pathname === "/signin" && (
                   <Login myProp={this.handleLoader} {...props} />
                 )} */}
-                {console.log("rendering component")}
               </Row>
             </Container>
             <AuthFooter />

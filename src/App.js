@@ -56,12 +56,29 @@ export default class App extends Component {
               </React.Fragment>
             ) : (
               <React.Fragment>
-                <Route exact path="/" render={(props) => <Auth {...props} />} />
-                <Route path="/signin" render={(props) => <Auth {...props} />} />
-                <Route path="/signup" render={(props) => <Auth {...props} />} />
-                <Route path="/forgot" render={(props) => <Auth {...props} />} />
-                <Redirect to="/signin"></Redirect>
-                {this.cookieRedirectDashboard()}
+                <Switch>
+                  <Route
+                    exact
+                    path="/"
+                    render={(props) => <Auth {...props} />}
+                  />
+                  <Route
+                    path="/signin"
+                    render={(props) => <Auth {...props} />}
+                  />
+                  <Route
+                    path="/signup"
+                    render={(props) => <Auth {...props} />}
+                  />
+                  <Route
+                    path="/forgot"
+                    render={(props) => <Auth {...props} />}
+                  />
+                  <Redirect to="/signin">
+                    {this.cookieRedirectDashboard}
+                  </Redirect>
+                </Switch>
+                {/* {this.cookieRedirectDashboard()} */}
               </React.Fragment>
             )}
           </AlertProvider>
