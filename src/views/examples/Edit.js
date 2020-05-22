@@ -107,19 +107,8 @@ class Edit extends React.Component {
   };
 
   componentDidMount = () => {
-    var config = {
-      apiKey: "AIzaSyDaH6y6-TmOgugETzqMuKgoj3HxTkDmGV0",
-      authDomain: "influenz-7d329.web.app",
-      projectNumber: "253623607816",
-      databaseUrl: "https://influenz-7d329.firebaseio.com/",
-      projectId: "influenz-7d329",
-      storageBucket: "influenz-7d329.appspot.com",
-    };
     const token = cookies.get("Auth-token");
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(config);
-    }
     Axios.get(
       `${api.protocol}${api.baseUrl}${api.campaign}${"?uuid="}${
         this.props.match.params.uuid
@@ -1259,12 +1248,19 @@ class Edit extends React.Component {
                                           lg="5"
                                           className="text-center my-auto"
                                         >
-                                          <img
-                                            className="img-responsive"
-                                            src={this.state.company_logo}
-                                            height="200px"
-                                            width="200px"
-                                          ></img>
+                                          <div
+                                            style={{
+                                              height: "200px",
+                                              width: "200px",
+                                            }}
+                                          >
+                                            <img
+                                              className="img-responsive"
+                                              src={this.state.company_logo}
+                                              height="auto"
+                                              width="100%"
+                                            ></img>
+                                          </div>
                                         </Col>
                                       </Row>
                                     </CardBody>
@@ -1814,7 +1810,10 @@ class Edit extends React.Component {
                                               <tr>
                                                 {/* <th scope="col">Campaign</th> */}
 
-                                                <th scope="col">Id</th>
+                                                <th scope="col">
+                                                  Transaction Id
+                                                </th>
+                                                <th scope="col">Payment Id</th>
                                                 <th scope="col">Amount</th>
                                                 <th scope="col">Status</th>
                                               </tr>
@@ -1823,13 +1822,11 @@ class Edit extends React.Component {
                                               {this.state.transaction_list.map(
                                                 (transactions) => (
                                                   <tr>
-                                                    {/* <th>
+                                                    <th>
                                                       {
-                                                        transactions.campaign
-                                                          .name
+                                                        transactions.transaction_id
                                                       }
-                                                    </th> */}
-
+                                                    </th>
                                                     <td scope="row">
                                                       {transactions.razorpay_payment_id
                                                         ? transactions.razorpay_payment_id
